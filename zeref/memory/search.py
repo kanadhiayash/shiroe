@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -12,8 +13,54 @@ from zeref.memory.atom_store import AtomStore
 from zeref.memory.indexer import INDEX_PATH
 
 
+# Scripts without whitespace word boundaries (CJK). Ranges cover the common
+# Han ideograph blocks plus Hiragana/Katakana — enough for real-world queries
+# without pulling in a segmentation dependency.
+_CJK_RANGES = (
+    (0x4E00, 0x9FFF),   # CJK Unified Ideographs
+    (0x3400, 0x4DBF),   # CJK Extension A
+    (0xF900, 0xFAFF),   # CJK Compatibility Ideographs
+    (0x3040, 0x309F),   # Hiragana
+    (0x30A0, 0x30FF),   # Katakana
+)
+
+
+def _is_cjk(ch: str) -> bool:
+    cp = ord(ch)
+    return any(lo <= cp <= hi for lo, hi in _CJK_RANGES)
+
+
+def _normalize(text: str) -> str:
+    return unicodedata.normalize("NFKC", text).lower()
+
+
 def tokenize(query: str) -> list[str]:
-    return [token.lower() for token in re.findall(r"[A-Za-z0-9_]+", query)]
+    """Unicode-aware tokenizer: NFKC-normalize, lowercase, segment on \\w+.
+
+    Whitespace-delimited scripts (Latin, Cyrillic, Devanagari, Arabic, ...)
+    come out as whole words, same as before. CJK runs have no whitespace to
+    segment on, so a bare \\w+ would swallow an entire sentence into one
+    unmatchable token — those get overlapping character bigrams instead.
+
+    # ponytail: Python's \\w excludes standalone combining marks (category
+    # Mn/Mc), so scripts that stack vowel signs onto a base letter (Devanagari
+    # matras, Arabic harakat) can fragment one word into several short tokens
+    # at each mark boundary. Retrieval still round-trips (index and query go
+    # through this same fragmentation), just with coarser word boundaries.
+    # Upgrade path: swap in the third-party `regex` module's \\p{L}\\p{M}*
+    # pattern if that dependency is ever acceptable here.
+    """
+    normalized = _normalize(query)
+    tokens: list[str] = []
+    for word in re.findall(r"\w+", normalized, flags=re.UNICODE):
+        if all(_is_cjk(ch) for ch in word):
+            if len(word) == 1:
+                tokens.append(word)
+            else:
+                tokens.extend(word[i:i + 2] for i in range(len(word) - 1))
+        else:
+            tokens.append(word)
+    return tokens
 
 
 def search_atoms(
@@ -66,7 +113,11 @@ def _search_sqlite(
     atom_type: str | None,
     status: str | None,
 ) -> dict[str, Any]:
-    match_query = " OR ".join(tokens)
+    # Tokens are quoted as FTS5 string literals so an unlucky token can never
+    # be parsed as a MATCH operator (NEAR, column filters, etc.) or unbalance
+    # the query — belt-and-braces on top of tokens already being restricted
+    # to \w+ output.
+    match_query = " OR ".join('"' + token.replace('"', '""') + '"' for token in tokens)
     filters = []
     params: list[Any] = [match_query]
     if atom_type:
@@ -102,6 +153,7 @@ def _search_sqlite(
         "query": query,
         "tokens": tokens,
         "source": "sqlite",
+        "abstained": False,
         "matches": matches,
     }
 
@@ -114,11 +166,23 @@ def _search_jsonl(
     atom_type: str | None,
     status: str | None,
 ) -> dict[str, Any]:
+    # No tokens means the query couldn't be tokenized (or was blank) — abstain
+    # rather than fail open into "every atom matches". `abstained: True` lets
+    # a caller tell this apart from a real, tokenized search that found
+    # nothing (`abstained: False`, `matches: []`).
+    if not tokens:
+        return {
+            "query": query,
+            "tokens": tokens,
+            "source": "jsonl",
+            "abstained": True,
+            "matches": [],
+        }
     atoms = AtomStore(root).load(atom_type=atom_type, status=status)
     scored = []
     for atom in atoms:
         score = _score_atom(atom, tokens)
-        if score > 0 or not tokens:
+        if score > 0:
             scored.append({
                 "atom": atom,
                 "score": score,
@@ -129,24 +193,28 @@ def _search_jsonl(
         "query": query,
         "tokens": tokens,
         "source": "jsonl",
+        "abstained": False,
         "matches": scored[:limit],
     }
 
 
 def _score_atom(atom: dict[str, Any], tokens: list[str]) -> int:
-    haystack = " ".join([
+    # Tokens are already NFKC-normalized (via tokenize()); normalize the
+    # haystack the same way so e.g. a precomposed vs. combining-mark "é"
+    # in stored text still substring-matches the query.
+    haystack = _normalize(" ".join([
         atom.get("claim", ""),
         atom.get("summary", ""),
         atom.get("source", ""),
         " ".join(str(tag) for tag in atom.get("tags", [])),
-    ]).lower()
+    ]))
     return sum(haystack.count(token) for token in tokens)
 
 
 def _why(atom: dict[str, Any], tokens: list[str], method: str) -> str:
     fields = []
     for field in ("claim", "summary", "source"):
-        text = str(atom.get(field, "")).lower()
+        text = _normalize(str(atom.get(field, "")))
         if any(token in text for token in tokens):
             fields.append(field)
     return f"{method}; matched fields: {', '.join(fields) if fields else 'none'}"
