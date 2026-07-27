@@ -6,9 +6,10 @@ privacy-audit: allow-file "Cost router references model tier names + example tok
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 from typing import Any
+
+from zeref.codecs.base import default_token_estimate
 
 
 DEFAULT_POLICY = {
@@ -63,13 +64,60 @@ def load_policy(root: Path | str = Path(".")) -> dict[str, Any]:
     return {**DEFAULT_POLICY, **json.loads(path.read_text(encoding="utf-8"))}
 
 
-def estimate_tokens(text: str) -> dict[str, Any]:
-    tokens = max(1, (len(re.findall(r"\S+", text)) * 4 + 2) // 3) if text else 0
+def estimate_tokens(
+    text: str,
+    *,
+    actual_tokens: int | None = None,
+    model: str | None = None,
+) -> dict[str, Any]:
+    """Layered token estimate — most-accurate-available signal wins.
+
+    1. ``actual_tokens``: real usage a caller read back from a provider
+       response. Authoritative, so it is trusted as-is.
+    2. A model-family tokenizer, if an optional tokenizer extra is
+       installed. Lazily imported; never a hard dependency.
+    3. A conservative fallback (see ``codecs.base.default_token_estimate``)
+       that takes the max of several signals so it cannot materially
+       undercount dense or non-Latin-script text.
+    """
+    chars = len(text)
+    if actual_tokens is not None:
+        return {
+            "estimated_tokens": actual_tokens,
+            "estimated_chars": chars,
+            "method": "provider_actual",
+        }
+    if not text:
+        return {"estimated_tokens": 0, "estimated_chars": 0, "method": "empty"}
+
+    tokenizer_name, tokenizer_tokens = _tokenizer_estimate(text, model)
+    if tokenizer_tokens is not None:
+        return {
+            "estimated_tokens": tokenizer_tokens,
+            "estimated_chars": chars,
+            "method": f"tokenizer:{tokenizer_name}",
+        }
+
     return {
-        "estimated_tokens": tokens,
-        "estimated_chars": len(text),
-        "method": "deterministic_words_x_1_33",
+        "estimated_tokens": default_token_estimate(text),
+        "estimated_chars": chars,
+        "method": "conservative_max_signal",
     }
+
+
+def _tokenizer_estimate(text: str, model: str | None) -> tuple[str | None, int | None]:
+    """Optional-extra tokenizer layer. Returns (name, count) or (None, None)
+    when no tokenizer library is installed or it fails to load/encode —
+    callers fall back to the conservative estimate in that case."""
+    try:
+        import tiktoken  # type: ignore  # optional dep, see pyproject [tokenizer] extra
+    except ImportError:
+        return None, None
+    try:
+        encoding = tiktoken.encoding_for_model(model) if model else tiktoken.get_encoding("cl100k_base")
+        return encoding.name, len(encoding.encode(text))
+    except Exception:
+        return None, None
 
 
 def route_operation(

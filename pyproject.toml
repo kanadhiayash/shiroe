@@ -27,10 +27,11 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
-llm    = ["litellm>=1.0"]    # zeref grade (LLM-enhanced)
-duckdb = ["duckdb>=0.10"]    # zeref db snapshot --parquet
-yaml   = ["pyyaml>=6.0"]     # richer REDACT.md YAML parsing
-all    = ["litellm>=1.0", "duckdb>=0.10", "pyyaml>=6.0"]
+llm       = ["litellm>=1.0"]    # zeref grade (LLM-enhanced)
+duckdb    = ["duckdb>=0.10"]    # zeref db snapshot --parquet
+yaml      = ["pyyaml>=6.0"]     # richer REDACT.md YAML parsing
+tokenizer = ["tiktoken>=0.5"]   # cost_router token estimate (model-family tokenizer)
+all       = ["litellm>=1.0", "duckdb>=0.10", "pyyaml>=6.0", "tiktoken>=0.5"]
 
 [project.scripts]
 zeref = "zeref.cli:main"
