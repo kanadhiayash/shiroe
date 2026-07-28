@@ -4,7 +4,7 @@
 
 ## The principle
 
-Zeref OS is harness-agnostic. The canonical spec lives in `AGENTS.md` (Linux Foundation hosted open standard, 60k+ repos, 20+ tools natively support it). Every harness-specific config file is a thin pointer to `AGENTS.md`.
+Zeref is harness-agnostic. The canonical spec lives in `AGENTS.md` (Linux Foundation hosted open standard, 60k+ repos, 20+ tools natively support it). Every harness-specific config file is a thin pointer to `AGENTS.md`.
 
 ## Per-harness load instructions
 

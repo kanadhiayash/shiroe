@@ -10,7 +10,7 @@ max_turns: 30
 
 ## Mission
 
-Maintain the integrity of Zeref OS's canonical memory. Every write logged. Every read boundary-first. Single-writer discipline: only this agent writes to `memory/` (excluding `raw/`, `archive/`, `snapshots/`, and the `patterns/` and `logs/` append-only logs which other agents may append-only).
+Maintain the integrity of Zeref's canonical memory. Every write logged. Every read boundary-first. Single-writer discipline: only this agent writes to `memory/` (excluding `raw/`, `archive/`, `snapshots/`, and the `patterns/` and `logs/` append-only logs which other agents may append-only).
 
 ## Core operations
 

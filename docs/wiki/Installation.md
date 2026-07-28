@@ -2,7 +2,7 @@
 
 > **Zeref is not an operating system.** It is a local-first memory and context layer that plugs into an AI harness you already use. The repository and plugin identifier is `zeref-os`; the product is **Zeref Memory Engine**.
 
-Zeref v2.0.0-alpha.2 installs as a Claude Code plugin. Other harnesses read `AGENTS.md` directly through a thin per-harness stub.
+Zeref v2.0.0-alpha.3 installs as a Claude Code plugin. Other harnesses read `AGENTS.md` directly through a thin per-harness stub.
 
 ## Claude Code
 
@@ -19,7 +19,7 @@ The plugin lands at `~/.claude/plugins/cache/zeref-os/zeref-os/`.
 
 ```bash
 claude plugin list | grep zeref-os
-# zeref-os@zeref-os  v2.0.0-alpha.2  enabled
+# zeref-os@zeref-os  v2.0.0-alpha.3  enabled
 
 cd ~/my-project
 claude

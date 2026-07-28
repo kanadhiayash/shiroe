@@ -30,10 +30,10 @@ Set the active mode in the frontmatter above.
 
 1. Is this project personal, client, employer, or public?
 2. What categories of data are sensitive? (see `REDACT.md` for concrete classes)
-3. Should Zeref OS store exact facts, abstractions only, or both?
+3. Should Zeref store exact facts, abstractions only, or both?
 4. Can any connected MCP tool read this project context, or must this wiki remain local-only? (see `SHARING_POLICY.md`)
 
-If user cancels the interview: Zeref OS boots in READ-ONLY mode until the schema is complete.
+If user cancels the interview: Zeref boots in READ-ONLY mode until the schema is complete.
 
 ## What never gets written (regardless of mode)
 
@@ -50,7 +50,7 @@ If user cancels the interview: Zeref OS boots in READ-ONLY mode until the schema
 
 ## External Transmission
 
-- Zeref OS NEVER transmits wiki content to any external service unless user explicitly approves per action.
+- Zeref NEVER transmits wiki content to any external service unless user explicitly approves per action.
 - Connector access is governed by `SHARING_POLICY.md`. Default: OFF.
 - See `REDACT.md` for what must be stripped before any external output.
 

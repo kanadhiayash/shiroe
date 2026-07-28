@@ -3,7 +3,7 @@
 # Zeref Memory Engine
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.0.0--alpha.2-blueviolet" alt="version 2.0.0-alpha.2">
+  <img src="https://img.shields.io/badge/version-2.0.0--alpha.3-blueviolet" alt="version 2.0.0-alpha.3">
   <img src="assets/zeref-os-hero.png" alt="Zeref Memory Engine" width="720">
 </p>
 
@@ -31,7 +31,7 @@ Zeref is a local-first memory engine that gives AI coding agents a persistent, r
 
 Memory lives in your project, in Markdown and SQLite you can read and diff. Sessions read it before they act, write to it through a guarded path, and hand it to the next session in a scrubbed, portable form.
 
-Current release: **v2.0.0-alpha.2**. Alpha software — interfaces may change. See [Limitations](#limitations).
+Current release: **v2.0.0-alpha.3**. Alpha software — interfaces may change. See [Limitations](#limitations).
 
 **Zeref is:**
 

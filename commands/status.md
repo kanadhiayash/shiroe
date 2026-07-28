@@ -13,7 +13,7 @@ Read-only. Do not write to memory or modify config.
 7. Count pending skill drafts in `skills/drafts/`.
 8. Output:
    ```
-   == Zeref OS Status ==
+   == Zeref Status ==
    Project: <name>
    Privacy: <mode> | Tier: <Free | Standard | Enterprise> | Parent sync: <on|off>
    Active team: <solo | build | research | red | audit | ship>

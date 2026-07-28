@@ -2,7 +2,7 @@
 """
 privacy-audit: allow-file "Validator error messages document pattern-shaped tokens (schema examples) that trigger the scanner as expected."
 
-zeref-validate.py — Validate Zeref OS plugin structure.
+zeref-validate.py — Validate Zeref plugin structure.
 
 Checks:
 - Root manifests (SKILL.md, AGENTS.md, CLAUDE.md, GEMINI.md)

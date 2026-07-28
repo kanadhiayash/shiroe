@@ -1,7 +1,7 @@
 """
 privacy-audit: allow-file "CLI help text names example commands, env-var-shaped tokens (ZEREF_ALLOW_*, GITHUB_TOKEN) as documentation of the security policy."
 
-zeref.cli — Reference CLI for Zeref OS (Sprint 2).
+zeref.cli — Reference CLI for Zeref (Sprint 2).
 
 Commands:
     zeref status          Print hot.md summary + active tier
@@ -29,7 +29,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 def _project_root() -> Path:
-    """Walk up from cwd until AGENTS.md found (Zeref OS root)."""
+    """Walk up from cwd until AGENTS.md found (Zeref root)."""
     from zeref.memory import MemoryRoot
 
     return MemoryRoot.discover().root
@@ -112,7 +112,7 @@ def cmd_init(args: argparse.Namespace) -> int:
     from zeref.memory import normalize_init_values, scaffold_project
 
     root = Path(args.directory).resolve() if args.directory else Path.cwd()
-    print(f"\nInitialising Zeref OS layout at {root}")
+    print(f"\nInitialising Zeref layout at {root}")
 
     # Use `is None` so empty-string CLI args (e.g. --parent "") skip the prompt.
     # Non-TTY stdin (piped install, CI) also skips prompts and uses defaults.
@@ -1093,6 +1093,25 @@ def cmd_release(args: argparse.Namespace) -> int:
     return 1
 
 
+def cmd_claims(args: argparse.Namespace) -> int:
+    """ZRF-66 / issue #172: capability evidence matrix + public-claim gate."""
+    from zeref.release.claim_gate import (
+        build_capability_matrix, format_findings, format_matrix, scan_public_claims,
+    )
+
+    root = _project_root()
+    if args.claims_command == "matrix":
+        entries = build_capability_matrix(root)
+        print(format_matrix(entries, format=args.format), end="")
+        return 0
+    if args.claims_command == "check":
+        findings = scan_public_claims(root)
+        print(format_findings(findings), end="")
+        return 1 if findings else 0
+    print("✘ unknown claims command")
+    return 1
+
+
 def cmd_team(args: argparse.Namespace) -> int:
     """vNext team compiler: compile | plan-show (PR 7)."""
     root = _project_root()
@@ -1238,11 +1257,38 @@ def cmd_state(args: argparse.Namespace) -> int:
 
 
 def cmd_doctor(args: argparse.Namespace) -> int:
+    if getattr(args, "installation", False):
+        from zeref.release.manifest import build_manifest
+
+        manifest = build_manifest(_project_root())
+        if args.format == "json":
+            print(json.dumps(manifest.to_dict(), indent=2, sort_keys=True))
+        else:
+            print(manifest.format_text(), end="")
+        return 0
+
     from zeref.release.doctor import doctor_passed, format_doctor, run_doctor
 
     checks = run_doctor(_project_root())
     print(format_doctor(checks, format=args.format), end="")
     return 0 if doctor_passed(checks) else 1
+
+
+def cmd_version(args: argparse.Namespace) -> int:
+    from zeref import __version__ as _v
+
+    if not getattr(args, "verbose", False):
+        print(f"zeref {_v}")
+        return 0
+
+    from zeref.release.manifest import build_manifest
+
+    manifest = build_manifest(_project_root())
+    if args.format == "json":
+        print(json.dumps(manifest.to_dict(), indent=2, sort_keys=True))
+    else:
+        print(manifest.format_text(), end="")
+    return 0
 
 
 def cmd_lineage(args: argparse.Namespace) -> int:
@@ -1313,7 +1359,7 @@ def _print_memory_item(item) -> None:
 
 def _build_parser() -> argparse.ArgumentParser:
     from zeref import __version__ as _v
-    p = argparse.ArgumentParser(prog="zeref", description=f"Zeref OS CLI v{_v}")
+    p = argparse.ArgumentParser(prog="zeref", description=f"Zeref CLI v{_v}")
     p.add_argument("--version", action="version", version=f"zeref {_v}")
     sub = p.add_subparsers(dest="command", required=True)
 
@@ -1596,6 +1642,9 @@ def _build_parser() -> argparse.ArgumentParser:
     from zeref import cli_capability
     cli_capability.register(sub)
 
+    from zeref import cli_providers
+    cli_providers.register(sub)
+
     policy = sub.add_parser("policy", help="vNext policy engine (precedence + autonomy)")
     policy_sub = policy.add_subparsers(dest="policy_command", required=True)
     policy_sub.add_parser("show", help="Print the merged policy stack")
@@ -1626,8 +1675,21 @@ def _build_parser() -> argparse.ArgumentParser:
     release_check = release_sub.add_parser("check", help="Run local release checks")
     release_check.add_argument("--format", choices=["text", "md", "json"], default="text")
 
+    claims = sub.add_parser("claims", help="Capability evidence matrix + public-claim gate (ZRF-66)")
+    claims_sub = claims.add_subparsers(dest="claims_command", required=True)
+    claims_matrix = claims_sub.add_parser("matrix", help="Print the capability evidence matrix")
+    claims_matrix.add_argument("--format", choices=["text", "json"], default="text")
+    claims_sub.add_parser("check", help="Scan public docs for blocked claim patterns")
+
     doctor = sub.add_parser("doctor", help="Run local Zeref health checks")
     doctor.add_argument("--format", choices=["text", "json"], default="text")
+    doctor.add_argument("--installation", action="store_true",
+                        help="Report the installed-state manifest (identity, version, git SHA, content digests) instead of the standard health checks")
+
+    version_p = sub.add_parser("version", help="Print version info")
+    version_p.add_argument("--verbose", action="store_true",
+                           help="Print the full installed-state manifest instead of just the version string")
+    version_p.add_argument("--format", choices=["text", "json"], default="text")
 
     prompt = sub.add_parser("prompt", help="Classify and rewrite task prompts")
     prompt_sub = prompt.add_subparsers(dest="prompt_command", required=True)
@@ -1717,11 +1779,14 @@ def main() -> None:
         "privacy": cmd_privacy,
         "route": cmd_route,
         "capability": lambda a: __import__("zeref.cli_capability", fromlist=["handle"]).handle(a),
+        "providers": lambda a: __import__("zeref.cli_providers", fromlist=["handle"]).handle(a),
         "policy": cmd_policy,
         "team": cmd_team,
         "state": cmd_state,
         "release": cmd_release,
+        "claims": cmd_claims,
         "doctor": cmd_doctor,
+        "version": cmd_version,
         "prompt": cmd_prompt,
         "handoff": cmd_handoff,
         "loop": cmd_loop,

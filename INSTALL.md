@@ -94,6 +94,19 @@ Memory layout:    flat
 ✔ Validation passed
 ```
 
+## Checking install freshness
+
+If commands or skills seem out of date after an update, confirm what's
+actually installed:
+
+```bash
+zeref doctor --installation   # or: zeref version --verbose
+```
+
+This reports the installed product identity, version, git SHA, and content
+digests. If the version/SHA don't match the latest tag on the source repo,
+your harness is serving a cached copy — reinstall the plugin to refresh it.
+
 ## Uninstall
 
 ```bash

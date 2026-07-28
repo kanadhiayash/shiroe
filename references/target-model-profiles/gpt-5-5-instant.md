@@ -5,6 +5,8 @@ family: chatgpt
 variant: gpt-5-5-instant
 source_url: https://github.com/asgeirtj/system_prompts_leaks/blob/main/OpenAI/gpt-5.5-instant.md
 source_updated_at: 2026-05-24
+# community mirror repo, not the vendor — see issue #175
+source_authority: third_party
 last_verified_catalog_sha: 5d3c7696339b4d8add91808e20e3fe3e29a12957
 extracted_by: zeref v1.2 profile-extractor (main-thread Opus 4.7)
 extracted_at: 2026-07-11

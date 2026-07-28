@@ -6,6 +6,42 @@ Versioning: [Semantic Versioning](https://semver.org/) — `MAJOR.MINOR.PATCH`.
 
 ---
 
+## [2.0.0-alpha.3] — 2026-07-27 — Hardening integration: routing, retrieval, install freshness, claim gate
+
+Integrates the routing-classifier eval corpus, Unicode-aware hybrid
+retrieval, and plugin identity/install-freshness workstreams, plus a new
+external benchmark truth gate. Version bump required so the plugin content
+changed in this release (`.claude-plugin/plugin.json`, `marketplace.json`)
+is not served from a stale cached payload — Claude Code resolves an
+installed plugin's version from `plugin.json` first.
+
+### Added
+
+- **Source-authority freshness grading** — target-model profiles carry a
+  `source_authority` field (`official` | `third_party` | `derived`); a
+  stale `official`-sourced profile still hard-fails release, a stale
+  `third_party`/`derived` one now emits a non-blocking WARNING surfaced in
+  both the release report and `zeref doctor`, instead of the gate refusing
+  to pass.
+- **External benchmark truth gate** — a capability evidence matrix
+  (namespace: conformance/integration/performance/external_benchmark/
+  security_review; evidence tier: fixture-tested/external-tested) plus a
+  public-claim scanner wired into `zeref release check` and a new
+  `zeref claims` command. Blocks routing-accuracy claims resting on a
+  self-authored fixture corpus, comparative rankings resting on contested
+  vendor figures, Zeref benchmark numbers published without baselines, and
+  external-benchmark score claims before any dataset run is on record.
+- **Upgrade-from-stale-cache regression fixture** for the install-freshness
+  manifest.
+
+### Version
+
+- `2.0.0-alpha.3` across `zeref/VERSION`, `pyproject.toml`,
+  `zeref-registry.json`, `.claude-plugin/plugin.json`, README badge,
+  `docs/wiki/Installation.md`.
+
+---
+
 ## [2.0.0-alpha.2] — 2026-07-14 — Hardening: consistency + claim accuracy
 
 Consistency and claim-accuracy hardening release. No runtime behavior change.

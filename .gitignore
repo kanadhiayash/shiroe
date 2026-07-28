@@ -49,6 +49,8 @@ __pycache__/
 *.pyo
 *.pyd
 .env
+.env.*
+!.env.example
 .venv/
 venv/
 build/
@@ -90,6 +92,10 @@ memory/sync/
 # Raw evidence dumps are operator records kept outside this repository
 # and must not re-enter the public tree.
 docs/audits/release-evidence/
+
+# Working evidence dumps for individual tickets (classification tables, scratch
+# notes) — operator records, not deliverables.
+docs/_evidence/
 
 # Local lineage sandbox imports. Foreign repository clones and inventories are
 # generated evidence only and must not enter Zeref core.

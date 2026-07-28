@@ -33,6 +33,13 @@ def get_provider(provider: str = DEFAULT_PROVIDER) -> ProviderAdapter:
     return _cache[provider]
 
 
-def resolve_model(reasoning_class: str, provider: str = DEFAULT_PROVIDER) -> ModelSpec:
-    """Resolve a reasoning class to a concrete model via a provider adapter."""
-    return get_provider(provider).resolve(reasoning_class)
+def resolve_model(
+    reasoning_class: str, provider: str = DEFAULT_PROVIDER, *, live: bool = True
+) -> ModelSpec:
+    """Resolve a reasoning class to a concrete model via a provider adapter.
+
+    ``live=False`` (dry-run/local validation) lets an unverified or
+    deprecated model resolve with a recorded warning instead of raising —
+    see ZRF-60. Nothing is sent anywhere on that path.
+    """
+    return get_provider(provider).resolve(reasoning_class, live=live)

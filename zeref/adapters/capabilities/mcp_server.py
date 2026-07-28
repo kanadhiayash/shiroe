@@ -98,10 +98,12 @@ class MCPServerAdapter:
             )
 
         # Launch, send initialize, read one JSON line back, terminate.
+        from zeref import __version__ as _zeref_version
+
         request = json.dumps({
             "jsonrpc": "2.0", "id": 1, "method": "initialize",
             "params": {"protocolVersion": "2024-11-05", "capabilities": {},
-                       "clientInfo": {"name": "zeref", "version": "2.0.0-alpha.2"}},
+                       "clientInfo": {"name": "zeref", "version": _zeref_version}},
         })
         try:
             proc = subprocess.Popen(

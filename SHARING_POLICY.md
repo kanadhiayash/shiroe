@@ -1,7 +1,7 @@
 <!-- privacy-audit: allow-file "Sharing-policy spec enumerates connector names + example redact classes; no user data." -->
 ---
 # Per-connector sharing allowlist — all OFF by default per ZEREF_OS §4.3 + D8 + D11.
-# Zeref OS recommends a connector only after detecting repeated manual behavior. User must enable here before use.
+# Zeref recommends a connector only after detecting repeated manual behavior. User must enable here before use.
 defaults:
   read_project_context: false   # may a connector read PROJECT.md, INDEX.md, decisions?
   write_external: false         # may agents push to external surfaces (Notion page, Linear issue) without per-action approval?
@@ -47,6 +47,11 @@ connectors:
   firecrawl:
     enabled: false
     redact_classes: [internal_paths]
+  provider_refresh:
+    enabled: false          # zeref providers refresh — list-models GET only, no user payload
+    read_project_context: false
+    allowed_surfaces: [list-models]
+    redact_classes: []
 ---
 
 # SHARING_POLICY.md — What connectors can read and write
@@ -56,15 +61,15 @@ connectors:
 ## Rules
 
 1. **OFF by default.** Every MCP / connector is `enabled: false` until explicitly enabled.
-2. **No bundled tools.** Zeref OS ships zero connectors. User installs and enables.
-3. **Recommendation-only.** Zeref OS recommends a connector after detecting repeated manual behavior. Never installs.
+2. **No bundled tools.** Zeref ships zero connectors. User installs and enables.
+3. **Recommendation-only.** Zeref recommends a connector after detecting repeated manual behavior. Never installs.
 4. **Per-action approval for external writes.** Even when `enabled: true`, agents must request approval per write unless `write_external: true` is set.
 5. **Redact before send.** Every external transmission runs through `REDACT.md` classes listed in `redact_classes` for that connector.
 6. **Read-context is opt-in.** A connector reading project context (PROJECT.md, INDEX.md, decisions) is separately gated by `read_project_context: true`.
 
 ## To enable a connector
 
-1. Install the MCP server (Zeref OS does not install on your behalf).
+1. Install the MCP server (Zeref does not install on your behalf).
 2. Open this file. Flip `enabled: false` → `enabled: true` for that connector.
 3. Configure `allowed_surfaces` (which APIs/objects the connector may touch).
 4. Verify `redact_classes` covers the data shape going out.

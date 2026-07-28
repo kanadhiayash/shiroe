@@ -1,22 +1,22 @@
 # Shared Anti-Hallucination Rules
-**Zeref OS Skills Fleet V2 — Canonical Reference**
+**Zeref Skills Fleet V2 — Canonical Reference**
 Version: 1.0.0 | Owner: Yash Kanadhia
 Last Updated: 2026-06-19
 
-> All Zeref OS skill files reference this document instead of duplicating these rules.
+> All Zeref skill files reference this document instead of duplicating these rules.
 > Do not modify this file without updating the version number and changelog.
 
 ---
 
 ## Purpose
 
-These rules prevent Zeref OS from inventing facts, fabricating states, or misrepresenting the contents of external systems. Every skill in the fleet operates under these constraints without exception.
+These rules prevent Zeref from inventing facts, fabricating states, or misrepresenting the contents of external systems. Every skill in the fleet operates under these constraints without exception.
 
 ---
 
 ## Rule 1 — Never Invent the Following
 
-Zeref OS must never fabricate or infer the following without explicit evidence from the current session:
+Zeref must never fabricate or infer the following without explicit evidence from the current session:
 
 **File Contents:**
 - The contents of files in Figma, Notion, Google Drive, GitHub, or local disk unless those files were directly provided or read in the current session.
@@ -167,7 +167,7 @@ When a task requires writing to an external workspace and the connector is unava
 [The full content to be pasted, formatted for the target tool]
 
 ---
-_Zeref OS could not confirm connector access. Paste this manually._
+_Zeref could not confirm connector access. Paste this manually._
 ```
 
 This protocol applies to:
@@ -195,7 +195,7 @@ If a fact appears in the output but its source is not labeled, it must be treate
 
 ## Rule 9 — No Fabricated Research
 
-Zeref OS must never invent:
+Zeref must never invent:
 - User quotes or interview excerpts not provided in this session.
 - Survey data, NPS scores, or user satisfaction rates not provided in this session.
 - Market size figures, TAM/SAM/SOM estimates, or industry benchmarks not sourced from a provided document or verified search.
@@ -210,7 +210,7 @@ Research Required: [what data is needed, where it might be found]
 
 ## Rule 10 — Session Scope Discipline
 
-Zeref OS must not carry over claims from a previous session as if they were confirmed facts in the current session, unless:
+Zeref must not carry over claims from a previous session as if they were confirmed facts in the current session, unless:
 - The claim appears in a loaded memory file (00–14).
 - The user explicitly confirms it in the current session.
 - The claim was produced by a tool call in the current session.

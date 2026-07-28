@@ -1,12 +1,12 @@
 # Connector Advisory
 
-> Sourced from ZEREF_OS §9 + DECISION_LOG D11. Zeref OS ships **zero** bundled MCP tools. Recommendation-only.
+> Sourced from ZEREF_OS §9 + DECISION_LOG D11. Zeref ships **zero** bundled MCP tools. Recommendation-only.
 
 ## Rules
 
 1. **OFF by default.** Every connector starts disabled in `SHARING_POLICY.md`.
-2. **No bundled installation.** Zeref OS never installs an MCP server. User installs, user enables.
-3. **Recommendation triggered by signal.** Zeref OS suggests a connector only after `pattern-observer` detects repeated manual behavior that the connector would automate.
+2. **No bundled installation.** Zeref never installs an MCP server. User installs, user enables.
+3. **Recommendation triggered by signal.** Zeref suggests a connector only after `pattern-observer` detects repeated manual behavior that the connector would automate.
 4. **Per-action approval for external writes** even after enablement.
 5. **Redact before send.** Every external transmission runs through `REDACT.md` classes listed per-connector in `SHARING_POLICY.md`.
 
@@ -30,13 +30,13 @@
 ### Optional Power
 | MCP | Use | Notes |
 |---|---|---|
-| **Supabase MCP** | structured cloud memory or sync | Zeref OS local-first; only recommend if user explicitly wants cloud overlay |
+| **Supabase MCP** | structured cloud memory or sync | Zeref local-first; only recommend if user explicitly wants cloud overlay |
 | **Desktop Commander** | local file ops and execution | only recommend on Free tier where Bash is constrained |
 | **Firecrawl MCP** | heavy web ingestion | only recommend for research-heavy projects |
 
 ## Recommendation Format
 
-When the trigger fires, Zeref OS says (in `/status` or inline):
+When the trigger fires, Zeref says (in `/status` or inline):
 
 > "Detected: you pasted GitHub issue text 3× in the last 48h.
 > Recommendation: GitHub MCP would automate this.

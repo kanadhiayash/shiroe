@@ -12,6 +12,16 @@ Zero external deps — reuses `_parse_yaml_frontmatter` from `zeref.security.pol
 
 Freshness: profiles carry `source_updated_at`; consumers can call
 `is_stale(profile, max_age_days=60)` to gate on staleness.
+
+Source authority (issue #175): profiles also carry `source_authority`, one of
+`official` | `third_party` | `derived`. A profile sourced from the vendor
+itself (`official`) hard-fails the release gate when stale — nobody has
+re-verified it and staleness is a real risk. A profile sourced from a mirror
+or reconstruction (`third_party` / `derived`) cannot be re-verified against
+an authoritative publisher at all, so staleness there is downgraded to a
+non-blocking WARNING: the gate should not claim a verification nobody
+performed, but it also should not treat "we can't check" the same as
+"we checked and it's wrong". See `grade_profile_freshness`.
 """
 from __future__ import annotations
 
@@ -38,12 +48,15 @@ _REQUIRED_FIELDS = (
     "variant",
     "source_url",
     "source_updated_at",
+    "source_authority",
     "last_verified_catalog_sha",
     "system_prompt_tokens",
     "output_style",
     "tool_use_format",
     "refusal_signature",
 )
+
+SOURCE_AUTHORITIES = ("official", "third_party", "derived")
 
 
 @dataclass(frozen=True)
@@ -56,6 +69,7 @@ class TargetProfile:
     variant: str
     source_url: str
     source_updated_at: str
+    source_authority: str
     last_verified_catalog_sha: str
     system_prompt_tokens: int
     tool_declaration_tokens: int
@@ -114,6 +128,11 @@ def _build_profile(fm: dict) -> TargetProfile:
     for req in _REQUIRED_FIELDS:
         if req not in fm:
             raise ProfileSchemaError(f"profile missing required field: {req}")
+    authority = _coerce_str(fm["source_authority"])
+    if authority not in SOURCE_AUTHORITIES:
+        raise ProfileSchemaError(
+            f"source_authority must be one of {SOURCE_AUTHORITIES}, got {authority!r}"
+        )
     return TargetProfile(
         target_id=_coerce_str(fm["target_id"]),
         vendor=_coerce_str(fm["vendor"]),
@@ -121,6 +140,7 @@ def _build_profile(fm: dict) -> TargetProfile:
         variant=_coerce_str(fm["variant"]),
         source_url=_coerce_str(fm["source_url"]),
         source_updated_at=_coerce_str(fm["source_updated_at"]),
+        source_authority=authority,
         last_verified_catalog_sha=_coerce_str(fm["last_verified_catalog_sha"]),
         system_prompt_tokens=_coerce_int(fm.get("system_prompt_tokens")),
         tool_declaration_tokens=_coerce_int(fm.get("tool_declaration_tokens")),
@@ -182,6 +202,58 @@ def is_stale(profile: TargetProfile, *, max_age_days: int = 60,
         return True
     now = today or date.today()
     return (now - source).days > max_age_days
+
+
+def grade_profile_freshness(
+    *, project_root: Path | None = None, max_age_days: int = 60,
+    today: date | None = None,
+) -> tuple[str, str]:
+    """Grade every on-disk profile for schema validity + source-graded staleness.
+
+    Single source of truth shared by the release gate and `zeref doctor`
+    (issue #175) so the two surfaces cannot drift. Returns (status, reason):
+
+      "skip" - no profiles directory / no profiles on disk (pre-v1.2)
+      "fail" - a schema-invalid profile, or an `official`-sourced profile
+               stale beyond max_age_days (hard-fail: nobody re-verified it)
+      "warn" - a `third_party`/`derived`-sourced profile is stale beyond
+               max_age_days (non-blocking: staleness can't be independently
+               verified against an authoritative publisher either way)
+      "pass" - all profiles present, schema-valid, and not hard-stale
+    """
+    profiles = list_profiles(project_root=project_root)
+    if not profiles:
+        return "skip", "no profiles on disk — pre-v1.2 skip"
+    invalid: list[str] = []
+    stale_official: list[str] = []
+    stale_unverifiable: list[str] = []
+    for pid in profiles:
+        try:
+            p = load_profile(pid, project_root=project_root)
+        except ProfileSchemaError as exc:
+            invalid.append(f"{pid}: {exc}")
+            continue
+        if not is_stale(p, max_age_days=max_age_days, today=today):
+            continue
+        if p.source_authority == "official":
+            stale_official.append(pid)
+        else:
+            stale_unverifiable.append(f"{pid} ({p.source_authority})")
+    if invalid:
+        return "fail", "; ".join(invalid[:3])
+    if stale_official:
+        return "fail", (
+            f"{len(stale_official)} official-source profile(s) stale "
+            f"(>{max_age_days}d): " + ", ".join(stale_official[:3])
+        )
+    if stale_unverifiable:
+        return "warn", (
+            f"{len(stale_unverifiable)} profile(s) stale (>{max_age_days}d) but "
+            f"sourced third_party/derived — no authoritative publisher to "
+            f"re-verify against, not treated as a hard failure: "
+            + ", ".join(stale_unverifiable[:3])
+        )
+    return "pass", f"{len(profiles)} profile(s), all schema-valid + fresh"
 
 
 def estimate_input_tokens(profile: TargetProfile | None,

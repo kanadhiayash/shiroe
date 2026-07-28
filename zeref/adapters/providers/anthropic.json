@@ -1,11 +1,72 @@
 {
-  "schema": "zeref.provider/v1",
+  "schema": "zeref.provider/v2",
   "provider": "anthropic",
-  "_comment": "Only place in the repo where Anthropic model ids are canonical. frontier is CRITICAL-only (enforced by zeref.core.reasoning.validate_request); effort=high rides with frontier so top spend is reserved for critical, ambitious work.",
+  "_comment": "Only place in the repo where Anthropic model ids are canonical. frontier is CRITICAL-only (enforced by zeref.core.reasoning.validate_request); effort=high rides with frontier so top spend is reserved for critical, ambitious work. ZRF-60: every entry verified against docs.claude.com/anthropic.com (see verified_at/source_url per model). Unconfirmed capability subfields are left null rather than guessed.",
   "classes": {
-    "frontier": {"model_id": "claude-fable-5", "effort": "high", "restrict_to_criticality": "CRITICAL"},
-    "deep": {"model_id": "claude-opus-4-8", "effort": "medium"},
-    "balanced": {"model_id": "claude-sonnet-5", "effort": "medium"},
-    "fast": {"model_id": "claude-haiku-4-5", "effort": "low"}
+    "frontier": {
+      "model_id": "claude-fable-5",
+      "effort": "high",
+      "restrict_to_criticality": "CRITICAL",
+      "lifecycle": "active",
+      "source_url": "https://platform.claude.com/docs/en/about-claude/models/overview",
+      "verified_at": "2026-07-27",
+      "verified_by": "human",
+      "context_window": 1000000,
+      "max_output_tokens": 128000,
+      "endpoint": "messages",
+      "modalities": ["text", "image"],
+      "supports_tools": null,
+      "supports_structured_output": null,
+      "region": null,
+      "retention_class": null
+    },
+    "deep": {
+      "model_id": "claude-opus-4-8",
+      "effort": "medium",
+      "lifecycle": "active",
+      "source_url": "https://platform.claude.com/docs/en/about-claude/models/overview",
+      "verified_at": "2026-07-27",
+      "verified_by": "human",
+      "context_window": 1000000,
+      "max_output_tokens": 128000,
+      "endpoint": "messages",
+      "modalities": ["text", "image"],
+      "supports_tools": null,
+      "supports_structured_output": null,
+      "region": null,
+      "retention_class": null
+    },
+    "balanced": {
+      "model_id": "claude-sonnet-5",
+      "effort": "medium",
+      "lifecycle": "active",
+      "source_url": "https://platform.claude.com/docs/en/about-claude/models/overview",
+      "verified_at": "2026-07-27",
+      "verified_by": "human",
+      "context_window": 1000000,
+      "max_output_tokens": 128000,
+      "endpoint": "messages",
+      "modalities": ["text", "image"],
+      "supports_tools": null,
+      "supports_structured_output": null,
+      "region": null,
+      "retention_class": null
+    },
+    "fast": {
+      "model_id": "claude-haiku-4-5",
+      "effort": "low",
+      "lifecycle": "active",
+      "source_url": "https://platform.claude.com/docs/en/about-claude/models/overview",
+      "verified_at": "2026-07-27",
+      "verified_by": "human",
+      "context_window": 200000,
+      "max_output_tokens": 64000,
+      "endpoint": "messages",
+      "modalities": ["text", "image"],
+      "supports_tools": null,
+      "supports_structured_output": null,
+      "region": null,
+      "retention_class": null
+    }
   }
 }

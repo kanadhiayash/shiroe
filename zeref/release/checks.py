@@ -50,42 +50,42 @@ def run_release_check(root: Path) -> list[ReleaseFinding]:
     findings.append(_check_pyproject_backend(root))
     findings.append(_check_soul_present(root))
     findings.append(_check_target_profiles(root))
+    findings.append(_check_claim_gate(root))
     _emit_release_evidence(root, findings)
     return findings
 
 
-def _check_target_profiles(root: Path) -> ReleaseFinding:
-    """Phase 14 profiles: schema-valid + <=60 days stale.
+def _check_claim_gate(root: Path) -> ReleaseFinding:
+    """ZRF-66 / issue #172: block public claims that exceed their evidence
+    class (routing-accuracy claims off a fixture-coverage corpus, contested
+    vendor comparisons, un-baselined Zeref numbers, unscored external
+    benchmarks). See zeref.release.claim_gate for the encoded constraints."""
+    from zeref.release.claim_gate import scan_public_claims
+    findings = scan_public_claims(root)
+    if findings:
+        sample = "; ".join(f"{f.path}:{f.line} ({f.constraint})" for f in findings[:3])
+        return _fail("claim_gate", f"{len(findings)} blocked public claim(s): {sample}")
+    return _pass("claim_gate", "no blocked public-claim patterns found")
 
-    Fail-open when the profiles directory is absent (pre-v1.2). PASS with a
-    note when profiles are present but no Tier-1 model IDs are covered yet
-    (canary state)."""
+
+def _check_target_profiles(root: Path) -> ReleaseFinding:
+    """Phase 14 profiles: schema-valid + source-graded freshness (issue #175).
+
+    Fail-open when the profiles directory is absent (pre-v1.2). A stale
+    `official`-sourced profile hard-fails; a stale `third_party`/`derived`
+    profile emits a non-blocking WARNING instead — see
+    `zeref.prompt.target_profile.grade_profile_freshness` for the shared
+    grading logic (also used by `zeref doctor`)."""
     try:
-        from zeref.prompt.target_profile import (
-            list_profiles, load_profile, is_stale, ProfileSchemaError,
-        )
+        from zeref.prompt.target_profile import grade_profile_freshness
     except ImportError:
         return _pass("target_profiles", "loader unavailable — pre-v1.2 skip")
-    profiles = list_profiles(project_root=root)
-    if not profiles:
-        return _pass("target_profiles", "no profiles on disk — pre-v1.2 skip")
-    stale: list[str] = []
-    invalid: list[str] = []
-    for pid in profiles:
-        try:
-            p = load_profile(pid, project_root=root)
-        except ProfileSchemaError as exc:
-            invalid.append(f"{pid}: {exc}")
-            continue
-        if is_stale(p, max_age_days=60):
-            stale.append(pid)
-    if invalid:
-        return _fail("target_profiles", "; ".join(invalid[:3]))
-    if stale:
-        return _fail("target_profiles", f"{len(stale)} stale (>60d): "
-                                        + ", ".join(stale[:3]))
-    return _pass("target_profiles",
-                 f"{len(profiles)} profile(s), all schema-valid + fresh")
+    status, reason = grade_profile_freshness(project_root=root, max_age_days=60)
+    if status == "fail":
+        return _fail("target_profiles", reason)
+    if status == "warn":
+        return _warn("target_profiles", reason)
+    return _pass("target_profiles", reason)
 
 
 def _check_version_consistency(root: Path) -> ReleaseFinding:
@@ -428,6 +428,11 @@ def _fail(name: str, reason: str) -> ReleaseFinding:
 def _skip(name: str, reason: str) -> ReleaseFinding:
     """Explicitly-not-run: surfaced loudly, never counted as pass."""
     return ReleaseFinding(name=name, status="skip", reason=reason)
+
+
+def _warn(name: str, reason: str) -> ReleaseFinding:
+    """Non-blocking WARNING: surfaced loudly, never counted as pass, never fails the gate."""
+    return ReleaseFinding(name=name, status="warn", reason=reason)
 
 
 def _tracked_memory_scaffold_present(root: Path) -> bool:

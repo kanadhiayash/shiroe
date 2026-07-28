@@ -1,4 +1,4 @@
-"""Zeref OS — reference Python runtime."""
+"""Zeref — reference Python runtime."""
 
 from pathlib import Path
 

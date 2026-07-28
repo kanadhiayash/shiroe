@@ -5,6 +5,8 @@ family: claude
 variant: opus-4-8
 source_url: https://github.com/asgeirtj/system_prompts_leaks/blob/main/Anthropic/claude-opus-4.8.md
 source_updated_at: 2026-06-09
+# community mirror repo, not the vendor — see issue #175
+source_authority: third_party
 last_verified_catalog_sha: 5d3c7696339b4d8add91808e20e3fe3e29a12957
 extracted_by: zeref v1.2 profile-extractor (main-thread Opus 4.7)
 extracted_at: 2026-07-11

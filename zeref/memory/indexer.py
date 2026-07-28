@@ -29,6 +29,12 @@ def rebuild_index(root: Path | str = Path(".")) -> dict[str, Any]:
             DROP TABLE IF EXISTS links;
             DROP TABLE IF EXISTS events;
             DROP TABLE IF EXISTS atoms_fts;
+            DROP TABLE IF EXISTS index_meta;
+
+            CREATE TABLE index_meta(
+              key TEXT PRIMARY KEY,
+              value TEXT
+            );
 
             CREATE TABLE atoms(
               id TEXT PRIMARY KEY,
@@ -80,6 +86,16 @@ def rebuild_index(root: Path | str = Path(".")) -> dict[str, Any]:
             );
             """
         )
+        # Records which tokenizer built this index, so search.py's
+        # _index_stale() can detect a pre-upgrade index (built from raw text,
+        # no bigrams) and fall back to the JSONL scan instead of silently
+        # matching nothing against new query tokens.
+        from zeref.memory.search import TOKENIZER_VERSION  # local import: avoids a search<->indexer cycle
+
+        conn.execute(
+            "INSERT INTO index_meta(key, value) VALUES ('tokenizer_version', ?)",
+            (str(TOKENIZER_VERSION),),
+        )
         for atom in atoms:
             _insert_atom(conn, atom)
         conn.commit()
@@ -119,14 +135,21 @@ def _insert_atom(conn: sqlite3.Connection, atom: dict[str, Any]) -> None:
             json.dumps(atom, sort_keys=True),
         ),
     )
+    # FTS5's default tokenizer treats a whole CJK run (no whitespace) as one
+    # token, so a bigram query token would never equal it. Pre-tokenizing the
+    # indexed text with the same tokenize() used for queries — including its
+    # CJK bigram split — keeps index-time and query-time tokens symmetric for
+    # every script, not just whitespace-delimited ones.
+    from zeref.memory.search import tokenize  # local import: avoids a search<->indexer cycle
+
     conn.execute(
         "INSERT INTO atoms_fts(id, claim, summary, source, tags) VALUES (?, ?, ?, ?, ?)",
         (
             atom["id"],
-            atom["claim"],
-            atom["summary"],
-            atom["source"],
-            " ".join(str(tag) for tag in atom.get("tags", [])),
+            " ".join(tokenize(atom["claim"])),
+            " ".join(tokenize(atom["summary"])),
+            " ".join(tokenize(atom["source"])),
+            " ".join(tokenize(" ".join(str(tag) for tag in atom.get("tags", [])))),
         ),
     )
     for entity in atom.get("entities", []):

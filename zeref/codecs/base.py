@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Protocol, runtime_checkable
@@ -59,6 +61,21 @@ def infer_shape(data: object) -> DataShape:
 
 
 def default_token_estimate(payload: str) -> int:
-    """Coarse tokenizer-independent estimate (≈ 4 chars / token). Codecs
-    override this when they can produce something better."""
-    return max(1, (len(payload) + 3) // 4)
+    """Conservative, tokenizer-independent estimate. Codecs override this
+    when they can produce something better (e.g. a real tokenizer).
+
+    Whitespace-run counting alone (words * 1.33) collapses to ~0 tokens for
+    any dense or non-Latin-script text (CJK, Devanagari, Arabic, minified
+    JSON/code, base64) since those have few or no ASCII spaces — silently
+    undercounting and letting oversized content walk through budget checks.
+    Instead this takes the MAX of three independent signals so it
+    structurally cannot materially undercount: overcounting is safe,
+    undercounting can blow a context window.
+    """
+    if not payload:
+        return 0
+    word_count = len(re.findall(r"\S+", payload))
+    word_estimate = math.ceil(word_count * 4 / 3)
+    char_estimate = math.ceil(len(payload) / 2.5)
+    byte_estimate = math.ceil(len(payload.encode("utf-8")) / 3)
+    return max(1, word_estimate, char_estimate, byte_estimate)
