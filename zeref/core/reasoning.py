@@ -48,6 +48,12 @@ class ModelSpec:
     model_id: str
     reasoning_class: str
     effort: str | None = None
+    # ZRF-60: capability verification carried on the resolved spec so callers
+    # (and the gateway) can see *why* a resolution was allowed without a
+    # second lookup. Defaults preserve every pre-ZRF-60 construction site.
+    lifecycle: str = "active"
+    verified: bool = True
+    warning: str | None = None
 
 
 def is_reasoning_class(name: str) -> bool:

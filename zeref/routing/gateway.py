@@ -62,6 +62,12 @@ class ModelCallRequest:
     placement: str = ANY
     privacy_class: str = "internal"
     provider: str = DEFAULT_PROVIDER
+    # ZRF-60: a dry-run never calls the model — it's a validation/local-check
+    # path. Only dry-run calls may resolve an unverified/deprecated/retired
+    # model (with a recorded warning on the returned ModelSpec). Every other
+    # call is live and fails closed on capability problems, before
+    # resolution completes.
+    dry_run: bool = False
 
     def __post_init__(self) -> None:
         if self.criticality.upper() not in CRITICALITIES:
@@ -145,7 +151,9 @@ def route(request: ModelCallRequest) -> RouteDecision:
             f"{request.purpose!r}"
         )
 
-    spec = resolve_model(granted, provider=request.provider)
+    # ZRF-60: capability fail-closed check happens inside resolve_model,
+    # before a ModelSpec is ever constructed on a live path — not after.
+    spec = resolve_model(granted, provider=request.provider, live=not request.dry_run)
 
     return RouteDecision(
         model_spec=spec,

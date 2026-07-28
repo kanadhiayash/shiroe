@@ -47,6 +47,11 @@ connectors:
   firecrawl:
     enabled: false
     redact_classes: [internal_paths]
+  provider_refresh:
+    enabled: false          # zeref providers refresh — list-models GET only, no user payload
+    read_project_context: false
+    allowed_surfaces: [list-models]
+    redact_classes: []
 ---
 
 # SHARING_POLICY.md — What connectors can read and write
