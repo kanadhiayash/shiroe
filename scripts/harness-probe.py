@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 harness-probe.py — Detect the host AI harness and validate the surface
-Zeref OS expects to find.
+Zeref expects to find.
 
 Detection heuristics:
     Claude Code   → CLAUDE.md present + claude binary on PATH

@@ -18,6 +18,6 @@ model_tier: standard
 budget_warn_at: 50000
 ---
 
-# Zeref OS
+# Zeref Memory Engine
 
 Project initialised via `zeref init` on 2026-06-05.

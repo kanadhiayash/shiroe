@@ -1,6 +1,6 @@
 <!-- privacy-audit: allow-file "Rubric documents axis names + example evidence fields as spec; no user data." -->
 
-# Internal Quality Axes Rubric — Zeref OS v1.0.0
+# Internal Quality Axes Rubric — Zeref v1.0.0
 
 > **Internal quality axes — fixture-based self-checks. NOT external benchmark
 > results.** Every axis below scores local invariants against committed
@@ -22,7 +22,7 @@ process.
 
 ## Axis 1 — Portability
 
-> Can a fresh user, in any supported AI harness, boot Zeref OS and reach
+> Can a fresh user, in any supported AI harness, boot Zeref and reach
 > a working memory layer with no manual editing?
 
 | Sub-criterion | Weight | 0–3 | 4–6 | 7–8 | 9–10 |
@@ -39,7 +39,7 @@ process.
 
 ## Axis 2 — Adaptivity
 
-> Can Zeref OS import and rank skills the user already has, rather than
+> Can Zeref import and rank skills the user already has, rather than
 > forcing them to re-author the same skill inside the project?
 
 | Sub-criterion | Weight | 0–3 | 4–6 | 7–8 | 9–10 |

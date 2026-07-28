@@ -1,7 +1,7 @@
 """
 privacy-audit: allow-file "CLI help text names example commands, env-var-shaped tokens (ZEREF_ALLOW_*, GITHUB_TOKEN) as documentation of the security policy."
 
-zeref.cli — Reference CLI for Zeref OS (Sprint 2).
+zeref.cli — Reference CLI for Zeref (Sprint 2).
 
 Commands:
     zeref status          Print hot.md summary + active tier
@@ -29,7 +29,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 def _project_root() -> Path:
-    """Walk up from cwd until AGENTS.md found (Zeref OS root)."""
+    """Walk up from cwd until AGENTS.md found (Zeref root)."""
     from zeref.memory import MemoryRoot
 
     return MemoryRoot.discover().root
@@ -112,7 +112,7 @@ def cmd_init(args: argparse.Namespace) -> int:
     from zeref.memory import normalize_init_values, scaffold_project
 
     root = Path(args.directory).resolve() if args.directory else Path.cwd()
-    print(f"\nInitialising Zeref OS layout at {root}")
+    print(f"\nInitialising Zeref layout at {root}")
 
     # Use `is None` so empty-string CLI args (e.g. --parent "") skip the prompt.
     # Non-TTY stdin (piped install, CI) also skips prompts and uses defaults.
@@ -1238,11 +1238,38 @@ def cmd_state(args: argparse.Namespace) -> int:
 
 
 def cmd_doctor(args: argparse.Namespace) -> int:
+    if getattr(args, "installation", False):
+        from zeref.release.manifest import build_manifest
+
+        manifest = build_manifest(_project_root())
+        if args.format == "json":
+            print(json.dumps(manifest.to_dict(), indent=2, sort_keys=True))
+        else:
+            print(manifest.format_text(), end="")
+        return 0
+
     from zeref.release.doctor import doctor_passed, format_doctor, run_doctor
 
     checks = run_doctor(_project_root())
     print(format_doctor(checks, format=args.format), end="")
     return 0 if doctor_passed(checks) else 1
+
+
+def cmd_version(args: argparse.Namespace) -> int:
+    from zeref import __version__ as _v
+
+    if not getattr(args, "verbose", False):
+        print(f"zeref {_v}")
+        return 0
+
+    from zeref.release.manifest import build_manifest
+
+    manifest = build_manifest(_project_root())
+    if args.format == "json":
+        print(json.dumps(manifest.to_dict(), indent=2, sort_keys=True))
+    else:
+        print(manifest.format_text(), end="")
+    return 0
 
 
 def cmd_lineage(args: argparse.Namespace) -> int:
@@ -1313,7 +1340,7 @@ def _print_memory_item(item) -> None:
 
 def _build_parser() -> argparse.ArgumentParser:
     from zeref import __version__ as _v
-    p = argparse.ArgumentParser(prog="zeref", description=f"Zeref OS CLI v{_v}")
+    p = argparse.ArgumentParser(prog="zeref", description=f"Zeref CLI v{_v}")
     p.add_argument("--version", action="version", version=f"zeref {_v}")
     sub = p.add_subparsers(dest="command", required=True)
 
@@ -1631,6 +1658,13 @@ def _build_parser() -> argparse.ArgumentParser:
 
     doctor = sub.add_parser("doctor", help="Run local Zeref health checks")
     doctor.add_argument("--format", choices=["text", "json"], default="text")
+    doctor.add_argument("--installation", action="store_true",
+                        help="Report the installed-state manifest (identity, version, git SHA, content digests) instead of the standard health checks")
+
+    version_p = sub.add_parser("version", help="Print version info")
+    version_p.add_argument("--verbose", action="store_true",
+                           help="Print the full installed-state manifest instead of just the version string")
+    version_p.add_argument("--format", choices=["text", "json"], default="text")
 
     prompt = sub.add_parser("prompt", help="Classify and rewrite task prompts")
     prompt_sub = prompt.add_subparsers(dest="prompt_command", required=True)
@@ -1726,6 +1760,7 @@ def main() -> None:
         "state": cmd_state,
         "release": cmd_release,
         "doctor": cmd_doctor,
+        "version": cmd_version,
         "prompt": cmd_prompt,
         "handoff": cmd_handoff,
         "loop": cmd_loop,

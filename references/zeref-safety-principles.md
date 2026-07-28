@@ -1,8 +1,8 @@
-# Zeref OS Safety Principles (v4.3)
+# Zeref Safety Principles (v4.3)
 
 **Shared reference — used by all skills and agents.**
 
-These rules exist not as arbitrary restrictions but because Zeref OS handles persistent project memory across long horizons. A mistake here erases knowledge that took weeks to build.
+These rules exist not as arbitrary restrictions but because Zeref handles persistent project memory across long horizons. A mistake here erases knowledge that took weeks to build.
 
 ---
 
@@ -27,7 +27,7 @@ These rules exist not as arbitrary restrictions but because Zeref OS handles per
 **What**: Always read `memory/hot.md` first (≤500 words). If insufficient, read `memory/index.md`. Find the relevant domain. Read only the named section of the named page.
 
 ## Rule 6 — Irreversible actions require explicit confirmation
-**Why**: Destructive operations (file deletion outside `memory/archive/`, force-push, dropping permissions) cannot be undone from inside Zeref OS.
+**Why**: Destructive operations (file deletion outside `memory/archive/`, force-push, dropping permissions) cannot be undone from inside Zeref.
 **What**: Always prompt the user with the exact action + target + consequence before executing. Never infer approval from session context.
 
 ## Rule 7 — Evidence is graded, not inferred
@@ -43,7 +43,7 @@ These rules exist not as arbitrary restrictions but because Zeref OS handles per
 **What**: `pattern-to-skill` only drafts to `skills/drafts/`. `/review-skill` is the only path from `skills/drafts/` to `skills/`. The Two-Strikes Rule (`references/two-strikes-rule.md`) gates rule creation — never codify on first occurrence.
 
 ## Rule 10 — Honest limits declared publicly
-**Why**: Overpromised capabilities erode trust when reality disappoints. Better to declare what Zeref OS doesn't do.
+**Why**: Overpromised capabilities erode trust when reality disappoints. Better to declare what Zeref doesn't do.
 **What**: Three honest limits in README:
 1. No real-time collaborative merge
 2. No hosted backend
@@ -51,7 +51,7 @@ These rules exist not as arbitrary restrictions but because Zeref OS handles per
 
 ## Rule 11 — Connectors OFF by default
 **Why**: Pre-enabled connectors leak project context before the user consents.
-**What**: Every MCP / connector in `SHARING_POLICY.md` starts `enabled: false`. Zeref OS recommends connectors only after `pattern-observer` detects repeated manual behavior (per `references/connector-advisory.md`).
+**What**: Every MCP / connector in `SHARING_POLICY.md` starts `enabled: false`. Zeref recommends connectors only after `pattern-observer` detects repeated manual behavior (per `references/connector-advisory.md`).
 
 ## Rule 12 — Archive, never hard delete (per D9)
 **Why**: Hard delete is unrecoverable. The wiki must keep an audit trail of supersession.

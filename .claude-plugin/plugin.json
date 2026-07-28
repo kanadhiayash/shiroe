@@ -2,7 +2,7 @@
   "_comment_privacy_audit": "privacy-audit: allow-file \u2014 author metadata + descriptor. No user data.",
   "name": "zeref-os",
   "version": "2.0.0-alpha.2",
-  "description": "Zeref Memory Engine (legacy: Zeref OS) \u2014 local-first memory and context layer for AI-assisted work. NOT an operating system. Harness-agnostic, model-agnostic, privacy-first. Flat memory layout, append-only pattern log, snapshots, on-demand team packs (small/medium/enterprise). Makes AI work cumulative across every harness.",
+  "description": "Zeref Memory Engine \u2014 local-first memory and context layer for AI-assisted work. NOT an operating system. Harness-agnostic, model-agnostic, privacy-first. Flat memory layout, append-only pattern log, snapshots, on-demand team packs (small/medium/enterprise). Makes AI work cumulative across every harness.",
   "author": {
     "name": "Yash Kanadhia"
   }

@@ -5,11 +5,11 @@ version: 1.1.1
 description: Zeref Memory Engine (compat identifier `zeref-os`) — local-first context and memory engine for AI-assisted work. Harness-agnostic, model-agnostic, privacy-first. Flat memory layout, per-project wiki, append-only pattern log, snapshots, on-demand team packs. Makes AI work cumulative instead of stateless across every harness.
 ---
 
-# Zeref OS
+# Zeref Memory Engine
 
-Zeref OS is a local-first context and memory engine that plugs *into* your existing AI harness (Claude Code, Cursor, Codex, Gemini, Windsurf, Aider). It is **not itself a harness**, **not a CEO persona**, **not a kernel-level OS**. It is the persistent memory layer your AI tools should have had from day one — named after Zeref Dragneel from *Fairy Tail*, the immortal scholar who carried ancient knowledge across forms and ages.
+Zeref is a local-first context and memory engine that plugs *into* your existing AI harness (Claude Code, Cursor, Codex, Gemini, Windsurf, Aider). It is **not itself a harness**, **not a CEO persona**, **not a kernel-level OS**. It is the persistent memory layer your AI tools should have had from day one — named after Zeref Dragneel from *Fairy Tail*, the immortal scholar who carried ancient knowledge across forms and ages.
 
-## What Zeref OS does
+## What Zeref does
 
 - **Remembers**: per-project flat `memory/` wiki + append-only `PATTERNS.jsonl` + snapshots
 - **Persists across harnesses**: works in Claude Code, Codex, Gemini CLI / Antigravity, Cursor, Windsurf, Aider, Hermes, Amp, Zed, Perplexity Computer, or any tool that reads markdown
@@ -50,4 +50,4 @@ memory/
 
 ## Promise
 
-Zeref OS makes AI work feel cumulative instead of stateless — in every harness, with any model, with privacy on by default.
+Zeref makes AI work feel cumulative instead of stateless — in every harness, with any model, with privacy on by default.

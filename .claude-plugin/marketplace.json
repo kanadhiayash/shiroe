@@ -2,7 +2,7 @@
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "_comment_privacy_audit": "privacy-audit: allow-file — author + owner metadata. No user data.",
   "name": "zeref-os",
-  "description": "Zeref OS — local-first context and memory engine for AI-assisted work. Harness-agnostic, model-agnostic, privacy-first.",
+  "description": "Zeref Memory Engine — local-first context and memory engine for AI-assisted work. Harness-agnostic, model-agnostic, privacy-first.",
   "owner": {
     "name": "Yash Kanadhia",
     "url": "https://github.com/kanadhiayash"
