@@ -11,6 +11,23 @@ sections:
   6. Stop / escalation rules — markdown
 """
 
+from zeref.context.allocator import (
+    AllocationBudget,
+    AllocationResult,
+    AllocatorError,
+    Omission,
+    allocate_packet,
+    resolve_capability,
+)
 from zeref.context.packet import ContextPacket, build_packet
 
-__all__ = ["ContextPacket", "build_packet"]
+__all__ = [
+    "ContextPacket",
+    "build_packet",
+    "AllocationBudget",
+    "AllocationResult",
+    "AllocatorError",
+    "Omission",
+    "allocate_packet",
+    "resolve_capability",
+]
