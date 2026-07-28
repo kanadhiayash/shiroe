@@ -48,7 +48,7 @@ NAMESPACES = ("conformance", "integration", "performance", "external_benchmark",
 EVIDENCE_TIERS = ("fixture_tested", "external_tested")
 MATURITIES = ("runtime", "contract", "experimental")
 
-_EXTERNAL_BENCHMARK_NAMES = ("locomo", "longmemeval", "personamem", "ruler", "helmet")
+_EXTERNAL_BENCHMARK_NAMES = ("locomo", "longmemeval", "convomem", "personamem", "ruler", "helmet")
 
 
 @dataclass(frozen=True)
