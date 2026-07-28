@@ -137,6 +137,80 @@ def test_is_stale_detects_upgrade(repo_root: Path) -> None:
     assert is_stale(old, repo_root) is True
 
 
+def _git(repo: Path, *args: str) -> None:
+    subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True)
+
+
+def _init_repo(path: Path) -> None:
+    _git(path, "init", "-q")
+    _git(path, "config", "user.email", "test@example.com")
+    _git(path, "config", "user.name", "Test")
+
+
+def _seed_installable(root: Path, *, version: str, plugin_description: str) -> None:
+    (root / "AGENTS.md").write_text("# AGENTS.md\n", encoding="utf-8")
+    (root / "pyproject.toml").write_text(
+        f'[project]\nname = "zeref-os"\nversion = "{version}"\n', encoding="utf-8",
+    )
+    (root / "zeref-registry.json").write_text(
+        json.dumps({"version": version}), encoding="utf-8",
+    )
+    (root / ".claude-plugin").mkdir(exist_ok=True)
+    (root / ".claude-plugin" / "plugin.json").write_text(
+        json.dumps({"name": "zeref-os", "version": version, "description": plugin_description}),
+        encoding="utf-8",
+    )
+
+
+def test_upgrade_from_stale_cache_replaces_old_payload(tmp_path: Path, monkeypatch) -> None:
+    """Regression fixture for the exact defect ZRF-67/PR9 exists to fix:
+    Claude Code resolves an installed plugin's version from plugin.json
+    first, and skips newer repo commits when that string looks unchanged.
+    PR9 changed plugin.json/marketplace.json *content* (a rebrand) without
+    bumping the version — which reproduces the bug it was meant to fix.
+
+    This builds two real on-disk installs — an "old cached" one and a "new
+    published" one, each a real tiny git repo, each manifested with the
+    genuine `build_manifest` — and proves `is_stale` correctly flags the
+    old cache against the new payload, so the new content actually replaces
+    it rather than being silently skipped.
+    """
+    old_root = tmp_path / "old_cache"
+    new_root = tmp_path / "new_publish"
+    old_root.mkdir()
+    new_root.mkdir()
+
+    for root, version, desc in (
+        (old_root, "2.0.0-alpha.2", "Zeref OS — old descriptor text"),
+        (new_root, "2.0.0-alpha.3", "Zeref Memory Engine — rebranded descriptor text"),
+    ):
+        _init_repo(root)
+        _seed_installable(root, version=version, plugin_description=desc)
+        _git(root, "add", "-A")
+        _git(root, "commit", "-qm", "seed")
+
+    import zeref
+
+    monkeypatch.setattr(zeref, "__version__", "2.0.0-alpha.2", raising=False)
+    old_manifest = build_manifest(old_root)
+    monkeypatch.setattr(zeref, "__version__", "2.0.0-alpha.3", raising=False)
+    new_manifest = build_manifest(new_root)
+
+    # The payload genuinely changed (not just the version string).
+    assert old_manifest.version != new_manifest.version
+    assert old_manifest.package_digest != new_manifest.package_digest
+    assert old_manifest.registry_digest != new_manifest.registry_digest
+
+    # A cache still holding the old manifest must be detected as stale
+    # against the newly published root — this is what forces the refresh.
+    assert is_stale(old_manifest.to_dict(), new_root) is True
+
+    # Once the new payload IS what's installed, it is no longer stale
+    # against itself — the upgrade actually lands, it isn't perpetually
+    # flagged.
+    assert is_stale(new_manifest.to_dict(), new_root) is False
+
+
 def test_memory_survives_manifest_rebuild(tmp_path: Path) -> None:
     """Computing/rebuilding the manifest must never read or depend on memory/
     content, so a real reinstall (which regenerates packaged files) can never
