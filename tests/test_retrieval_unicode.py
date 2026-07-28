@@ -6,14 +6,15 @@ Refs ZRF-65.
 
 from __future__ import annotations
 
+import sqlite3
 from pathlib import Path
 
 import pytest
 
 from zeref.memory.atom_store import AtomStore
-from zeref.memory.indexer import rebuild_index
+from zeref.memory.indexer import INDEX_PATH, rebuild_index
 from zeref.memory.schemas import create_atom
-from zeref.memory.search import search_atoms, tokenize
+from zeref.memory.search import _index_stale, search_atoms, tokenize
 
 
 # ---------------------------------------------------------------------------
@@ -151,3 +152,51 @@ def test_round_trip_recall_sqlite_fts(tmp_path: Path) -> None:
     recall = (len(SCRIPT_FIXTURES) - len(misses)) / len(SCRIPT_FIXTURES)
     print(f"\n[sqlite] recall by script: {recall:.0%}, misses={misses}")
     assert not misses, f"sqlite FTS missed: {misses}"
+
+
+# ---------------------------------------------------------------------------
+# Tokenizer-version staleness: an index built by an old (raw-text) tokenizer
+# must not be served to a query producing new-style tokens (e.g. CJK
+# bigrams) — that mismatch returns zero results silently, with no error and
+# no atom-file mtime change to trip the existing staleness check.
+# ---------------------------------------------------------------------------
+
+def test_index_missing_tokenizer_version_is_stale_and_falls_back(tmp_path: Path) -> None:
+    atoms = _ingest_fixtures(tmp_path)
+    rebuild_index(tmp_path)
+    db_path = tmp_path / INDEX_PATH
+    assert _index_stale(tmp_path, db_path) is False
+
+    # Simulate a pre-upgrade install: an index built before index_meta
+    # existed at all (the exact shape of an old raw-text index).
+    conn = sqlite3.connect(db_path)
+    conn.execute("DROP TABLE index_meta")
+    conn.commit()
+    conn.close()
+
+    assert _index_stale(tmp_path, db_path) is True
+
+    _label, _claim, query = next(f for f in SCRIPT_FIXTURES if f[0] == "chinese")
+    result = search_atoms(tmp_path, query)
+    assert result["source"] == "jsonl", "stale index must fall back, not serve mismatched FTS content"
+    ids = {m["atom"]["id"] for m in result["matches"]}
+    assert atoms["chinese"]["id"] in ids
+
+
+def test_index_old_tokenizer_version_is_stale_and_falls_back(tmp_path: Path) -> None:
+    atoms = _ingest_fixtures(tmp_path)
+    rebuild_index(tmp_path)
+    db_path = tmp_path / INDEX_PATH
+
+    conn = sqlite3.connect(db_path)
+    conn.execute("UPDATE index_meta SET value = '1' WHERE key = 'tokenizer_version'")
+    conn.commit()
+    conn.close()
+
+    assert _index_stale(tmp_path, db_path) is True
+
+    _label, _claim, query = next(f for f in SCRIPT_FIXTURES if f[0] == "chinese")
+    result = search_atoms(tmp_path, query)
+    assert result["source"] == "jsonl"
+    ids = {m["atom"]["id"] for m in result["matches"]}
+    assert atoms["chinese"]["id"] in ids

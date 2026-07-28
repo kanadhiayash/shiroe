@@ -25,6 +25,16 @@ _CJK_RANGES = (
 )
 
 
+# Bump this whenever tokenize()'s output changes for the same input (new
+# segmentation rule, new normalization step, etc.). _index_stale() compares
+# it against what's stored in the index's index_meta table and forces a
+# rebuild on mismatch — otherwise an index built by an older tokenizer keeps
+# serving content that new query tokens can never match (silently, since
+# _index_stale()'s mtime check alone doesn't notice: no atom file changed,
+# only the code that tokenizes them did).
+TOKENIZER_VERSION = 2
+
+
 def _is_cjk(ch: str) -> bool:
     cp = ord(ch)
     return any(lo <= cp <= hi for lo, hi in _CJK_RANGES)
@@ -83,15 +93,22 @@ def search_atoms(
 
 
 def _index_stale(root: Path, db_path: Path) -> bool:
-    """True when any atom file changed at/after the index was built.
+    """True when any atom file changed at/after the index was built, or the
+    index was built by a different tokenizer version.
 
     Guarantees add -> search coherence: a freshly appended atom is never
     hidden behind a stale SQLite index; we fall back to the canonical JSONL
-    scan until `zeref memory index` rebuilds it.
+    scan until `zeref memory index` rebuilds it. The tokenizer-version check
+    covers the upgrade case the mtime check can't see: an index built before
+    a tokenizer change still has an up-to-date mtime (no atom file changed),
+    but its FTS content was tokenized the old way and new query tokens
+    (e.g. CJK bigrams) will never match it.
     """
     try:
         index_mtime = db_path.stat().st_mtime
     except OSError:
+        return True
+    if _stored_tokenizer_version(db_path) != TOKENIZER_VERSION:
         return True
     atom_dir = root / "memory" / "l1_atoms"
     if not atom_dir.exists():
@@ -103,6 +120,24 @@ def _index_stale(root: Path, db_path: Path) -> bool:
         except OSError:
             continue
     return False
+
+
+def _stored_tokenizer_version(db_path: Path) -> int | None:
+    """Version recorded in index_meta at build time, or None if absent —
+    covers both a pre-upgrade index (no index_meta table at all) and a
+    fresh-but-differently-versioned one.
+    """
+    try:
+        conn = sqlite3.connect(db_path)
+        try:
+            row = conn.execute(
+                "SELECT value FROM index_meta WHERE key = 'tokenizer_version'"
+            ).fetchone()
+        finally:
+            conn.close()
+    except sqlite3.Error:
+        return None
+    return int(row[0]) if row else None
 
 
 def _search_sqlite(

@@ -29,6 +29,12 @@ def rebuild_index(root: Path | str = Path(".")) -> dict[str, Any]:
             DROP TABLE IF EXISTS links;
             DROP TABLE IF EXISTS events;
             DROP TABLE IF EXISTS atoms_fts;
+            DROP TABLE IF EXISTS index_meta;
+
+            CREATE TABLE index_meta(
+              key TEXT PRIMARY KEY,
+              value TEXT
+            );
 
             CREATE TABLE atoms(
               id TEXT PRIMARY KEY,
@@ -79,6 +85,16 @@ def rebuild_index(root: Path | str = Path(".")) -> dict[str, Any]:
               tags
             );
             """
+        )
+        # Records which tokenizer built this index, so search.py's
+        # _index_stale() can detect a pre-upgrade index (built from raw text,
+        # no bigrams) and fall back to the JSONL scan instead of silently
+        # matching nothing against new query tokens.
+        from zeref.memory.search import TOKENIZER_VERSION  # local import: avoids a search<->indexer cycle
+
+        conn.execute(
+            "INSERT INTO index_meta(key, value) VALUES ('tokenizer_version', ?)",
+            (str(TOKENIZER_VERSION),),
         )
         for atom in atoms:
             _insert_atom(conn, atom)
