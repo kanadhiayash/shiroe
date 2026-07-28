@@ -74,10 +74,20 @@ def test_dict_shape_is_backward_compatible() -> None:
 def test_dense_non_latin_text_now_exceeds_the_memory_write_budget() -> None:
     """Regression guard for the defect itself: previously this routed to
     a plain no-write decision because it looked like ~2 tokens; now it
-    must be recognized as exceeding the memory-write budget."""
+    must be recognized as exceeding the memory-write budget.
+
+    ZRF-63 note: the original probe used the operation name "some-view",
+    which is not a real operation route_operation() recognizes anywhere
+    else in this codebase — it only reached the budget check because
+    unrecognized operations used to fall through to the generic
+    budget-or-no-write path (the exact defect ZRF-63 closes: unknown
+    operations now fail closed instead). Swapped to "memory-add", a real
+    operation, so this test still exercises the token-estimate regression
+    it was written for without depending on that now-fixed loophole.
+    """
     budget = DEFAULT_POLICY["max_context_tokens_for_memory_write"]
     oversized_cjk = "你好世界" * 500  # ~2000 chars, well past the 1200 budget
-    result = route_operation("some-view", text=oversized_cjk)
+    result = route_operation("memory-add", text=oversized_cjk)
     assert result["estimate"]["estimated_tokens"] > budget
     assert result["ladder_step"] == "flagship-review"
 
@@ -89,4 +99,9 @@ def test_existing_route_operation_decisions_still_hold() -> None:
     assert route_operation("memory-add", duplicate=True)["ladder_step"] == "link-existing"
     assert route_operation("patch", status_change=True)["ladder_step"] == "atom-patch"
     assert route_operation("memory-add", public_claim=True)["executor"] == "flagship"
-    assert route_operation("")["ladder_step"] == "no-write"
+    # ZRF-63 note: empty-string was previously used here to assert a
+    # "no-write" decision for "no operation, no text". That relied on the
+    # same defect fixed above — an unrecognized operation (empty string is
+    # not a real operation name) falling through to a generic no-write
+    # default instead of failing closed. It now correctly fails closed.
+    assert route_operation("")["executor"] == "blocked"
