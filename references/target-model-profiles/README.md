@@ -17,7 +17,12 @@ Every profile MUST carry:
 
 - `target_id` — matches `_shared/model-resolver.md` model_id.
 - `vendor`, `family`, `variant`.
-- `source_url`, `source_updated_at`, `last_verified_catalog_sha`.
+- `source_url`, `source_updated_at`, `source_authority`, `last_verified_catalog_sha`.
+- `source_authority` — one of `official` (published directly by the vendor),
+  `third_party` (a mirror/leak repo, no authoritative publisher — e.g. the
+  `system_prompts_leaks` catalog these Tier-1 profiles are sourced from), or
+  `derived` (reconstructed/inferred, not a direct capture). Grades how the
+  freshness ceiling is enforced — see "Freshness policy" below.
 - `extracted_by`, `extracted_at`.
 - Cost-router: `system_prompt_bytes`, `system_prompt_tokens`,
   `tool_declaration_tokens`, `bare_prompt_tokens`, `prompt_cache_ttl_min`.
@@ -54,8 +59,16 @@ Every profile MUST carry:
 ## Freshness policy
 
 - Profiles carry `source_updated_at` from the catalog.
-- `zeref release check` refuses PASS when any Tier-1 profile is >60 days
-  stale relative to the release date.
+- `zeref release check` and `zeref doctor` refuse PASS (hard-fail) when a
+  profile with `source_authority: official` is >60 days stale relative to
+  the release date — an official publisher exists to re-verify against, so
+  staleness there is treated as unverified drift.
+- A `third_party`/`derived` profile that is >60 days stale downgrades to a
+  non-blocking WARNING instead of a hard fail: there is no authoritative
+  publisher to re-check it against either way, so refusing to release would
+  just be recording a verification nobody could have performed. The
+  WARNING still surfaces in the release report and in `zeref doctor` output
+  — it is never silently dropped or reported as PASS. (issue #175)
 - Monthly refresh cadence (see
   [skills/imported/system-prompts-leaks/README.md](../../skills/imported/system-prompts-leaks/README.md)).
 

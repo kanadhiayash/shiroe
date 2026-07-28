@@ -36,8 +36,27 @@ def run_doctor(root: Path) -> list[DoctorCheck]:
             root / "memory" / "audit" / "guard_failures.jsonl",
         ),
         _path_check("permissions", root / "config" / "PERMISSIONS.md"),
+        _target_profiles_check(root),
     ]
     return checks
+
+
+def _target_profiles_check(root: Path) -> DoctorCheck:
+    """Surface target-model-profile freshness in `zeref doctor` too (issue #175).
+
+    Shares grading with the release gate (`zeref.release.checks`) via
+    `grade_profile_freshness` so the two surfaces can't drift out of sync.
+    """
+    try:
+        from zeref.prompt.target_profile import grade_profile_freshness
+    except ImportError:
+        return DoctorCheck("target_profiles", "pass", "loader unavailable — pre-v1.2 skip")
+    status, reason = grade_profile_freshness(project_root=root, max_age_days=60)
+    if status == "fail":
+        return DoctorCheck("target_profiles", "fail", reason)
+    if status == "warn":
+        return DoctorCheck("target_profiles", "warn", reason)
+    return DoctorCheck("target_profiles", "pass", reason)
 
 
 def format_doctor(checks: list[DoctorCheck], *, format: str = "text") -> str:
@@ -47,7 +66,10 @@ def format_doctor(checks: list[DoctorCheck], *, format: str = "text") -> str:
 
 
 def doctor_passed(checks: list[DoctorCheck]) -> bool:
-    return all(check.status == "pass" for check in checks)
+    """True when no check failed. A "warn" status is non-blocking (see
+    target_profiles: a stale third_party/derived profile is surfaced loudly
+    but never fails the gate — see issue #175)."""
+    return all(check.status != "fail" for check in checks)
 
 
 def _python_check() -> DoctorCheck:
