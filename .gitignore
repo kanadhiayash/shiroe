@@ -91,6 +91,10 @@ memory/sync/
 # and must not re-enter the public tree.
 docs/audits/release-evidence/
 
+# Working evidence dumps for individual tickets (classification tables, scratch
+# notes) — operator records, not deliverables.
+docs/_evidence/
+
 # Local lineage sandbox imports. Foreign repository clones and inventories are
 # generated evidence only and must not enter Zeref core.
 .zeref-sandbox/

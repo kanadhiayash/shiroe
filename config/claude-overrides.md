@@ -27,13 +27,13 @@ overrides:
 
 ## Skill / command surface
 
-- All Zeref OS skills surface as `zeref:<skill-name>` via Claude Code's Skill tool.
-- All Zeref OS commands surface as `/zeref:<command>` in the slash command namespace.
+- All Zeref skills surface as `zeref:<skill-name>` via Claude Code's Skill tool.
+- All Zeref commands surface as `/zeref:<command>` in the slash command namespace.
 - The `.claude-plugin/plugin.json` manifest binds these.
 
 ## Hooks
 
-Zeref OS relies on Claude Code's native SessionStart and UserPromptSubmit hooks (not custom watchers) to trigger:
+Zeref relies on Claude Code's native SessionStart and UserPromptSubmit hooks (not custom watchers) to trigger:
 - `/start` boot sequence on session start
 - `privacy-guardian` pre-write checks
 - `pattern-observer` background scan on every prompt submit

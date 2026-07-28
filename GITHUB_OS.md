@@ -1,12 +1,12 @@
 <!-- privacy-audit: allow-file "Governance spec cites credential-shaped tokens in never-commit list." -->
 
-# Zeref OS — Repo Doctrine (per-repo GITHUB_OS)
+# Zeref — Repo Doctrine (per-repo GITHUB_OS)
 
 Git and release conventions for this repository.
 
 ## Source of truth
 
-- **Canonical spec**: `AGENTS.md` (root of this repo) — Zeref OS behavioral constitution
+- **Canonical spec**: `AGENTS.md` (root of this repo) — Zeref behavioral constitution
 - **This file**: git, release, and classification conventions for the repo
 
 ## Conventions

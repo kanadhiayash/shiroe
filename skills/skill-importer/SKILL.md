@@ -23,7 +23,7 @@ deliverables:
 
 **Purpose.** Pull a skill from the user's broader skill directory (e.g.
 `~/.claude/skills/`, `~/.codex/skills/`, a sibling project, or a public
-skill repo) into this Zeref OS project. The import is provenance-tracked
+skill repo) into this Zeref project. The import is provenance-tracked
 and does **not** auto-activate the skill — the user reviews it via
 `/review-skill` first.
 
@@ -79,4 +79,4 @@ This skill is the destination side of "adaptivity". When the user says
   pipeline first).
 - Source has no `SKILL.md` (not a valid skill).
 - Privacy filter flags credentials in the source.
-- Import target name collides with a built-in Zeref OS skill.
+- Import target name collides with a built-in Zeref skill.

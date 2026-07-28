@@ -32,6 +32,24 @@ Release notes must include:
 - Known risks.
 - Migration notes if needed.
 
+## Version bump on every published change
+
+Claude Code resolves an installed plugin's freshness from `plugin.json`'s
+`version` field first, before marketplace metadata or commit SHA. If that
+field does not change, a host may keep serving a previously cached payload
+even though the source repository has moved on.
+
+Every change that ships to the plugin marketplace (any edit under
+`.claude-plugin/`, `agents/`, `commands/`, `skills/`, `references/`,
+`team/`, `team-packs/`, or `zeref/`) must bump the version in lockstep
+across `zeref/VERSION`, `pyproject.toml`, `zeref-registry.json`,
+`.claude-plugin/plugin.json`, the README badge, and `docs/wiki/Installation.md`
+— enforced by `scripts/check-version-consistency.py` (a required gate,
+above). Skipping the bump is the single most common cause of a stale
+install; `zeref doctor --installation` / `zeref version --verbose` report
+the installed manifest (version, git SHA, content digests) so a stale cache
+can be diagnosed from the outside.
+
 ## Tags
 
 Use SemVer tags:
