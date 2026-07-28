@@ -66,6 +66,19 @@ def test_blocks_contested_vendor_comparison(tmp_path: Path) -> None:
     assert any(f.constraint == "contested_vendor_comparison" for f in findings)
 
 
+def test_allows_citing_vendor_baselines_without_zeref_ranking(tmp_path: Path) -> None:
+    """Citing a vendor's own published figures for context — e.g. Mem0's
+    baseline showing full-context beats Mem0 — is not Zeref making a
+    ranking claim, and must not trip the gate just for mentioning a vendor
+    name near a comparison word."""
+    (tmp_path / "README.md").write_text(
+        "Mem0's own baseline: full-context 72.9% vs Mem0 66.9%.\n",
+        encoding="utf-8",
+    )
+    findings = scan_public_claims(tmp_path)
+    assert not any(f.constraint == "contested_vendor_comparison" for f in findings)
+
+
 def test_blocks_zeref_score_without_baselines(tmp_path: Path) -> None:
     (tmp_path / "README.md").write_text(
         "Zeref scores 91% on the LoCoMo benchmark.\n",

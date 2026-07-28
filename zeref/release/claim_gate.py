@@ -254,8 +254,14 @@ def scan_public_claims(root: Path) -> list[ClaimFinding]:
                     ),
                 ))
 
-            # (b1) contested vendor comparative ranking
-            if any(v in lowered for v in _VENDOR_NAMES) and any(c in lowered for c in _COMPARISON_WORDS):
+            # (b1) contested vendor comparative ranking — only when Zeref is
+            # the subject of the comparison. Citing a vendor's own published
+            # figures for context (e.g. justifying why a baseline is
+            # required) is not Zeref making a ranking claim; require "zeref"
+            # on the line so the gate targets the claim, not the citation.
+            if "zeref" in lowered and any(v in lowered for v in _VENDOR_NAMES) and any(
+                c in lowered for c in _COMPARISON_WORDS
+            ):
                 findings.append(ClaimFinding(
                     path=rel, line=lineno,
                     constraint="contested_vendor_comparison",
