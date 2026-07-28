@@ -262,7 +262,7 @@ def test_registry_reasoning_class_and_status() -> None:
     registry_path = REPO_ROOT / "zeref-registry.json"
     registry = json.loads(registry_path.read_text(encoding="utf-8"))
 
-    assert registry["version"] == "2.0.0-alpha.2"
+    assert registry["version"] == "2.0.0-alpha.3"
 
     allowed_classes = {"fast", "balanced", "deep", "frontier"}
     allowed_statuses = {"runtime", "adapter", "contract", "experimental"}

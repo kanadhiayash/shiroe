@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "zeref-os"
-version = "2.0.0-alpha.2"
+version = "2.0.0-alpha.3"
 description = "Zeref Memory Engine — local-first context and memory engine for AI harnesses"
 readme = "README.md"
 license = { text = "MIT" }
