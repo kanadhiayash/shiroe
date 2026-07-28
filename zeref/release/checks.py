@@ -50,8 +50,22 @@ def run_release_check(root: Path) -> list[ReleaseFinding]:
     findings.append(_check_pyproject_backend(root))
     findings.append(_check_soul_present(root))
     findings.append(_check_target_profiles(root))
+    findings.append(_check_claim_gate(root))
     _emit_release_evidence(root, findings)
     return findings
+
+
+def _check_claim_gate(root: Path) -> ReleaseFinding:
+    """ZRF-66 / issue #172: block public claims that exceed their evidence
+    class (routing-accuracy claims off a fixture-coverage corpus, contested
+    vendor comparisons, un-baselined Zeref numbers, unscored external
+    benchmarks). See zeref.release.claim_gate for the encoded constraints."""
+    from zeref.release.claim_gate import scan_public_claims
+    findings = scan_public_claims(root)
+    if findings:
+        sample = "; ".join(f"{f.path}:{f.line} ({f.constraint})" for f in findings[:3])
+        return _fail("claim_gate", f"{len(findings)} blocked public claim(s): {sample}")
+    return _pass("claim_gate", "no blocked public-claim patterns found")
 
 
 def _check_target_profiles(root: Path) -> ReleaseFinding:

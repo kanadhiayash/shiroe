@@ -307,6 +307,11 @@ def main() -> int:
     (REPO / args.out_json).write_text(
         json.dumps({
             "label": "internal quality axes — fixture-based self-checks, not external benchmarks",
+            # ZRF-66 / issue #172: machine-readable evidence class, so any
+            # consumer (claim gate, docs generator) can tell at a glance this
+            # is NOT external_benchmark evidence without parsing prose.
+            "evidence_namespace": "conformance",
+            "evidence_tier": "fixture_tested",
             "passed": passed,
             "pass_bar": {"axis_min": 9.0},
             "axes": results,

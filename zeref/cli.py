@@ -1093,6 +1093,25 @@ def cmd_release(args: argparse.Namespace) -> int:
     return 1
 
 
+def cmd_claims(args: argparse.Namespace) -> int:
+    """ZRF-66 / issue #172: capability evidence matrix + public-claim gate."""
+    from zeref.release.claim_gate import (
+        build_capability_matrix, format_findings, format_matrix, scan_public_claims,
+    )
+
+    root = _project_root()
+    if args.claims_command == "matrix":
+        entries = build_capability_matrix(root)
+        print(format_matrix(entries, format=args.format), end="")
+        return 0
+    if args.claims_command == "check":
+        findings = scan_public_claims(root)
+        print(format_findings(findings), end="")
+        return 1 if findings else 0
+    print("✘ unknown claims command")
+    return 1
+
+
 def cmd_team(args: argparse.Namespace) -> int:
     """vNext team compiler: compile | plan-show (PR 7)."""
     root = _project_root()
@@ -1656,6 +1675,12 @@ def _build_parser() -> argparse.ArgumentParser:
     release_check = release_sub.add_parser("check", help="Run local release checks")
     release_check.add_argument("--format", choices=["text", "md", "json"], default="text")
 
+    claims = sub.add_parser("claims", help="Capability evidence matrix + public-claim gate (ZRF-66)")
+    claims_sub = claims.add_subparsers(dest="claims_command", required=True)
+    claims_matrix = claims_sub.add_parser("matrix", help="Print the capability evidence matrix")
+    claims_matrix.add_argument("--format", choices=["text", "json"], default="text")
+    claims_sub.add_parser("check", help="Scan public docs for blocked claim patterns")
+
     doctor = sub.add_parser("doctor", help="Run local Zeref health checks")
     doctor.add_argument("--format", choices=["text", "json"], default="text")
     doctor.add_argument("--installation", action="store_true",
@@ -1759,6 +1784,7 @@ def main() -> None:
         "team": cmd_team,
         "state": cmd_state,
         "release": cmd_release,
+        "claims": cmd_claims,
         "doctor": cmd_doctor,
         "version": cmd_version,
         "prompt": cmd_prompt,
