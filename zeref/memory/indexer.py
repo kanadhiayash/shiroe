@@ -70,6 +70,15 @@ def rebuild_index(root: Path | str = Path(".")) -> dict[str, Any]:
               PRIMARY KEY(source_id, target_id, relation)
             );
 
+            CREATE TABLE triples(
+              subject TEXT,
+              predicate TEXT,
+              object TEXT,
+              source_atom_id TEXT,
+              confidence REAL,
+              PRIMARY KEY(subject, predicate, object, source_atom_id)
+            );
+
             CREATE TABLE events(
               id TEXT PRIMARY KEY,
               ts TEXT,
@@ -170,3 +179,16 @@ def _insert_atom(conn: sqlite3.Connection, atom: dict[str, Any]) -> None:
                 "INSERT OR IGNORE INTO links(source_id, target_id, relation) VALUES (?, ?, ?)",
                 (atom["id"], str(link["target_id"]), str(link.get("relation", "related"))),
             )
+
+    # Deterministic, lexical-only extraction -- no model call, no NER. See
+    # triples.py's module docstring for the precision-first guardrails.
+    from zeref.memory.triples import extract_triples  # local import: avoids a search<->indexer cycle
+
+    for triple in extract_triples(atom):
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO triples(subject, predicate, object, source_atom_id, confidence)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (triple["subject"], triple["predicate"], triple["object"], triple["source_atom_id"], triple["confidence"]),
+        )

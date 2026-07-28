@@ -11,6 +11,7 @@ from typing import Any
 
 from zeref.memory.atom_store import AtomStore
 from zeref.memory.bitemporal import rank_key, recency_key
+from zeref.memory.expand import expand_tokens
 from zeref.memory.indexer import INDEX_PATH
 
 
@@ -82,20 +83,51 @@ def search_atoms(
     atom_type: str | None = None,
     status: str | None = None,
     as_of: str | None = None,
+    expand: bool = True,
 ) -> dict[str, Any]:
-    """Search atoms. ``as_of`` is the bi-temporal ranking reference time
-    (default: now) — see zeref.memory.bitemporal.rank_key. It only breaks
-    ties among equally-scored matches; it does not filter results.
+    """Search atoms, bi-temporally ranked and optionally supplemented by a
+    deterministic query expansion.
+
+    ``as_of`` is the bi-temporal ranking reference time (default: now) — see
+    zeref.memory.bitemporal.rank_key. Current/valid atoms outrank superseded
+    or not-yet/no-longer-valid ones; it does not filter results out, it only
+    orders them (a superseded atom can still fill a slot when there aren't
+    enough current matches).
+
+    Expansion (see zeref.memory.expand) only ever *supplements*: direct-token
+    results are computed and bi-temporally ranked first, and are never
+    reordered or dropped by expansion, so a query that already gets full,
+    correct results behaves identically whether expand is True or False.
+    Expansion only fills remaining slots up to `limit` when the direct
+    search comes up short -- and it never runs at all when the query itself
+    didn't tokenize (see the abstention check below), so it can never turn
+    an honest abstention into a fabricated match.
     """
     root_path = Path(root)
     db_path = root_path / INDEX_PATH
     tokens = tokenize(query)
-    if db_path.exists() and tokens and not _index_stale(root_path, db_path):
+    if not tokens:
+        return {
+            "query": query,
+            "tokens": tokens,
+            "source": "jsonl",
+            "abstained": True,
+            "matches": [],
+            "expansion": {"tokens": [], "added": []},
+        }
+
+    expansion = expand_tokens(tokens) if expand else {"tokens": [], "added": []}
+
+    if db_path.exists() and not _index_stale(root_path, db_path):
         try:
-            return _search_sqlite(db_path, query, tokens, limit, atom_type, status, as_of)
+            result = _search_sqlite(db_path, query, tokens, expansion, limit, atom_type, status, as_of)
+            result["expansion"] = expansion
+            return result
         except sqlite3.Error:
             pass
-    return _search_jsonl(root_path, query, tokens, limit, atom_type, status, as_of)
+    result = _search_jsonl(root_path, query, tokens, expansion, limit, atom_type, status, as_of)
+    result["expansion"] = expansion
+    return result
 
 
 def _index_stale(root: Path, db_path: Path) -> bool:
@@ -146,20 +178,19 @@ def _stored_tokenizer_version(db_path: Path) -> int | None:
     return int(row[0]) if row else None
 
 
-def _search_sqlite(
-    db_path: Path,
-    query: str,
-    tokens: list[str],
-    limit: int,
+def _fts_query(
+    conn: sqlite3.Connection,
+    match_terms: list[str],
     atom_type: str | None,
     status: str | None,
-    as_of: str | None = None,
-) -> dict[str, Any]:
+    exclude_ids: set[str],
+    limit: int,
+) -> list[tuple[Any, ...]]:
     # Tokens are quoted as FTS5 string literals so an unlucky token can never
     # be parsed as a MATCH operator (NEAR, column filters, etc.) or unbalance
     # the query — belt-and-braces on top of tokens already being restricted
     # to \w+ output.
-    match_query = " OR ".join('"' + token.replace('"', '""') + '"' for token in tokens)
+    match_query = " OR ".join('"' + token.replace('"', '""') + '"' for token in match_terms)
     filters = []
     params: list[Any] = [match_query]
     if atom_type:
@@ -168,16 +199,11 @@ def _search_sqlite(
     if status:
         filters.append("atoms.status = ?")
         params.append(status)
+    if exclude_ids:
+        filters.append(f"atoms.id NOT IN ({','.join('?' for _ in exclude_ids)})")
+        params.extend(sorted(exclude_ids))
     where = " AND " + " AND ".join(filters) if filters else ""
-    # ponytail: over-fetch a bounded window (not the full match set) so the
-    # bitemporal tie-break below has candidates to re-rank within — a
-    # superseded fact ranked just outside `limit` by bm25 alone can still
-    # lose to a current one inside it. Ceiling: a superseded fact ranked
-    # beyond the window is still invisible to the tie-break; raise the
-    # multiplier (or push valid_from/valid_until/recorded_at/superseded_at
-    # into the SQL ORDER BY) if that proves visible in practice.
-    fetch_limit = min(limit * 4, 200)
-    params.append(fetch_limit)
+    params.append(limit)
     sql = f"""
         SELECT atoms.raw_json, bm25(atoms_fts) AS rank
         FROM atoms_fts
@@ -186,31 +212,89 @@ def _search_sqlite(
         ORDER BY rank
         LIMIT ?
     """
-    conn = sqlite3.connect(db_path)
-    try:
-        rows = conn.execute(sql, params).fetchall()
-    finally:
-        conn.close()
-    matches = []
-    for bm25_position, row in enumerate(rows):
-        atom = json.loads(row[0])
-        matches.append({
-            "atom": atom,
-            "score": round(float(row[1]), 6),
-            "why": _why(atom, tokens, "SQLite FTS rank"),
-            "bm25_position": bm25_position,
-        })
-    # Bi-temporal validity/supersession outranks raw bm25 rank (see
-    # zeref.memory.bitemporal.rank_key). bm25 order is the relevance term and
-    # comes next; recency only separates atoms bm25 ranked identically.
-    matches.sort(
+    return conn.execute(sql, params).fetchall()
+
+
+def _rank_and_trim(
+    candidates: list[dict[str, Any]],
+    as_of: str | None,
+    limit: int,
+) -> list[dict[str, Any]]:
+    """Bi-temporal-first sort (current/valid outranks superseded/expired) --
+    see zeref.memory.bitemporal.rank_key. Relevance (`rank_position`, the
+    FTS rank order) comes next, then recency breaks any remaining tie.
+    Recency must sit after relevance: it's a continuous value that almost
+    never ties, so putting it first would let recency decide every
+    comparison before relevance was ever consulted -- see
+    zeref.memory.bitemporal.recency_key. Shared by the direct and expansion
+    passes so a superseded atom matched only via expansion still can't
+    outrank a current expansion match.
+    """
+    candidates.sort(
         key=lambda item: (
             *rank_key(item["atom"], as_of),
-            item["bm25_position"],
+            item["rank_position"],
             recency_key(item["atom"]),
         )
     )
-    matches = [{k: v for k, v in item.items() if k != "bm25_position"} for item in matches[:limit]]
+    return [{k: v for k, v in item.items() if k != "rank_position"} for item in candidates[:limit]]
+
+
+def _search_sqlite(
+    db_path: Path,
+    query: str,
+    tokens: list[str],
+    expansion: dict[str, Any],
+    limit: int,
+    atom_type: str | None,
+    status: str | None,
+    as_of: str | None = None,
+) -> dict[str, Any]:
+    conn = sqlite3.connect(db_path)
+    try:
+        # ponytail: over-fetch a bounded window (not the full match set) so
+        # the bitemporal tie-break has candidates to re-rank within — a
+        # superseded fact ranked just outside `limit` by bm25 alone can
+        # still lose to a current one inside it. Ceiling: a superseded fact
+        # ranked beyond the window is still invisible to the tie-break;
+        # raise the multiplier if that proves visible in practice.
+        rows = _fts_query(conn, tokens, atom_type, status, set(), min(limit * 4, 200))
+        direct = []
+        for position, row in enumerate(rows):
+            atom = json.loads(row[0])
+            direct.append({
+                "atom": atom,
+                "score": round(float(row[1]), 6),
+                "matched_via": "direct",
+                "why": _why(atom, tokens, "SQLite FTS rank"),
+                "rank_position": position,
+            })
+        matches = _rank_and_trim(direct, as_of, limit)
+
+        # Supplement only: direct matches above are never reordered or
+        # dropped further. Expansion terms just fill remaining slots when
+        # the direct search came up short, and only atoms not already
+        # matched directly are eligible, so a query that already fills
+        # `limit` behaves identically whether expansion ran or not.
+        remaining = limit - len(matches)
+        if remaining > 0 and expansion["tokens"]:
+            exclude_ids = {m["atom"]["id"] for m in matches}
+            extra_rows = _fts_query(
+                conn, expansion["tokens"], atom_type, status, exclude_ids, min(remaining * 4, 200)
+            )
+            extra = []
+            for position, row in enumerate(extra_rows):
+                atom = json.loads(row[0])
+                extra.append({
+                    "atom": atom,
+                    "score": round(float(row[1]), 6),
+                    "matched_via": "expansion",
+                    "why": _why(atom, expansion["tokens"], "SQLite FTS rank (expansion)"),
+                    "rank_position": position,
+                })
+            matches.extend(_rank_and_trim(extra, as_of, remaining))
+    finally:
+        conn.close()
     return {
         "query": query,
         "tokens": tokens,
@@ -224,23 +308,12 @@ def _search_jsonl(
     root: Path,
     query: str,
     tokens: list[str],
+    expansion: dict[str, Any],
     limit: int,
     atom_type: str | None,
     status: str | None,
     as_of: str | None = None,
 ) -> dict[str, Any]:
-    # No tokens means the query couldn't be tokenized (or was blank) — abstain
-    # rather than fail open into "every atom matches". `abstained: True` lets
-    # a caller tell this apart from a real, tokenized search that found
-    # nothing (`abstained: False`, `matches: []`).
-    if not tokens:
-        return {
-            "query": query,
-            "tokens": tokens,
-            "source": "jsonl",
-            "abstained": True,
-            "matches": [],
-        }
     atoms = AtomStore(root).load(atom_type=atom_type, status=status)
     scored = []
     for atom in atoms:
@@ -249,6 +322,7 @@ def _search_jsonl(
             scored.append({
                 "atom": atom,
                 "score": score,
+                "matched_via": "direct",
                 "why": _why(atom, tokens, "JSONL token scan"),
             })
     # Bi-temporal validity/supersession outranks raw text score (a superseded
@@ -266,12 +340,46 @@ def _search_jsonl(
             item["atom"]["id"],
         )
     )
+    matches = scored[:limit]
+
+    # Same supplement-only rule as the SQLite path: fill remaining slots
+    # from expansion terms, excluding atoms already present, never touching
+    # the direct-match ordering above.
+    remaining = limit - len(matches)
+    if remaining > 0 and expansion["tokens"]:
+        exclude_ids = {m["atom"]["id"] for m in matches}
+        extra = []
+        for atom in atoms:
+            if atom["id"] in exclude_ids:
+                continue
+            score = _score_atom(atom, expansion["tokens"])
+            if score > 0:
+                extra.append({
+                    "atom": atom,
+                    "score": score,
+                    "matched_via": "expansion",
+                    "why": _why(atom, expansion["tokens"], "JSONL token scan (expansion)"),
+                })
+        # Same dominance -> relevance -> recency -> stable-tiebreaker order
+        # as the direct-match sort above -- see bitemporal.rank_key and
+        # bitemporal.recency_key.
+        extra.sort(
+            key=lambda item: (
+                *rank_key(item["atom"], as_of),
+                -item["score"],
+                recency_key(item["atom"]),
+                item["atom"]["created_at"],
+                item["atom"]["id"],
+            )
+        )
+        matches.extend(extra[:remaining])
+
     return {
         "query": query,
         "tokens": tokens,
         "source": "jsonl",
         "abstained": False,
-        "matches": scored[:limit],
+        "matches": matches,
     }
 
 
