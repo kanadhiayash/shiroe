@@ -425,10 +425,16 @@ def cmd_grade(args: argparse.Namespace) -> int:
         require_connector(policy, "litellm", purpose="grade-claim")
         scrubbed_claim, _rpt = scrub(claim, root / "REDACT.md", provenance="cli/grade/claim")
         import litellm  # type: ignore
-        from zeref.adapters.providers import resolve_model
+        from zeref.routing.gateway import ModelCallRequest, route
+        # Claim grading is LOW criticality; the gateway holds it to "fast".
+        _decision = route(ModelCallRequest(
+            criticality="LOW",
+            purpose="grade-claim",
+            requested_class="fast",
+            provider="openai",
+        ))
         resp = litellm.completion(
-            # Claim grading is a LOW-criticality task → "fast" reasoning class.
-            model=resolve_model("fast", provider="openai").model_id,
+            model=_decision.model_spec.model_id,
             messages=[{"role": "user", "content": (
                 f"Grade this claim on recency, provenance, corroboration (high/medium/low each). "
                 f"Claim: \"{scrubbed_claim}\"\n"

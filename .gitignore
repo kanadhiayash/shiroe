@@ -94,3 +94,6 @@ docs/audits/release-evidence/
 # Local lineage sandbox imports. Foreign repository clones and inventories are
 # generated evidence only and must not enter Zeref core.
 .zeref-sandbox/
+
+# Local verification evidence (never published; see hardening program governance)
+docs/_evidence/
