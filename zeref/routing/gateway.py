@@ -22,7 +22,7 @@ vocabulary; no user data."
 from __future__ import annotations
 
 import hashlib
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from zeref.adapters.providers import DEFAULT_PROVIDER, resolve_model
 from zeref.core.reasoning import (
@@ -34,6 +34,7 @@ from zeref.core.reasoning import (
     resolve_class,
     validate_request,
 )
+from zeref.routing.criticality import Classification, TaskSignals, classify
 
 POLICY_VERSION = "zeref.routing.gateway/v1"
 
@@ -50,6 +51,22 @@ PRIVACY_CLASSES: tuple[str, ...] = ("public", "internal", "confidential", "restr
 
 class RoutingError(ReasoningPolicyError):
     """Raised when a request cannot be routed under current policy."""
+
+
+class ApprovalRequiredError(RoutingError):
+    """Raised when a classified HIGH/CRITICAL call needs a human before routing.
+
+    ZRF-61: an ambiguous classification is not auto-routed just because it
+    resolved to *some* level. The caller must re-invoke with ``approved=True``
+    once a human has looked at ``classification.rationale``.
+    """
+
+    def __init__(self, classification: Classification, purpose: str) -> None:
+        self.classification = classification
+        super().__init__(
+            f"classification {classification.criticality} for {purpose!r} is ambiguous "
+            f"and requires human approval before routing: {classification.rationale}"
+        )
 
 
 @dataclass(frozen=True)
@@ -122,6 +139,10 @@ class RouteDecision:
     purpose: str
     task_digest: str
     policy_version: str = POLICY_VERSION
+    # ZRF-61: populated only when the criticality came from classify_and_route
+    # rather than being handed in already-validated. None means "the caller
+    # asserted this criticality directly" — the pre-ZRF-61 path, unchanged.
+    classification: Classification | None = None
 
 
 def route(request: ModelCallRequest) -> RouteDecision:
@@ -166,3 +187,44 @@ def route(request: ModelCallRequest) -> RouteDecision:
         purpose=request.purpose,
         task_digest=request.task_digest(),
     )
+
+
+def classify_and_route(
+    signals: TaskSignals,
+    purpose: str,
+    *,
+    requested_class: str | None = None,
+    placement: str = ANY,
+    privacy_class: str = "internal",
+    provider: str = DEFAULT_PROVIDER,
+    dry_run: bool = False,
+    approved: bool = False,
+) -> RouteDecision:
+    """ZRF-61: classify ``signals`` and route, instead of trusting a caller-typed criticality.
+
+    A caller that no longer picks (or defaults) a criticality itself cannot
+    under-classify a dangerous task by mistake — the classifier
+    (:mod:`zeref.routing.criticality`) does it from structured signals and
+    fails upward on ambiguity. When that classification is flagged for
+    review, this raises :class:`ApprovalRequiredError` instead of silently
+    auto-routing; re-call with ``approved=True`` once a human has signed off.
+
+    This is additive: :func:`route` still accepts an explicit, pre-validated
+    ``ModelCallRequest.criticality`` unchanged, so every PR1 call site keeps
+    working exactly as before.
+    """
+    classification = classify(signals)
+    if classification.flagged_for_review and not approved:
+        raise ApprovalRequiredError(classification, purpose)
+
+    request = ModelCallRequest(
+        criticality=classification.criticality,
+        purpose=purpose,
+        requested_class=requested_class,
+        placement=placement,
+        privacy_class=privacy_class,
+        provider=provider,
+        dry_run=dry_run,
+    )
+    decision = route(request)
+    return replace(decision, classification=classification)
