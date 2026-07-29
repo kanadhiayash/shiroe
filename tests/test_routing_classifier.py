@@ -27,7 +27,16 @@ from pathlib import Path
 import pytest
 
 from zeref.core.reasoning import CRITICALITIES
-from zeref.routing.criticality import TaskSignals, classify
+from zeref.routing.criticality import (
+    BLAST_RADII,
+    CHANGE_SHAPES,
+    CLAIM_DIRECTIONS,
+    ENVIRONMENTS,
+    FINANCIAL_EFFECTS,
+    PRIVACY_CLASSES,
+    TaskSignals,
+    classify,
+)
 from zeref.routing.gateway import (
     ANY,
     ApprovalRequiredError,
@@ -251,3 +260,140 @@ def test_explicit_criticality_path_is_unaffected() -> None:
     decision = route(ModelCallRequest(criticality="HIGH", purpose="pre-ZRF-61 caller"))
     assert decision.reasoning_class == "deep"
     assert decision.classification is None
+
+
+# ---------------------------------------------------------------------------
+# Graded signals: four signals that previously fired unconditionally
+#
+# Each of these four could only say "present" or "absent", so a staging schema
+# tweak scored the same as a production migration, and retracting an
+# overstated public claim scored the same as publishing a new unverified one.
+# Grading them adds precision WITHOUT lowering any floor that protects a
+# genuinely dangerous task — the two property tests at the bottom are what
+# hold that line.
+# ---------------------------------------------------------------------------
+
+def test_corrective_public_claim_is_high_not_critical() -> None:
+    signals = TaskSignals(blast_radius="public", is_public_claim=True, claim_direction="corrective")
+    assert classify(signals).criticality == "HIGH"
+
+
+def test_asserting_public_claim_stays_critical() -> None:
+    signals = TaskSignals(blast_radius="public", is_public_claim=True)
+    assert classify(signals).criticality == "CRITICAL"
+
+
+def test_irretractable_corrective_claim_stays_critical() -> None:
+    signals = TaskSignals(
+        blast_radius="public", is_public_claim=True,
+        claim_direction="corrective", reversible=False,
+    )
+    assert classify(signals).criticality == "CRITICAL"
+
+
+def test_financial_code_path_touch_is_high_not_critical() -> None:
+    signals = TaskSignals(
+        blast_radius="public", financial_or_legal_impact=True,
+        financial_effect="touches_path",
+    )
+    assert classify(signals).criticality == "HIGH"
+
+
+def test_executing_a_payment_stays_critical() -> None:
+    signals = TaskSignals(blast_radius="org", financial_or_legal_impact=True)
+    assert classify(signals).criticality == "CRITICAL"
+
+
+def test_money_path_that_writes_the_ledger_stays_critical() -> None:
+    signals = TaskSignals(
+        financial_or_legal_impact=True, financial_effect="touches_path",
+        writes_canonical_state=True,
+    )
+    assert classify(signals).criticality == "CRITICAL"
+
+
+def test_reversible_staging_schema_change_is_medium() -> None:
+    signals = TaskSignals(blast_radius="team", schema_or_migration=True, environment="staging")
+    assert classify(signals).criticality == "MEDIUM"
+
+
+def test_irreversible_staging_schema_change_stays_high() -> None:
+    signals = TaskSignals(
+        blast_radius="team", schema_or_migration=True,
+        environment="staging", reversible=False,
+    )
+    assert classify(signals).criticality == "HIGH"
+
+
+def test_production_schema_change_stays_high() -> None:
+    signals = TaskSignals(blast_radius="team", schema_or_migration=True)
+    assert classify(signals).criticality == "HIGH"
+
+
+def test_production_schema_migrating_canonical_state_stays_critical() -> None:
+    signals = TaskSignals(schema_or_migration=True, writes_canonical_state=True)
+    assert classify(signals).criticality == "CRITICAL"
+
+
+def test_team_scoped_nonprod_additive_reversible_has_no_floor() -> None:
+    signals = TaskSignals(blast_radius="team", environment="development", change_shape="additive")
+    assert classify(signals).criticality == "LOW"
+
+
+def test_team_scoped_breaking_change_still_floors_medium() -> None:
+    signals = TaskSignals(blast_radius="team", environment="development")
+    assert classify(signals).criticality == "MEDIUM"
+
+
+# --- the two properties that make the above safe ---------------------------
+
+_OLD_FIELDS = {
+    "reversible": (True, False),
+    "blast_radius": BLAST_RADII,
+    "privacy_class": PRIVACY_CLASSES,
+    "is_public_claim": (True, False),
+    "schema_or_migration": (True, False),
+    "production_or_credential_access": (True, False),
+    "financial_or_legal_impact": (True, False),
+    "writes_canonical_state": (True, False),
+}
+
+
+def test_no_new_field_value_can_exceed_its_default() -> None:
+    """Defaults are the most severe value of every new enum.
+
+    This is what makes the new fields safe to omit: a caller that has never
+    heard of them cannot land on a LOWER criticality than they would have
+    before the fields existed. Exhaustive over the old input space crossed
+    with every combination of the new one.
+    """
+    import itertools
+    from dataclasses import replace
+
+    names = list(_OLD_FIELDS)
+    for combo in itertools.product(*(_OLD_FIELDS[n] for n in names)):
+        base = TaskSignals(**dict(zip(names, combo)))
+        ceiling = _idx(classify(base).criticality)
+        for env, shape, claim, effect in itertools.product(
+            ENVIRONMENTS, CHANGE_SHAPES, CLAIM_DIRECTIONS, FINANCIAL_EFFECTS
+        ):
+            variant = replace(
+                base, environment=env, change_shape=shape,
+                claim_direction=claim, financial_effect=effect,
+            )
+            assert _idx(classify(variant).criticality) <= ceiling, (
+                f"{variant} routed ABOVE its own default — a new field value "
+                f"must never raise the floor beyond the default"
+            )
+
+
+def test_every_new_field_rejects_unknown_values() -> None:
+    """Typos must fail loudly rather than silently selecting a lenient branch."""
+    for field, bad in (
+        ("environment", "prod"),
+        ("change_shape", "additive-ish"),
+        ("claim_direction", "retracting"),
+        ("financial_effect", "touches"),
+    ):
+        with pytest.raises(ValueError):
+            TaskSignals(**{field: bad})
