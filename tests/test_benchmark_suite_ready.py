@@ -323,3 +323,29 @@ def test_shared_transport_is_the_only_key_reader() -> None:
         assert "GEMINI_API_KEY" not in src or "gemini_api" in src, (
             f"{who} reads the key without going through the shared transport"
         )
+
+
+def test_longmemeval_accepts_the_cleaned_release_filename() -> None:
+    """The loader must accept the filename the official instructions produce.
+
+    PINNED_VERSION and PINNED_SHA256 both describe longmemeval_s_cleaned.json,
+    but the loader used to require longmemeval_s.json — so following the
+    documented download forced a rename, and renaming discards the one signal
+    saying which release you have. The pre-Sept-2025 file is still accepted;
+    its numbers are not comparable to the cleaned release.
+    """
+    from benchmarks.external.loaders import longmemeval
+
+    assert longmemeval.DATA_FILENAME == "longmemeval_s_cleaned.json"
+    assert "longmemeval_s.json" in longmemeval.ACCEPTED_FILENAMES
+    # the cleaned name must be preferred when both are present
+    assert longmemeval.ACCEPTED_FILENAMES[0] == "longmemeval_s_cleaned.json"
+
+
+def test_longmemeval_resolution_prefers_cleaned(tmp_path: Path) -> None:
+    from benchmarks.external.loaders import longmemeval
+
+    (tmp_path / "longmemeval_s.json").write_text("[]", encoding="utf-8")
+    assert longmemeval._resolve_data_file(tmp_path).name == "longmemeval_s.json"
+    (tmp_path / "longmemeval_s_cleaned.json").write_text("[]", encoding="utf-8")
+    assert longmemeval._resolve_data_file(tmp_path).name == "longmemeval_s_cleaned.json"
