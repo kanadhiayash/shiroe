@@ -179,16 +179,29 @@ def valid_intervals_overlap(left: dict[str, Any], right: dict[str, Any]) -> bool
 # Ranking
 # ---------------------------------------------------------------------------
 
-def rank_key(atom: dict[str, Any], ref: str | None = None) -> tuple[int, int, float]:
-    """Sort key (ascending = better) for bi-temporal-aware tie-breaking.
+def rank_key(atom: dict[str, Any], ref: str | None = None) -> tuple[int, int]:
+    """Dominance sort key (ascending = better) for bi-temporal ranking.
 
-    Prefers atoms valid at ``ref`` over not-valid-at-ref, prefers current
-    (not superseded) over superseded, and among ties prefers a more recent
-    ``recorded_at``. A superseded fact never outranks a current one — the
-    second key component dominates any ``recorded_at`` difference.
+    Prefers atoms valid at ``ref`` over not-valid-at-ref, and current (not
+    superseded) over superseded. A superseded fact never outranks a current
+    one, however well it matches the query.
+
+    Deliberately excludes recency. Both components here are small integers, so
+    they tie often and let the caller's relevance term decide. ``recorded_at``
+    is a continuous value that almost never ties, so folding it in here would
+    silently decide every comparison before relevance was ever consulted — see
+    :func:`recency_key`, which callers must apply *after* their score term.
     """
     not_valid = 0 if is_valid_at(atom, ref) else 1
     superseded = 1 if atom.get("superseded_at") is not None else 0
+    return (not_valid, superseded)
+
+
+def recency_key(atom: dict[str, Any]) -> float:
+    """Tie-breaker (ascending = better): more recently recorded wins.
+
+    Only meaningful *after* a relevance term. Sorting by this before score
+    makes recency outrank relevance, which is not the ranking contract.
+    """
     recorded = _parse(atom.get("recorded_at")) or _parse(atom.get("created_at"))
-    recency = -recorded.timestamp() if recorded is not None else 0.0
-    return (not_valid, superseded, recency)
+    return -recorded.timestamp() if recorded is not None else 0.0
