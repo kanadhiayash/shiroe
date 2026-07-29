@@ -130,8 +130,16 @@ def git_sha() -> str:
         return "unknown"
 
 
-def build_provenance(loader, data_dir: Path, model_id: str, prompts_hash: str,
-                     usage_total: dict[str, Any], mode: str) -> dict[str, Any]:
+def build_provenance(
+    loader, data_dir: Path, model_id: str, prompts_hash: str,
+    usage_total: dict[str, Any], mode: str,
+    *,
+    judge_model: str | None = None,
+    seed: int | None = None,
+    avg_latency_ms: float | None = None,
+    failures: list[dict[str, Any]] | None = None,
+    exclusions: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     data_file = data_dir / loader.DATA_FILENAME
     return {
         "git_sha": git_sha(),
@@ -145,8 +153,13 @@ def build_provenance(loader, data_dir: Path, model_id: str, prompts_hash: str,
             "path": str(data_dir),
         },
         "model_id": model_id,
+        "judge_model": judge_model,
+        "seed": seed,
         "prompts_hash": prompts_hash,
         "cost": usage_total,
+        "avg_latency_ms": avg_latency_ms,
+        "failures": failures if failures is not None else [],
+        "exclusions": exclusions if exclusions is not None else [],
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "mode": mode,
     }
@@ -253,15 +266,32 @@ def write_results(path: str | Path, payload: dict[str, Any]) -> Path:
     return out
 
 
+_BACKEND_FACTORIES = {
+    "plain_files": lambda: __import__(
+        "benchmarks.external.baselines.plain_files", fromlist=["PlainFilesBackend"]
+    ).PlainFilesBackend(),
+    "sqlite_fts": lambda: __import__(
+        "benchmarks.external.baselines.sqlite_store", fromlist=["SqliteFtsBackend"]
+    ).SqliteFtsBackend(),
+    "zeref": lambda: __import__(
+        "benchmarks.external.baselines.zeref_backend", fromlist=["ZerefBackend"]
+    ).ZerefBackend(),
+    "full_context": lambda: __import__(
+        "benchmarks.external.baselines.full_context", fromlist=["FullContextBackend"]
+    ).FullContextBackend(),
+    "bm25": lambda: __import__(
+        "benchmarks.external.baselines.bm25", fromlist=["Bm25Backend"]
+    ).Bm25Backend(),
+}
+
+
 def _make_backend(name: str):
-    if name == "plain_files":
-        from benchmarks.external.baselines.plain_files import PlainFilesBackend
-        return PlainFilesBackend()
-    if name == "sqlite_fts":
-        from benchmarks.external.baselines.sqlite_store import SqliteFtsBackend
-        return SqliteFtsBackend()
-    raise KeyError(f"unknown backend {name!r}; supported: plain_files, sqlite_fts "
-                   "(the zeref backend adapter lands in Phase B)")
+    try:
+        return _BACKEND_FACTORIES[name]()
+    except KeyError:
+        raise KeyError(
+            f"unknown backend {name!r}; supported: {sorted(_BACKEND_FACTORIES)}"
+        ) from None
 
 
 def main() -> int:
