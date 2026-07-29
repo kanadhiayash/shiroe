@@ -16,8 +16,8 @@ from benchmarks.external.schema import DatasetCheck, Task, Turn, read_json
 
 NAME = "longmemeval"
 OFFICIAL_URL = "https://github.com/xiaowu0162/LongMemEval"
-PINNED_VERSION = "longmemeval_s v1 (pin release/commit at download time)"
-PINNED_SHA256: str | None = None  # record via check() after manual download
+PINNED_VERSION = 'longmemeval_s_cleaned.json, HF xiaowu0162/longmemeval-cleaned rev 98d7416 (2026-07-29); 500 tasks. CLEANED release - not comparable to pre-Sept-2025 numbers'
+PINNED_SHA256: str | None = "d6f21ea9d60a0d56f34a05b609c79c88a451d2ae03597821ea3d5a9678c3a442"
 LICENSE = 'MIT'
 LICENSE_NOTE = 'MIT-licensed dataset and code (xiaowu0162/LongMemEval).'
 DATA_FILENAME = "longmemeval_s.json"

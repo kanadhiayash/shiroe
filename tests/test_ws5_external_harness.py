@@ -51,11 +51,43 @@ def test_loader_parses_fixture_to_common_schema(name: str) -> None:
 
 
 @pytest.mark.parametrize("name", LOADER_NAMES)
-def test_loader_check_passes_on_fixture_dir(name: str) -> None:
-    result = get_loader(name).check(FIXTURES / name)
-    assert result.ok, result.errors
+def test_loader_check_parses_fixture_dir(name: str) -> None:
+    """The fixture must parse, and a hash must be reported.
+
+    A loader with a PINNED_SHA256 will additionally report a checksum
+    mismatch here, and that is correct: the pin identifies the real release,
+    while the committed fixture is a small synthetic stand-in that must never
+    equal it. So the mismatch is tolerated, but any OTHER error is a failure,
+    and parsing must still succeed.
+    """
+    loader = get_loader(name)
+    result = loader.check(FIXTURES / name)
     assert result.task_count > 0
-    assert result.sha256_actual  # hash reported so it can be pinned
+    assert result.sha256_actual or getattr(loader, "PINNED_SHA256", None) is None
+    non_checksum = [e for e in result.errors if "checksum mismatch" not in e]
+    assert not non_checksum, non_checksum
+    if getattr(loader, "PINNED_SHA256", None) is None:
+        assert result.ok, result.errors
+
+
+def test_pin_rejects_data_that_is_not_the_pinned_release(tmp_path: Path) -> None:
+    """A pin that never fails is decoration.
+
+    Point a pinned loader at a well-formed file whose bytes differ from the
+    pinned release and the check must refuse it — that is the whole purpose
+    of recording the hash before a scored run.
+    """
+    from benchmarks.external.loaders import locomo
+
+    assert locomo.PINNED_SHA256, "locomo should be pinned"
+    target = tmp_path / locomo.DATA_FILENAME
+    target.write_text(
+        (FIXTURES / "locomo" / locomo.DATA_FILENAME).read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    result = locomo.check(tmp_path)
+    assert not result.ok
+    assert any("checksum mismatch" in e for e in result.errors)
 
 
 @pytest.mark.parametrize("name", LOADER_NAMES)

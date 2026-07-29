@@ -114,11 +114,19 @@ def _cmd_external(args: argparse.Namespace) -> int:
         _error(str(exc))
         return 1
 
+    # Estimation only — never live. Cost projection must be network-free, so
+    # the client used for estimate() is always constructed with live=False.
     provider = m["AnthropicProvider"](dry_run=True)
-    judge = m["DeterministicFakeJudge"]() if args.judge == "fake" else m["GeminiJudgeClient"]()
+    judge = (
+        m["DeterministicFakeJudge"]() if args.judge == "fake"
+        else m["GeminiJudgeClient"](live=False)
+    )
 
     try:
-        estimate = m["estimate_run_cost"](args.benchmark, args.data, arm_names, provider, judge)
+        estimate = m["estimate_run_cost"](
+            args.benchmark, args.data, arm_names, provider, judge,
+            limit=args.limit, seed=args.seed,
+        )
     except (m["DatasetMissingError"], KeyError) as exc:
         _error(str(exc))
         return 1
@@ -149,6 +157,21 @@ def _cmd_external(args: argparse.Namespace) -> int:
         if not args.confirm:
             _error("pass --confirm to proceed with a --live run at the estimate above.")
             return 1
+        # Only past the budget check AND explicit confirmation do the live
+        # clients get built. Everything above this line is network-free.
+        provider = m["AnthropicProvider"](dry_run=False)
+        if args.judge == "gemini":
+            judge = m["GeminiJudgeClient"](live=True)
+            if not judge.has_key():
+                _error(
+                    "no GEMINI_API_KEY found (environment or .env.local); "
+                    "cannot run a live scored run. The key value is never "
+                    "printed by this tool."
+                )
+                return 1
+        else:
+            _info("note: --judge fake with --live scores against the deterministic "
+                  "fake judge; no judge model is called.")
 
     try:
         if scored:

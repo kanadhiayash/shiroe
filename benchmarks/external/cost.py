@@ -12,6 +12,7 @@ checks the running total against it before every provider/judge call.
 
 from __future__ import annotations
 
+import random
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -60,6 +61,8 @@ def estimate_run_cost(
     arms: tuple[str, ...],
     provider: Provider,
     judge: JudgeClient,
+    limit: int | None = None,
+    seed: int = 0,
 ) -> CostEstimate:
     """Estimate judge-call count and dollar cost for a scored run, BEFORE
     running anything. Reads the local dataset file (no network) to get an
@@ -71,6 +74,11 @@ def estimate_run_cost(
     """
     loader = get_loader(benchmark)
     tasks = loader.load(Path(data_dir))
+    # Must apply the SAME sampling the runner will, or a --limit run is priced
+    # for the whole dataset and the budget gate refuses a run that would in
+    # fact have cost a fraction of the ceiling. Mirrors run_three_arms().
+    if limit is not None and limit < len(tasks):
+        tasks = random.Random(seed).sample(tasks, limit)
     task_count = len(tasks)
     calls_per_arm = task_count
     total_calls = calls_per_arm * len(arms)

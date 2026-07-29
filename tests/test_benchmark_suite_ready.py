@@ -127,3 +127,116 @@ def test_judge_never_exposes_the_api_key() -> None:
         assert not (isinstance(value, str) and len(value) > 20 and value.startswith("AIza")), (
             "an API-key-shaped string is stored on the judge instance"
         )
+
+
+# ---------------------------------------------------------------------------
+# Live judge: parsing, redaction, and the opt-in gates.
+# Every test here is offline — none may reach the network.
+# ---------------------------------------------------------------------------
+
+def test_judge_defaults_to_disabled_and_refuses() -> None:
+    """live=False is the default, so no test or dry run can bill the API."""
+    from benchmarks.external.judges.gemini import GeminiJudgeClient
+
+    with pytest.raises(RuntimeError, match="disabled"):
+        GeminiJudgeClient().judge("q", ("a",), "p")
+
+
+def test_judge_parses_a_normal_verdict() -> None:
+    from benchmarks.external.judges.gemini import _parse_verdict
+
+    correct, score, rationale = _parse_verdict(
+        '{"correct": true, "score": 0.9, "rationale": "matches the reference"}'
+    )
+    assert correct is True and score == 0.9 and "matches" in rationale
+
+
+def test_judge_parses_a_fenced_verdict() -> None:
+    """Models often wrap JSON in a markdown fence despite being told not to."""
+    from benchmarks.external.judges.gemini import _parse_verdict
+
+    correct, score, _ = _parse_verdict(
+        '```json\n{"correct": false, "score": 0.0, "rationale": "wrong entity"}\n```'
+    )
+    assert correct is False and score == 0.0
+
+
+def test_unparseable_verdict_scores_incorrect_and_says_so() -> None:
+    """A malformed reply must not silently become a pass.
+
+    Counting it correct would inflate whichever arm triggered it; dropping it
+    would shrink the denominator invisibly. It scores incorrect and records
+    why, so the damage is visible in the results file.
+    """
+    from benchmarks.external.judges.gemini import _parse_verdict
+
+    correct, score, rationale = _parse_verdict("I think it's basically right?")
+    assert correct is False and score == 0.0
+    assert "unparseable" in rationale
+
+
+def test_out_of_range_score_is_clamped() -> None:
+    from benchmarks.external.judges.gemini import _parse_verdict
+
+    assert _parse_verdict('{"correct": true, "score": 7}')[1] == 1.0
+    assert _parse_verdict('{"correct": false, "score": -3}')[1] == 0.0
+
+
+def test_redact_strips_key_shaped_strings() -> None:
+    """Backstop for an error body that echoes a request back."""
+    from benchmarks.external.judges.gemini import _redact
+
+    assert "AIzaSyFAKEFAKEFAKEFAKE123456" not in _redact(
+        "error at ?key=AIzaSyFAKEFAKEFAKEFAKE123456&alt=json"
+    )
+    assert "[REDACTED" in _redact("?key=AIzaSyFAKEFAKEFAKEFAKE123456")
+
+
+def test_usage_uses_real_token_counts_and_is_not_marked_estimated() -> None:
+    from benchmarks.external.judges.gemini import _usage_from_response
+
+    usage = _usage_from_response(
+        {"usageMetadata": {"promptTokenCount": 1000, "candidatesTokenCount": 20}},
+        "gemini-2.5-flash",
+    )
+    assert usage.input_tokens == 1000 and usage.output_tokens == 20
+    assert usage.estimated is False and usage.cost_usd > 0
+
+
+def test_judge_never_puts_the_key_in_a_url() -> None:
+    """The key must travel as a header.
+
+    urllib embeds the request URL in HTTPError/URLError strings, so a key in
+    the query string would leak into every traceback and CI log.
+    """
+    from benchmarks.external.judges import gemini
+
+    source = (Path(gemini.__file__)).read_text(encoding="utf-8")
+    assert "?key=" not in source, "API key must not be passed as a URL parameter"
+    assert "x-goog-api-key" in source, "API key should be sent as a header"
+
+
+def test_pricing_is_not_the_old_placeholder() -> None:
+    """Judge pricing drives the --max-cost budget gate.
+
+    The original table used 0.075/0.30 per Mtok, which is 20-30x below the
+    real rate. An underestimate here does not just misreport cost — it lets
+    estimate_run_cost() authorize a run far more expensive than the
+    projection the operator approved.
+    """
+    from benchmarks.external.judges.gemini import DEFAULT_MODEL_ID, PRICING_USD_PER_MTOK
+
+    assert DEFAULT_MODEL_ID in PRICING_USD_PER_MTOK, "the default model must be priced"
+    in_rate, out_rate = PRICING_USD_PER_MTOK[DEFAULT_MODEL_ID]
+    assert (in_rate, out_rate) != (0.075, 0.30), "placeholder pricing is back"
+    assert in_rate > 0 and out_rate > 0
+
+
+def test_unknown_model_prices_expensive_not_free() -> None:
+    """An unpriced model must over-estimate, so the ceiling trips early."""
+    from benchmarks.external.judges.gemini import PRICING_USD_PER_MTOK, _rates_for
+
+    known_max = max(rate for rates in PRICING_USD_PER_MTOK.values() for rate in rates)
+    unknown_in, unknown_out = _rates_for("gemini-does-not-exist-9")
+    assert unknown_out >= known_max or unknown_out > 0
+    assert unknown_in > 0

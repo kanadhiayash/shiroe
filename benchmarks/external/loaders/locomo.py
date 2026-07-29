@@ -15,11 +15,11 @@ from benchmarks.external.schema import DatasetCheck, Task, Turn, read_json
 
 NAME = "locomo"
 OFFICIAL_URL = "https://github.com/snap-research/locomo"
-PINNED_VERSION = "locomo10 (repo snapshot, pin commit at download time)"
+PINNED_VERSION = 'locomo10.json from snap-research/locomo main (downloaded 2026-07-29); 1542 tasks'
 # Pin the sha256 of the downloaded locomo10.json here after the manual
 # download; None means "not yet pinned" and check() will report the actual
 # hash so it can be recorded before any published run.
-PINNED_SHA256: str | None = None
+PINNED_SHA256: str | None = "79fa87e90f04081343b8c8debecb80a9a6842b76a7aa537dc9fdf651ea698ff4"
 LICENSE = 'see LICENSE.txt in snap-research/locomo (no SPDX identifier declared)'
 LICENSE_NOTE = "GitHub reports NOASSERTION; confirm terms in the repo's LICENSE.txt before publishing numbers."
 DATA_FILENAME = "locomo10.json"
