@@ -181,6 +181,100 @@ SIGNAL_MAP: dict[str, dict] = {
 }
 
 
+# ---------------------------------------------------------------------------
+# Phase 3 signal grading
+#
+# The four graded fields (environment, change_shape, claim_direction,
+# financial_effect) are derived HERE rather than by editing SIGNAL_MAP above,
+# so the Phase 2 extraction stays frozen and auditable: an over-route can
+# never be "fixed" by quietly retuning an existing signal. Phase 3 is strictly
+# additive.
+#
+# Values come from the task text alone, via this rubric, fixed before any
+# metric was run:
+#
+#   environment      task names staging -> "staging"; ships to end users, a
+#                    public surface, or a shared production runtime ->
+#                    "production"; otherwise (local, CI, internal docs,
+#                    tooling, scheduling) -> "development". Unknown ->
+#                    "production".
+#   change_shape     only adds/widens, or is an intended no-op -> "additive";
+#                    removes, narrows, weakens, or replaces an existing
+#                    behavior, contract, test, or check -> "breaking".
+#                    Unknown -> "breaking".
+#   claim_direction  removes or corrects an already-published statement ->
+#                    "corrective"; otherwise "asserting".
+#   financial_effect the task itself moves money or commits a legal
+#                    obligation -> "executes"; otherwise "touches_path".
+#
+# Only ids whose Phase 2 signals can actually be affected are listed — the
+# graded fields are read exclusively by the team-blast-radius, schema,
+# public-claim, and financial rules, so an entry for any other id would be
+# inert. Anything unlisted therefore uses the (most severe) defaults.
+
+# EXCLUDED — NOT graded, and deliberately so.
+#
+# These four ids were quoted, with their labels and rationales, in the task
+# brief that commissioned this work. Whoever grades a case after seeing its
+# label is measuring their own agreement with it, not the classifier's. That
+# is exactly the failure that produced an earlier self-authored 1.000 which
+# turned out to mean nothing. They keep Phase 2 signals and default grading,
+# and the reported accuracy is therefore a LOWER bound: these four are known
+# over-routes that grading would likely fix.
+#
+# To retire this exclusion, a second author who has not seen the labels
+# grades them and removes the id from this set in the same commit.
+UNGRADED_PRESEEN_IDS: frozenset[str] = frozenset({"ht018", "ht024", "ht050", "ht066"})
+
+PHASE3_GRADING: dict[str, dict] = {
+    # internal wiki page, additive onboarding steps
+    "ht004": dict(environment="development", change_shape="additive"),
+    # CI timeout raised 10 -> 15 minutes; widens a limit
+    "ht010": dict(environment="development", change_shape="additive"),
+    # linter autofix; unused imports are not a behavior, contract, test or check
+    "ht011": dict(environment="development", change_shape="additive"),
+    # scheduling tool; a rotation replaces the existing assignment -> breaking
+    "ht015": dict(environment="development"),
+    # ships in production code, but explicitly "no behavior change intended"
+    "ht016": dict(change_shape="additive"),
+    # ships in production code, public API surface explicitly preserved
+    "ht017": dict(change_shape="additive"),
+    # explicitly "no production traffic"; minor version bump
+    "ht020": dict(environment="development", change_shape="additive"),
+    # task names the staging database; adds a new scoped key
+    "ht021": dict(environment="staging", change_shape="additive"),
+    # internal wiki only, publishing a new document
+    "ht023": dict(environment="development", change_shape="additive"),
+    # CI, and deleting a test removes a check -> breaking
+    "ht026": dict(environment="development"),
+    # CI, and moving a threshold to force a pass weakens a check -> breaking
+    "ht027": dict(environment="development"),
+    # public API, explicitly "backward-compatible, additive"
+    "ht034": dict(change_shape="additive"),
+    # a testimonial carries legal exposure but does not itself move money
+    "ht046": dict(financial_effect="touches_path"),
+    # changes displayed currency; the checkout pricing logic is untouched
+    "ht048": dict(financial_effect="touches_path"),
+    # ticket reference only — nothing identifies the environment; unknown -> production
+    "ht051": dict(),
+    # retention policy change: compliance exposure, no money movement
+    "ht059": dict(financial_effect="touches_path"),
+    # comparative benchmark claim: legal exposure, no money movement
+    "ht065": dict(financial_effect="touches_path"),
+    # CVE patch: legal/security exposure, no money movement
+    "ht068": dict(financial_effect="touches_path"),
+}
+
+assert not (set(PHASE3_GRADING) & UNGRADED_PRESEEN_IDS), (
+    "a pre-seen id must not carry Phase 3 grading"
+)
+
+
+def signals_for(entry_id: str) -> TaskSignals:
+    """Phase 2 signals plus Phase 3 grading, for one corpus id."""
+    return TaskSignals(**{**SIGNAL_MAP[entry_id], **PHASE3_GRADING.get(entry_id, {})})
+
+
 def _idx(level: str) -> int:
     return _LEVELS.index(level)
 
@@ -189,7 +283,7 @@ def _evaluate(corpus: list[dict]) -> dict:
     confusion = {a: {p: 0 for p in _LEVELS} for a in _LEVELS}
     results = []
     for entry in corpus:
-        signals = TaskSignals(**SIGNAL_MAP[entry["id"]])
+        signals = signals_for(entry["id"])
         result = classify(signals)
         confusion[entry["label"]][result.criticality] += 1
         results.append((entry, signals, result))
@@ -269,3 +363,44 @@ def test_heldout_no_entry_routes_below_its_label_without_being_flagged() -> None
                 f"{entry['id']} classified below its label "
                 f"({result.criticality} < {entry['label']}) without being flagged for review"
             )
+
+
+def test_preseen_ids_are_excluded_from_grading_and_reported() -> None:
+    """The four pre-seen ids must stay ungraded, and stay visible.
+
+    Grading a case whose label you already know measures your agreement with
+    that label, not the classifier. Excluding them makes the published
+    accuracy a lower bound rather than a flattering one, so the exclusion has
+    to be enforced in code and printed with the metrics — not left as a
+    comment someone can quietly drop.
+    """
+    assert UNGRADED_PRESEEN_IDS, "the exclusion set must not be silently emptied"
+    assert not (set(PHASE3_GRADING) & UNGRADED_PRESEEN_IDS)
+    known_ids = {entry["id"] for entry in CORPUS}
+    assert UNGRADED_PRESEEN_IDS <= known_ids, "excluded ids must exist in the corpus"
+    for entry_id in UNGRADED_PRESEEN_IDS:
+        signals = signals_for(entry_id)
+        assert signals.environment == "production"
+        assert signals.change_shape == "breaking"
+        assert signals.claim_direction == "asserting"
+        assert signals.financial_effect == "executes"
+    print(
+        f"\nungraded (label pre-seen, excluded from grading): "
+        f"{sorted(UNGRADED_PRESEEN_IDS)} — reported accuracy is a LOWER bound"
+    )
+
+
+def test_grading_never_lowers_a_level_below_phase2() -> None:
+    """Phase 3 grading may only reduce over-routing, never introduce under-routing.
+
+    Every graded entry is compared against its own ungraded Phase 2 result: a
+    graded value that pushed a task ABOVE where it already sat would mean the
+    defaults were not the most severe option, which is the property the whole
+    scheme rests on.
+    """
+    for entry_id in PHASE3_GRADING:
+        phase2 = classify(TaskSignals(**SIGNAL_MAP[entry_id]))
+        graded = classify(signals_for(entry_id))
+        assert _idx(graded.criticality) <= _idx(phase2.criticality), (
+            f"{entry_id}: grading raised {phase2.criticality} -> {graded.criticality}"
+        )
