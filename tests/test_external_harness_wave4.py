@@ -312,7 +312,9 @@ def test_gemini_judge_never_invoked_live_in_tests(monkeypatch) -> None:
 
 def test_gemini_judge_reads_env_local(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
-    monkeypatch.setattr("benchmarks.external.judges.gemini.REPO", tmp_path)
+    # key reading lives in the shared transport now (gemini_api), so the
+    # judge and provider cannot drift apart on it
+    monkeypatch.setattr("benchmarks.external.gemini_api.REPO", tmp_path)
     (tmp_path / ".env.local").write_text(f'GEMINI_API_KEY="{SENTINEL_KEY}"\n', encoding="utf-8")
     judge = GeminiJudgeClient()
     assert judge.has_key() is True

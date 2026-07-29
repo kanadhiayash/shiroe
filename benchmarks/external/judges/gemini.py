@@ -20,27 +20,25 @@ turn a dry run into a billed one. Tests use ``DeterministicFakeJudge``.
 from __future__ import annotations
 
 import json
-import os
 import re
-import ssl
 import time
-import urllib.error
-import urllib.request
-from pathlib import Path
 from typing import Any
 
+from benchmarks.external import gemini_api
 from benchmarks.external.judges.base import JudgeClient, Verdict
 from benchmarks.external.providers.base import Usage
 
-REPO = Path(__file__).resolve().parents[3]
-
-API_BASE = "https://generativelanguage.googleapis.com/v1beta"
-REQUEST_TIMEOUT_S = 60
-MAX_RETRIES = 3
-RETRY_BACKOFF_S = 1.5
-# 429 rate-limit and 5xx are transient; 400/401/403 are not and must fail fast
-# rather than burning the budget on three doomed retries.
-RETRYABLE_STATUS = frozenset({429, 500, 502, 503, 504})
+# Transport, key handling, redaction and pricing are shared with the
+# generation provider — see benchmarks/external/gemini_api.py. Re-exported
+# here so existing callers and tests keep working.
+MAX_RETRIES = gemini_api.MAX_RETRIES
+RETRYABLE_STATUS = gemini_api.RETRYABLE_STATUS
+CHARS_PER_TOKEN = gemini_api.CHARS_PER_TOKEN
+PRICING_USD_PER_MTOK = gemini_api.PRICING_USD_PER_MTOK
+_read_api_key = gemini_api.read_api_key
+_redact = gemini_api.redact
+_first_text = gemini_api.first_text
+_rates_for = gemini_api.rates_for
 
 # Asks for a judgement, not a rewrite: the judge decides whether the
 # prediction conveys a gold answer, and is told explicitly that wording may
@@ -65,60 +63,6 @@ is CORRECT.
 
 Respond with JSON only:
 {{"correct": true or false, "score": 0.0 to 1.0, "rationale": "one short sentence"}}"""
-
-
-_SSL_CONTEXT: "ssl.SSLContext | None" = None
-
-
-def _ssl_context() -> "ssl.SSLContext":
-    """A verifying TLS context, with an explicit CA bundle if one is needed.
-
-    Some python.org macOS builds ship without a configured trust store, so
-    the default context fails CERTIFICATE_VERIFY_FAILED against every host.
-    Fall back to certifi's bundle, then the system bundle. Verification is
-    NEVER disabled — this connection carries an API key.
-    """
-    global _SSL_CONTEXT
-    if _SSL_CONTEXT is not None:
-        return _SSL_CONTEXT
-    context = ssl.create_default_context()
-    if not context.cert_store_stats().get("x509_ca", 0):
-        for candidate in (_certifi_path(), "/etc/ssl/cert.pem"):
-            if candidate and Path(candidate).exists():
-                context = ssl.create_default_context(cafile=candidate)
-                break
-    _SSL_CONTEXT = context
-    return context
-
-
-def _certifi_path() -> str | None:
-    try:
-        import certifi
-    except ImportError:
-        return None
-    return certifi.where()
-
-
-def _redact(text: str) -> str:
-    """Strip anything key-shaped from text bound for an exception or log.
-
-    Defence in depth: the key is sent as a header, never a URL parameter, so
-    it should never appear here. This is the backstop for an API error body
-    that echoes a request back, or a future refactor that reintroduces a
-    query parameter.
-    """
-    text = re.sub(r"AIza[0-9A-Za-z_\-]{10,}", "[REDACTED-KEY]", text)
-    text = re.sub(r"(?i)(key|token|authorization)=[^&\s\"']+", r"\1=[REDACTED]", text)
-    return text[:500]
-
-
-def _first_text(payload: dict[str, Any]) -> str:
-    """Pull the model's text out of a generateContent response."""
-    for candidate in payload.get("candidates", []):
-        for part in candidate.get("content", {}).get("parts", []):
-            if isinstance(part.get("text"), str):
-                return part["text"]
-    return ""
 
 
 def _parse_verdict(text: str) -> tuple[bool, float, str]:
@@ -177,64 +121,9 @@ def _usage_from_response(payload: dict[str, Any], model_id: str) -> Usage:
 
 DEFAULT_MODEL_ID = "gemini-3.5-flash"
 
-# Paid-tier list pricing (USD per million tokens: input, output), verified
-# against https://ai.google.dev/gemini-api/docs/pricing on 2026-07-29.
-#
-# These replace placeholder values that were 20-30x too LOW (0.075/0.30).
-# That mattered: cost.estimate_run_cost() drives the --max-cost budget gate,
-# so an underestimate would have authorized a run many times more expensive
-# than the projection shown to the operator. Re-verify before quoting cost
-# publicly, and treat any model missing from this table as unpriced rather
-# than cheap — see _rates_for().
-PRICING_USD_PER_MTOK: dict[str, tuple[float, float]] = {
-    "gemini-3.5-flash": (1.50, 9.00),
-    "gemini-3.6-flash": (1.50, 7.50),
-    "gemini-2.5-flash": (0.30, 2.50),
-    "gemini-2.5-pro": (1.25, 5.00),
-}
-
-# Used when a model is absent from the table. Deliberately the most expensive
-# known rate, so an unknown model over-estimates cost and trips the budget
-# ceiling early rather than silently under-charging the estimate.
-_UNKNOWN_MODEL_RATES = (1.50, 9.00)
-
-
-def _rates_for(model_id: str) -> tuple[float, float]:
-    """Price a model, failing expensive rather than cheap when unknown."""
-    return PRICING_USD_PER_MTOK.get(model_id, _UNKNOWN_MODEL_RATES)
-
-# Rough chars-per-token heuristic for dry-run estimates (no tokenizer, no API).
-CHARS_PER_TOKEN = 4
-
 # Judge verdicts are short (a verdict plus a brief rationale) regardless of
 # input size — used as the fixed expected-output-token estimate below.
 EXPECTED_OUTPUT_TOKENS = 32
-
-
-def _read_api_key() -> str | None:
-    """Env var wins; falls back to a gitignored .env.local at the repo root.
-
-    Returns the raw key or None. Callers must not retain the return value —
-    `GeminiJudgeClient` only stores a boolean derived from it.
-    """
-    key = os.environ.get("GEMINI_API_KEY")
-    if key:
-        return key
-    env_local = REPO / ".env.local"
-    if not env_local.exists():
-        return None
-    try:
-        for line in env_local.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            name, _, value = line.partition("=")
-            if name.strip() == "GEMINI_API_KEY":
-                value = value.strip().strip('"').strip("'")
-                return value or None
-    except OSError:
-        return None
-    return None
 
 
 class GeminiJudgeClient(JudgeClient):
@@ -321,38 +210,5 @@ class GeminiJudgeClient(JudgeClient):
         )
 
     def _post(self, key: str, body: bytes) -> dict:
-        """POST to the Gemini API, retrying transient failures.
-
-        The key goes in the ``x-goog-api-key`` HEADER, never the URL. urllib
-        embeds the URL in HTTPError/URLError strings, so a key in the query
-        string would end up in every traceback and log line.
-        """
-        url = f"{API_BASE}/models/{self.model_id}:generateContent"
-        request = urllib.request.Request(
-            url,
-            data=body,
-            headers={
-                "Content-Type": "application/json",
-                "x-goog-api-key": key,
-                "User-Agent": "zeref-benchmark-judge/1.0",
-            },
-            method="POST",
-        )
-        last_error = ""
-        for attempt in range(MAX_RETRIES):
-            try:
-                with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_S, context=_ssl_context()) as response:
-                    return json.loads(response.read())
-            except urllib.error.HTTPError as exc:
-                # Read the body for the reason, but never echo headers back.
-                detail = exc.read(2048).decode("utf-8", "replace") if exc.fp else ""
-                last_error = f"HTTP {exc.code}: {_redact(detail)}"
-                if exc.code not in RETRYABLE_STATUS:
-                    raise RuntimeError(f"Gemini judge call failed — {last_error}") from None
-            except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
-                last_error = _redact(str(exc))
-            if attempt < MAX_RETRIES - 1:
-                time.sleep(RETRY_BACKOFF_S * (2 ** attempt))
-        raise RuntimeError(
-            f"Gemini judge call failed after {MAX_RETRIES} attempts — {last_error}"
-        ) from None
+        """Delegate to the shared Gemini transport (see gemini_api.post)."""
+        return gemini_api.post(self.model_id, key, body, what="judge")

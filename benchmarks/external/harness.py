@@ -130,6 +130,56 @@ def git_sha() -> str:
         return "unknown"
 
 
+def _model_family(model_id: str | None) -> str | None:
+    """Coarse vendor family for a model id, for the independence check."""
+    if not model_id:
+        return None
+    lowered = model_id.lower()
+    for family in ("gemini", "claude", "gpt", "llama", "mistral"):
+        if family in lowered:
+            return family
+    return None
+
+
+def _judge_independence(model_id: str | None, judge_model: str | None) -> dict[str, Any]:
+    """Whether the generator and judge come from the same model family.
+
+    Not a pass/fail gate — a statement of fact attached to every run so the
+    caveat travels with the number instead of living only in a PR comment.
+    """
+    gen_family = _model_family(model_id)
+    judge_family = _model_family(judge_model)
+    same_family = bool(gen_family and judge_family and gen_family == judge_family)
+    return {
+        "generator_family": gen_family,
+        "judge_family": judge_family,
+        "same_family": same_family,
+        "same_model": bool(model_id and judge_model and model_id == judge_model),
+        "caveat": (
+            "Generator and judge share a model family; LLM judges favour their "
+            "own family, so absolute scores may be inflated. All arms share one "
+            "generator and one judge, so the relative ranking between arms is "
+            "unaffected. Do not publish this as an absolute leaderboard score."
+            if same_family else
+            "Generator and judge are from different model families."
+        ),
+    }
+
+
+def _dataset_digest(loader, data_dir: Path) -> str | None:
+    """Digest the dataset, whether it is one file or a directory tree.
+
+    ConvoMem ships ~2,500 files, so the single-file assumption here used to
+    raise IsADirectoryError. A loader that knows how to fingerprint itself
+    (tree_sha256) wins; otherwise fall back to hashing the named file.
+    """
+    tree_digest = getattr(loader, "tree_sha256", None)
+    if callable(tree_digest):
+        return tree_digest(data_dir)
+    data_file = data_dir / loader.DATA_FILENAME
+    return sha256_file(data_file) if data_file.is_file() else None
+
+
 def build_provenance(
     loader, data_dir: Path, model_id: str, prompts_hash: str,
     usage_total: dict[str, Any], mode: str,
@@ -140,7 +190,6 @@ def build_provenance(
     failures: list[dict[str, Any]] | None = None,
     exclusions: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
-    data_file = data_dir / loader.DATA_FILENAME
     return {
         "git_sha": git_sha(),
         "harness_version": HARNESS_VERSION,
@@ -149,11 +198,18 @@ def build_provenance(
             "official_url": loader.OFFICIAL_URL,
             "pinned_version": loader.PINNED_VERSION,
             "sha256_pinned": loader.PINNED_SHA256,
-            "sha256_actual": sha256_file(data_file) if data_file.exists() else None,
+            "sha256_actual": _dataset_digest(loader, data_dir),
+            "license": getattr(loader, "LICENSE", None),
+            "license_note": getattr(loader, "LICENSE_NOTE", None),
             "path": str(data_dir),
         },
         "model_id": model_id,
         "judge_model": judge_model,
+        # Generator and judge sharing one model family biases absolute scores
+        # (LLM judges prefer their own family) but not the RELATIVE ranking
+        # between arms, because every arm shares the same generator and judge.
+        # Recorded per run so a published number carries the caveat with it.
+        "judge_independence": _judge_independence(model_id, judge_model),
         "seed": seed,
         "prompts_hash": prompts_hash,
         "cost": usage_total,

@@ -240,3 +240,86 @@ def test_unknown_model_prices_expensive_not_free() -> None:
     unknown_in, unknown_out = _rates_for("gemini-does-not-exist-9")
     assert unknown_out >= known_max or unknown_out > 0
     assert unknown_in > 0
+
+
+def test_gemini_provider_is_dry_run_by_default_and_never_stores_the_key() -> None:
+    """A Gemini-only run must not bill by accident, or retain the key."""
+    from benchmarks.external.providers.gemini import GeminiProvider
+
+    provider = GeminiProvider()
+    assert provider.dry_run is True
+    completion = provider.complete("probe")
+    assert completion.text == ""
+    assert completion.usage.estimated is True
+    assert isinstance(provider.has_key(), bool)
+    for value in vars(provider).values():
+        assert not (isinstance(value, str) and value.startswith("AIza")), (
+            "an API-key-shaped string is stored on the provider instance"
+        )
+
+
+def test_gemini_provider_and_judge_default_to_different_models() -> None:
+    """Judge independence: the judge must not grade its own model's output.
+
+    Same family is unavoidable on a Gemini-only run and is recorded as a
+    caveat, but generator and judge defaulting to the SAME model would make
+    the judge grade its own generation, which is worse and is avoidable.
+    """
+    from benchmarks.external.judges.gemini import GeminiJudgeClient
+    from benchmarks.external.providers.gemini import GeminiProvider
+
+    assert GeminiProvider().model_id != GeminiJudgeClient().model_id
+
+
+def test_unknown_gemini_model_prices_expensive_not_cheap() -> None:
+    """An unpriced model must over-estimate, so the budget gate trips early."""
+    from benchmarks.external import gemini_api
+
+    known = gemini_api.rates_for("gemini-2.5-flash")
+    unknown = gemini_api.rates_for("gemini-does-not-exist")
+    assert unknown >= known
+    assert unknown == gemini_api._UNKNOWN_MODEL_RATES
+
+
+def test_judge_independence_is_recorded_in_provenance() -> None:
+    """The caveat must travel with the number, not live in a PR comment."""
+    from benchmarks.external.harness import _judge_independence
+
+    same = _judge_independence("gemini-2.5-flash", "gemini-3.5-flash")
+    assert same["same_family"] is True
+    assert same["same_model"] is False
+    assert "relative ranking between arms is unaffected" in same["caveat"]
+
+    cross = _judge_independence("claude-opus-4-6", "gemini-3.5-flash")
+    assert cross["same_family"] is False
+
+
+def test_provenance_digests_a_directory_dataset() -> None:
+    """ConvoMem is a tree, not a file — provenance must not raise on it."""
+    from benchmarks.external.harness import _dataset_digest
+    from benchmarks.external.loaders import convomem, locomo
+
+    tree = _dataset_digest(convomem, FIXTURES / "convomem")
+    assert tree and len(tree) == 64
+    # single-file loaders keep working through the same helper
+    assert _dataset_digest(locomo, FIXTURES / "locomo") is not None
+
+
+def test_shared_transport_is_the_only_key_reader() -> None:
+    """One key-handling implementation, not two.
+
+    The judge and provider must both route through gemini_api so the
+    security-critical parts cannot drift apart.
+    """
+    from benchmarks.external import gemini_api
+    from benchmarks.external.judges import gemini as judge_mod
+    from benchmarks.external.providers import gemini as provider_mod
+
+    assert judge_mod._read_api_key is gemini_api.read_api_key
+    assert provider_mod.gemini_api is gemini_api
+    judge_src = (REPO / "benchmarks/external/judges/gemini.py").read_text(encoding="utf-8")
+    provider_src = (REPO / "benchmarks/external/providers/gemini.py").read_text(encoding="utf-8")
+    for src, who in ((judge_src, "judge"), (provider_src, "provider")):
+        assert "GEMINI_API_KEY" not in src or "gemini_api" in src, (
+            f"{who} reads the key without going through the shared transport"
+        )
