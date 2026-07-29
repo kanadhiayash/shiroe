@@ -18,6 +18,8 @@ NAME = "personamem"
 OFFICIAL_URL = "https://github.com/bowen-upenn/PersonaMem"
 PINNED_VERSION = "PersonaMem v1 (pin HF dataset revision at download time)"
 PINNED_SHA256: str | None = None  # record via check() after manual download
+LICENSE = 'unverified'
+LICENSE_NOTE = 'Licence not yet confirmed against the official release; verify before publishing numbers.'
 DATA_FILENAME = "personamem.json"
 DOWNLOAD_INSTRUCTIONS = (
     "Follow the official README to obtain the benchmark files and export a "

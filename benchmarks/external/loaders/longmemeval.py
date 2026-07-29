@@ -18,6 +18,8 @@ NAME = "longmemeval"
 OFFICIAL_URL = "https://github.com/xiaowu0162/LongMemEval"
 PINNED_VERSION = "longmemeval_s v1 (pin release/commit at download time)"
 PINNED_SHA256: str | None = None  # record via check() after manual download
+LICENSE = 'MIT'
+LICENSE_NOTE = 'MIT-licensed dataset and code (xiaowu0162/LongMemEval).'
 DATA_FILENAME = "longmemeval_s.json"
 DOWNLOAD_INSTRUCTIONS = (
     "Follow the official README download links and save the file as "
