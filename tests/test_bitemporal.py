@@ -292,3 +292,61 @@ def test_search_ranking_never_lets_superseded_outrank_current(fake_repo: Path) -
     ids_in_order = [m["atom"]["id"] for m in result["matches"]]
     assert ids_in_order[0] == new["id"]
     assert ids_in_order.index(new["id"]) < ids_in_order.index(old["id"])
+
+
+def test_recency_breaks_ties_but_never_overrides_relevance(fake_repo: Path) -> None:
+    """Two atoms, both valid and both current, so rank_key's dominance
+    components tie. Ordering must then fall to text score — a barely-relevant
+    atom does not win just for being recorded later. `recorded_at` is a
+    tie-breaker among equally-scored matches, not a term that outranks score.
+    """
+    store = AtomStore(fake_repo)
+    relevant = store.append(
+        _fact(
+            "launch code colour is vermilion, the launch code vermilion",
+            recorded_at="2026-01-01T00:00:00Z",
+            created_at="2026-01-01T00:00:00Z",
+        )
+    )
+    recent_but_weak = store.append(
+        _fact(
+            "gardening notes about tulips, taken near the launch",
+            recorded_at="2026-06-01T00:00:00Z",
+            created_at="2026-06-01T00:00:00Z",
+        )
+    )
+    assert relevant["id"] != recent_but_weak["id"]
+
+    result = search_atoms(fake_repo, "launch code vermilion", atom_type="fact", status=None)
+    ids_in_order = [m["atom"]["id"] for m in result["matches"]]
+    # Both match ("launch"), so both are present and the comparison is real.
+    assert set(ids_in_order) == {relevant["id"], recent_but_weak["id"]}
+    assert ids_in_order[0] == relevant["id"]
+
+
+def test_recency_still_breaks_ties_between_equally_scored_atoms(fake_repo: Path) -> None:
+    """The other half of the contract: when score genuinely ties, the more
+    recently recorded atom wins. Guards against 'fixing' the rule above by
+    dropping recency from the sort altogether.
+    """
+    store = AtomStore(fake_repo)
+    older = store.append(
+        _fact(
+            "deploy window is Tuesday",
+            recorded_at="2026-01-01T00:00:00Z",
+            created_at="2026-01-01T00:00:00Z",
+        )
+    )
+    newer = store.append(
+        _fact(
+            "deploy window is Tuesday",
+            recorded_at="2026-06-01T00:00:00Z",
+            created_at="2026-06-01T00:00:00Z",
+            provenance="deploy window is Tuesday v2",
+        )
+    )
+    assert older["id"] != newer["id"]
+
+    result = search_atoms(fake_repo, "deploy window", atom_type="fact", status=None)
+    ids_in_order = [m["atom"]["id"] for m in result["matches"]]
+    assert ids_in_order[0] == newer["id"]

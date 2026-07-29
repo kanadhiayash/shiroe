@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from zeref.memory.atom_store import AtomStore
-from zeref.memory.bitemporal import rank_key
+from zeref.memory.bitemporal import rank_key, recency_key
 from zeref.memory.indexer import INDEX_PATH
 
 
@@ -201,8 +201,15 @@ def _search_sqlite(
             "bm25_position": bm25_position,
         })
     # Bi-temporal validity/supersession outranks raw bm25 rank (see
-    # zeref.memory.bitemporal.rank_key); original bm25 order breaks ties.
-    matches.sort(key=lambda item: (*rank_key(item["atom"], as_of), item["bm25_position"]))
+    # zeref.memory.bitemporal.rank_key). bm25 order is the relevance term and
+    # comes next; recency only separates atoms bm25 ranked identically.
+    matches.sort(
+        key=lambda item: (
+            *rank_key(item["atom"], as_of),
+            item["bm25_position"],
+            recency_key(item["atom"]),
+        )
+    )
     matches = [{k: v for k, v in item.items() if k != "bm25_position"} for item in matches[:limit]]
     return {
         "query": query,
@@ -247,12 +254,14 @@ def _search_jsonl(
     # Bi-temporal validity/supersession outranks raw text score (a superseded
     # or not-yet/no-longer-valid fact must not outrank a current one just
     # because it happens to match the query text better) — see
-    # zeref.memory.bitemporal.rank_key. Score, then created_at, then id break
-    # remaining ties.
+    # zeref.memory.bitemporal.rank_key. Score is next: among atoms that are
+    # equally valid and current, relevance decides. Only then does recency
+    # break ties, followed by created_at and id for a total order.
     scored.sort(
         key=lambda item: (
             *rank_key(item["atom"], as_of),
             -item["score"],
+            recency_key(item["atom"]),
             item["atom"]["created_at"],
             item["atom"]["id"],
         )
