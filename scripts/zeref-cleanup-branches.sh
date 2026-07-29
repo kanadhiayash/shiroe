@@ -22,6 +22,15 @@ echo "==> repo: $REPO"
 echo "==> fetching and pruning remote refs"
 git fetch --all --prune --quiet
 
+# Refuse to touch a dirty tree. An earlier version switched to dev
+# unconditionally, which silently carried uncommitted work off the branch it
+# was made on — a cleanup tool must never move your changes for you.
+if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+  echo "!! working tree has uncommitted changes. Commit or stash first." >&2
+  git status --short --untracked-files=no >&2
+  exit 1
+fi
+
 CUR=$(git rev-parse --abbrev-ref HEAD)
 if [ "$CUR" != "dev" ]; then
   echo "==> switching to dev (was on $CUR)"
@@ -77,7 +86,7 @@ fi
 
 if [ "$APPLY" -eq 0 ]; then
   echo
-  echo "==> DRY RUN. Nothing changed. Re-run with:  ./cleanup-branches.sh --apply"
+  echo "==> DRY RUN. Nothing changed. Re-run with:  scripts/zeref-cleanup-branches.sh --apply"
   exit 0
 fi
 
