@@ -159,9 +159,37 @@ def test_anthropic_provider_dry_run_estimates_without_key(monkeypatch) -> None:
     assert usage.cost_usd > 0
     completion = provider.complete("hello")
     assert completion.text == ""
+
+
+def test_live_provider_without_a_key_refuses_before_any_request(monkeypatch) -> None:
+    """dry_run=False with no key must fail on the key check, not the network.
+
+    The env var is cleared explicitly so this means the same thing on a
+    machine that happens to have a key configured.
+    """
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     live = AnthropicProvider(dry_run=False)
-    with pytest.raises(RuntimeError, match="Phase A"):
+    with pytest.raises(RuntimeError, match="ANTHROPIC_API_KEY"):
         live.complete("hello")
+
+
+def test_provider_never_puts_the_key_in_a_url() -> None:
+    """urllib embeds the request URL in every error string, so a key in the
+    query string would leak into tracebacks and CI logs.
+    """
+    from benchmarks.external.providers import anthropic as provider_mod
+
+    source = Path(provider_mod.__file__).read_text(encoding="utf-8")
+    assert "?key=" not in source
+    assert "x-api-key" in source
+
+
+def test_provider_unknown_model_prices_expensive_not_free() -> None:
+    """An unpriced model must over-estimate so the budget ceiling trips early."""
+    from benchmarks.external.providers.anthropic import _rates_for
+
+    unknown_in, unknown_out = _rates_for("claude-does-not-exist-9")
+    assert unknown_in > 0 and unknown_out > 0
 
 
 def test_sqlite_baseline_ingest_recall() -> None:
