@@ -46,12 +46,20 @@ REQUIRED_FIELDS = (
     "last_confirmed_at",
     "valid_from",
     "valid_until",
+    "recorded_at",
+    "superseded_at",
     "entities",
     "tags",
     "links",
     "privacy",
     "provenance",
 )
+
+# Bi-temporal axes (independent — see zeref/memory/bitemporal.py):
+#   valid time:       valid_from / valid_until  — when the fact was true in the world.
+#   transaction time:  recorded_at / superseded_at — when Zeref learned/un-learned it.
+# All four are nullable: an open valid_from/valid_until means "unknown bound" (never
+# fabricate one), a null superseded_at means "still the current belief".
 
 
 class AtomValidationError(ValueError):
@@ -105,6 +113,8 @@ def create_atom(
     last_confirmed_at: str | None = None,
     valid_from: str | None = None,
     valid_until: str | None = None,
+    recorded_at: str | None = None,
+    superseded_at: str | None = None,
     entities: list[Any] | None = None,
     tags: list[Any] | None = None,
     links: list[Any] | None = None,
@@ -129,6 +139,12 @@ def create_atom(
         "last_confirmed_at": last_confirmed_at,
         "valid_from": valid_from,
         "valid_until": valid_until,
+        # Transaction time defaults to "recorded now" (recorded_at) / "still
+        # current" (superseded_at=None) — distinct from created_at so a future
+        # bulk-import path can set recorded_at independently of the atom's own
+        # created_at without conflating the two axes.
+        "recorded_at": recorded_at or ts,
+        "superseded_at": superseded_at,
         "entities": entities or [],
         "tags": tags or [],
         "links": links or [],
@@ -173,7 +189,10 @@ def validate_atom(atom: dict[str, Any]) -> None:
         if not isinstance(atom[field], list):
             errors.append(f"{field} must be a list")
 
-    for field in ("created_at", "observed_at", "last_confirmed_at", "valid_from", "valid_until"):
+    for field in (
+        "created_at", "observed_at", "last_confirmed_at",
+        "valid_from", "valid_until", "recorded_at", "superseded_at",
+    ):
         value = atom[field]
         if value is not None and not _is_iso_datetime(value):
             errors.append(f"{field} must be ISO-8601 or null")

@@ -7,6 +7,10 @@ Detection covers two classes:
 2. Structured conflicts — two active atoms whose claims share the same
    (entity, attribute) template but disagree on the extracted value:
    dates/times, quantities (with units), status keywords, identity values.
+   A structured mismatch is only flagged when the two atoms' valid-time
+   intervals overlap (see zeref.memory.bitemporal.valid_intervals_overlap) —
+   non-overlapping intervals mean the value legitimately changed over time
+   (an update), not a contradiction.
 
 Conflicts are SURFACED, never auto-resolved: the higher evidence grade is
 suggested as winner, but resolution stays human-arbitrated (AGENTS.md).
@@ -21,6 +25,7 @@ from typing import Any
 
 from zeref.lock import MemoryLock, atomic_write
 from zeref.memory.atom_store import AtomStore
+from zeref.memory.bitemporal import valid_intervals_overlap
 from zeref.memory.schemas import create_atom
 
 
@@ -223,6 +228,11 @@ def detect_conflict(left: dict[str, Any], right: dict[str, Any]) -> dict[str, An
     if left_template != right_template:
         return None
     if left_values == right_values:
+        return None
+    if not valid_intervals_overlap(left, right):
+        # Same entity/attribute, different value, but non-overlapping valid-time
+        # windows: a legitimate update over time (e.g. a price that changed),
+        # not a contradiction.
         return None
     kinds = sorted({kind for kind, _ in left_values} | {kind for kind, _ in right_values})
     return {

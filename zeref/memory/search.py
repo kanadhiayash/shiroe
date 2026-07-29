@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from zeref.memory.atom_store import AtomStore
+from zeref.memory.bitemporal import rank_key
 from zeref.memory.indexer import INDEX_PATH
 
 
@@ -80,16 +81,21 @@ def search_atoms(
     limit: int = 10,
     atom_type: str | None = None,
     status: str | None = None,
+    as_of: str | None = None,
 ) -> dict[str, Any]:
+    """Search atoms. ``as_of`` is the bi-temporal ranking reference time
+    (default: now) — see zeref.memory.bitemporal.rank_key. It only breaks
+    ties among equally-scored matches; it does not filter results.
+    """
     root_path = Path(root)
     db_path = root_path / INDEX_PATH
     tokens = tokenize(query)
     if db_path.exists() and tokens and not _index_stale(root_path, db_path):
         try:
-            return _search_sqlite(db_path, query, tokens, limit, atom_type, status)
+            return _search_sqlite(db_path, query, tokens, limit, atom_type, status, as_of)
         except sqlite3.Error:
             pass
-    return _search_jsonl(root_path, query, tokens, limit, atom_type, status)
+    return _search_jsonl(root_path, query, tokens, limit, atom_type, status, as_of)
 
 
 def _index_stale(root: Path, db_path: Path) -> bool:
@@ -147,6 +153,7 @@ def _search_sqlite(
     limit: int,
     atom_type: str | None,
     status: str | None,
+    as_of: str | None = None,
 ) -> dict[str, Any]:
     # Tokens are quoted as FTS5 string literals so an unlucky token can never
     # be parsed as a MATCH operator (NEAR, column filters, etc.) or unbalance
@@ -162,7 +169,15 @@ def _search_sqlite(
         filters.append("atoms.status = ?")
         params.append(status)
     where = " AND " + " AND ".join(filters) if filters else ""
-    params.append(limit)
+    # ponytail: over-fetch a bounded window (not the full match set) so the
+    # bitemporal tie-break below has candidates to re-rank within — a
+    # superseded fact ranked just outside `limit` by bm25 alone can still
+    # lose to a current one inside it. Ceiling: a superseded fact ranked
+    # beyond the window is still invisible to the tie-break; raise the
+    # multiplier (or push valid_from/valid_until/recorded_at/superseded_at
+    # into the SQL ORDER BY) if that proves visible in practice.
+    fetch_limit = min(limit * 4, 200)
+    params.append(fetch_limit)
     sql = f"""
         SELECT atoms.raw_json, bm25(atoms_fts) AS rank
         FROM atoms_fts
@@ -177,13 +192,18 @@ def _search_sqlite(
     finally:
         conn.close()
     matches = []
-    for row in rows:
+    for bm25_position, row in enumerate(rows):
         atom = json.loads(row[0])
         matches.append({
             "atom": atom,
             "score": round(float(row[1]), 6),
             "why": _why(atom, tokens, "SQLite FTS rank"),
+            "bm25_position": bm25_position,
         })
+    # Bi-temporal validity/supersession outranks raw bm25 rank (see
+    # zeref.memory.bitemporal.rank_key); original bm25 order breaks ties.
+    matches.sort(key=lambda item: (*rank_key(item["atom"], as_of), item["bm25_position"]))
+    matches = [{k: v for k, v in item.items() if k != "bm25_position"} for item in matches[:limit]]
     return {
         "query": query,
         "tokens": tokens,
@@ -200,6 +220,7 @@ def _search_jsonl(
     limit: int,
     atom_type: str | None,
     status: str | None,
+    as_of: str | None = None,
 ) -> dict[str, Any]:
     # No tokens means the query couldn't be tokenized (or was blank) — abstain
     # rather than fail open into "every atom matches". `abstained: True` lets
@@ -223,7 +244,19 @@ def _search_jsonl(
                 "score": score,
                 "why": _why(atom, tokens, "JSONL token scan"),
             })
-    scored.sort(key=lambda item: (-item["score"], item["atom"]["created_at"], item["atom"]["id"]))
+    # Bi-temporal validity/supersession outranks raw text score (a superseded
+    # or not-yet/no-longer-valid fact must not outrank a current one just
+    # because it happens to match the query text better) — see
+    # zeref.memory.bitemporal.rank_key. Score, then created_at, then id break
+    # remaining ties.
+    scored.sort(
+        key=lambda item: (
+            *rank_key(item["atom"], as_of),
+            -item["score"],
+            item["atom"]["created_at"],
+            item["atom"]["id"],
+        )
+    )
     return {
         "query": query,
         "tokens": tokens,
