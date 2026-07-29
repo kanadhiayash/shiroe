@@ -123,7 +123,10 @@ def _cmd_external(args: argparse.Namespace) -> int:
     )
 
     try:
-        estimate = m["estimate_run_cost"](args.benchmark, args.data, arm_names, provider, judge)
+        estimate = m["estimate_run_cost"](
+            args.benchmark, args.data, arm_names, provider, judge,
+            limit=args.limit, seed=args.seed,
+        )
     except (m["DatasetMissingError"], KeyError) as exc:
         _error(str(exc))
         return 1
