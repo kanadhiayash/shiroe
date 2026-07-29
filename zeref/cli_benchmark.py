@@ -46,7 +46,11 @@ def register(sub) -> None:
     ext.add_argument("--max-cost", type=float, default=None,
                      help="USD budget ceiling for a --live run (default: conservative; "
                           "hard ceiling: $500, see benchmarks.external.cost.COST_CEILING_USD)")
-    ext.add_argument("--provider", default="anthropic", choices=["anthropic"])
+    ext.add_argument("--provider", default="gemini", choices=["gemini", "anthropic"],
+                     help="generation backend. gemini needs only GEMINI_API_KEY; "
+                          "anthropic needs an Anthropic account")
+    ext.add_argument("--provider-model", default=None,
+                     help="override the generation model id (default: the provider's own)")
     ext.add_argument("--judge", default="gemini", choices=["fake", "gemini"])
     ext.add_argument("--seed", type=int, default=0)
     ext.add_argument("--limit", type=int, default=None,
@@ -64,6 +68,7 @@ def _load_harness_modules():
     from benchmarks.external.judges.fake import DeterministicFakeJudge
     from benchmarks.external.judges.gemini import GeminiJudgeClient
     from benchmarks.external.providers.anthropic import AnthropicProvider
+    from benchmarks.external.providers.gemini import GeminiProvider
     from benchmarks.external.runner import resolve_arms, run_three_arms, write_results
     from benchmarks.external.schema import DatasetMissingError
 
@@ -74,6 +79,7 @@ def _load_harness_modules():
         "DeterministicFakeJudge": DeterministicFakeJudge,
         "GeminiJudgeClient": GeminiJudgeClient,
         "AnthropicProvider": AnthropicProvider,
+        "GeminiProvider": GeminiProvider,
         "resolve_arms": resolve_arms,
         "run_three_arms": run_three_arms,
         "write_results": write_results,
@@ -97,6 +103,23 @@ def _error(msg: str) -> None:
     print(f"✘ {msg}", file=sys.stderr)
 
 
+def _make_provider(m, args, *, dry_run: bool):
+    """Build the generation provider named by --provider.
+
+    Kept in one place so the dry-run and live paths can never drift into
+    constructing different backends.
+    """
+    # getattr throughout: callers build this Namespace programmatically as well
+    # as via argparse, so a missing attribute must fall back rather than raise.
+    provider_name = getattr(args, "provider", "gemini")
+    key = "GeminiProvider" if provider_name == "gemini" else "AnthropicProvider"
+    kwargs = {"dry_run": dry_run}
+    model_id = getattr(args, "provider_model", None)
+    if model_id:
+        kwargs["model_id"] = model_id
+    return m[key](**kwargs)
+
+
 def _cmd_external(args: argparse.Namespace) -> int:
     try:
         m = _load_harness_modules()
@@ -116,7 +139,7 @@ def _cmd_external(args: argparse.Namespace) -> int:
 
     # Estimation only — never live. Cost projection must be network-free, so
     # the client used for estimate() is always constructed with live=False.
-    provider = m["AnthropicProvider"](dry_run=True)
+    provider = _make_provider(m, args, dry_run=True)
     judge = (
         m["DeterministicFakeJudge"]() if args.judge == "fake"
         else m["GeminiJudgeClient"](live=False)
@@ -159,7 +182,7 @@ def _cmd_external(args: argparse.Namespace) -> int:
             return 1
         # Only past the budget check AND explicit confirmation do the live
         # clients get built. Everything above this line is network-free.
-        provider = m["AnthropicProvider"](dry_run=False)
+        provider = _make_provider(m, args, dry_run=False)
         if args.judge == "gemini":
             judge = m["GeminiJudgeClient"](live=True)
             if not judge.has_key():
