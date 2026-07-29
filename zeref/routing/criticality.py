@@ -38,6 +38,19 @@ _LEVEL_ORDER: tuple[str, ...] = CRITICALITIES  # ("LOW", "MEDIUM", "HIGH", "CRIT
 BLAST_RADII: tuple[str, ...] = ("local", "team", "org", "public")
 PRIVACY_CLASSES: tuple[str, ...] = ("public", "internal", "confidential", "restricted")
 
+# Grading vocabularies. In every one of these the FIRST value is the most
+# severe, and it is also the field's default. That is deliberate and is the
+# property `test_no_new_field_value_can_exceed_its_default` proves
+# exhaustively: a caller who has never heard of these fields gets exactly the
+# classification they would have got before the fields existed, and no value
+# they can supply raises the result above that. Grading here only ever buys
+# precision on tasks that are genuinely tamer — it never lowers a floor that
+# was protecting something dangerous.
+ENVIRONMENTS: tuple[str, ...] = ("production", "staging", "development")
+CHANGE_SHAPES: tuple[str, ...] = ("breaking", "additive")
+CLAIM_DIRECTIONS: tuple[str, ...] = ("asserting", "corrective")
+FINANCIAL_EFFECTS: tuple[str, ...] = ("executes", "touches_path")
+
 
 @dataclass(frozen=True)
 class TaskSignals:
@@ -63,12 +76,26 @@ class TaskSignals:
     # ponytail: explicit flag, not inferred ambiguity-detection; upgrade to
     # a sensitivity analysis over flipped signals if false negatives show up.
     ambiguous: bool = False
+    # Grading dimensions. Defaults are the most severe value of each, so
+    # omitting them reproduces the pre-grading classification exactly.
+    environment: str = "production"  # production | staging | development
+    change_shape: str = "breaking"  # breaking | additive
+    claim_direction: str = "asserting"  # asserting | corrective
+    financial_effect: str = "executes"  # executes | touches_path
 
     def __post_init__(self) -> None:
         if self.blast_radius not in BLAST_RADII:
             raise ValueError(f"unknown blast_radius {self.blast_radius!r}; expected one of {BLAST_RADII}")
         if self.privacy_class not in PRIVACY_CLASSES:
             raise ValueError(f"unknown privacy_class {self.privacy_class!r}; expected one of {PRIVACY_CLASSES}")
+        if self.environment not in ENVIRONMENTS:
+            raise ValueError(f"unknown environment {self.environment!r}; expected one of {ENVIRONMENTS}")
+        if self.change_shape not in CHANGE_SHAPES:
+            raise ValueError(f"unknown change_shape {self.change_shape!r}; expected one of {CHANGE_SHAPES}")
+        if self.claim_direction not in CLAIM_DIRECTIONS:
+            raise ValueError(f"unknown claim_direction {self.claim_direction!r}; expected one of {CLAIM_DIRECTIONS}")
+        if self.financial_effect not in FINANCIAL_EFFECTS:
+            raise ValueError(f"unknown financial_effect {self.financial_effect!r}; expected one of {FINANCIAL_EFFECTS}")
 
 
 @dataclass(frozen=True)
@@ -104,10 +131,30 @@ def classify(signals: TaskSignals) -> Classification:
         reasons.append(f"{reason} -> floor {candidate}")
 
     # --- hard CRITICAL triggers: each is independently sufficient ----------
+    # A public claim is graded by DIRECTION. Publishing a new claim exposes
+    # the project to something it cannot take back; withdrawing an overstated
+    # one moves the exposure the other way. Treating both as CRITICAL made
+    # correcting an inaccurate claim as expensive as making one, which
+    # discourages exactly the behaviour that should be cheap. An irretractable
+    # correction is still CRITICAL.
     if signals.is_public_claim:
-        bump("CRITICAL", "makes a public claim (reputational/legal exposure the caller cannot undo by editing code)")
+        if signals.claim_direction == "asserting" or not signals.reversible:
+            bump("CRITICAL", "asserts a new public claim, or the publication cannot be retracted")
+        else:
+            bump("HIGH", "corrective public claim that can itself be retracted")
+    # Financial/legal impact is graded by whether the task EXECUTES the
+    # commitment or merely touches a money-adjacent path. Editing a payment
+    # handler is not the same as moving money; writing the ledger, or doing
+    # either irreversibly, still is.
     if signals.financial_or_legal_impact:
-        bump("CRITICAL", "has direct financial or legal consequence")
+        if (
+            signals.financial_effect == "executes"
+            or not signals.reversible
+            or signals.writes_canonical_state
+        ):
+            bump("CRITICAL", "commits funds or legal obligation, is irreversible, or writes the canonical ledger")
+        else:
+            bump("HIGH", "touches a financial or legal code path without committing to it, reversibly")
     if signals.schema_or_migration and signals.writes_canonical_state:
         bump("CRITICAL", "schema change that migrates canonical state")
     if signals.production_or_credential_access and not signals.reversible:
@@ -120,8 +167,19 @@ def classify(signals: TaskSignals) -> Classification:
     # --- HIGH triggers -------------------------------------------------------
     if signals.writes_canonical_state:
         bump("HIGH", "writes to canonical (shared source-of-truth) state")
+    # Schema work is graded by ENVIRONMENT. A staging column drop and a
+    # production migration are not the same risk, but the ungraded rule
+    # scored them identically. Non-production still floors MEDIUM (it affects
+    # teammates), and never LOW; irreversible non-production work stays HIGH.
+    # Production is unchanged, and the canonical-state CRITICAL trigger above
+    # is independent of this block.
     if signals.schema_or_migration:
-        bump("HIGH", "schema or migration impact")
+        if signals.environment == "production":
+            bump("HIGH", "production schema or migration impact")
+        elif not signals.reversible:
+            bump("HIGH", f"irreversible schema change in {signals.environment}")
+        else:
+            bump("MEDIUM", f"reversible schema change confined to {signals.environment}")
     if signals.production_or_credential_access:
         bump("HIGH", "touches production or credential access")
     if signals.blast_radius in ("org", "public"):
@@ -135,8 +193,19 @@ def classify(signals: TaskSignals) -> Classification:
     # --- MEDIUM triggers -------------------------------------------------------
     if not signals.reversible:
         bump("MEDIUM", "action is not reversible")
+    # Team blast radius is graded by what the change actually does to the
+    # team. A production-facing, irreversible, or breaking change still floors
+    # MEDIUM. A reversible, purely additive change in a non-production
+    # environment does not — that combination is the ordinary day-to-day work
+    # the unconditional floor was over-routing. "Breaking" includes removing
+    # or weakening an existing test or check, not just an API contract.
     if signals.blast_radius == "team":
-        bump("MEDIUM", "blast radius reaches the team")
+        if (
+            signals.environment == "production"
+            or not signals.reversible
+            or signals.change_shape == "breaking"
+        ):
+            bump("MEDIUM", "team-scoped change that is production-facing, irreversible, or breaking")
 
     flagged = signals.ambiguous and level in ("HIGH", "CRITICAL")
     rationale = "; ".join(reasons) if reasons else "no elevated-risk signals present; baseline LOW"
