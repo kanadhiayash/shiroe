@@ -18,6 +18,8 @@ NAME = "helmet"
 OFFICIAL_URL = "https://github.com/princeton-nlp/HELMET"
 PINNED_VERSION = "HELMET v1 QA subset (pin release/commit at download time)"
 PINNED_SHA256: str | None = None  # record via check() after manual download
+LICENSE = 'unverified'
+LICENSE_NOTE = 'Licence not yet confirmed against the official release; verify before publishing numbers.'
 DATA_FILENAME = "helmet.jsonl"
 DOWNLOAD_INSTRUCTIONS = (
     "Follow the official README data instructions and save the QA subset as "

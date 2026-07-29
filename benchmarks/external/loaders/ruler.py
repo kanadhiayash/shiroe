@@ -18,6 +18,8 @@ NAME = "ruler"
 OFFICIAL_URL = "https://github.com/NVIDIA/RULER"
 PINNED_VERSION = "RULER generator (pin repo commit + generation config at generation time)"
 PINNED_SHA256: str | None = None  # record via check() after generation
+LICENSE = 'Apache-2.0'
+LICENSE_NOTE = 'RULER is generated locally from the NVIDIA/RULER generator scripts (Apache-2.0).'
 DATA_FILENAME = "ruler.jsonl"
 DOWNLOAD_INSTRUCTIONS = (
     "Generate the task data with the official RULER scripts and save the "
