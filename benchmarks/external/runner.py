@@ -102,9 +102,14 @@ def run_three_arms(
     cost_estimate: CostEstimate | None = None
     if scored:
         effective_cost, clamped = effective_max_cost(max_cost)
-        cost_estimate = estimate_run_cost(benchmark, data_path, arm_names, provider, judge)
+        cost_estimate = estimate_run_cost(
+            benchmark, data_path, arm_names, provider, judge, limit=limit, seed=seed
+        )
 
     running_cost = 0.0
+    # Snapshot so usage can be reported as a per-run delta (see usage_total).
+    tokens_in_at_start = getattr(provider, "total_input_tokens", 0) if provider else 0
+    tokens_out_at_start = getattr(provider, "total_output_tokens", 0) if provider else 0
     latencies: list[float] = []
     failures: list[dict[str, Any]] = []
     exclusions: list[dict[str, Any]] = []
@@ -183,12 +188,21 @@ def run_three_arms(
     model_id = provider.model_id if provider is not None else "none (proxy mode, no provider)"
     judge_model = judge.model_id if judge is not None else None
     avg_latency_ms = (sum(latencies) / len(latencies)) if latencies else None
-    # Everything routed through this build is dry-run/fake (AnthropicProvider
-    # dry_run=True, GeminiJudgeClient.estimate) — `estimated` is always True
-    # until a later authorized session wires in live clients.
+    # Report the REAL accumulated usage. Hardcoding estimated=True here would
+    # stamp a live scored run as an estimate, which is exactly the kind of
+    # provenance error that makes a published number indefensible. A run counts
+    # as estimated only when it never made a live call: proxy mode, a dry-run
+    # provider, or a judge that only estimates.
+    provider_estimated = provider is None or getattr(provider, "dry_run", True)
+    judge_estimated = judge is None or not getattr(judge, "_live", False)
+    # Deltas, not lifetime totals: a provider instance accumulates across every
+    # run it is passed to, so reporting its running total would attribute an
+    # earlier run's tokens to this one.
     usage_total = {
-        "input_tokens": 0, "output_tokens": 0,
-        "cost_usd": round(running_cost, 6), "estimated": True,
+        "input_tokens": (getattr(provider, "total_input_tokens", 0) - tokens_in_at_start) if provider else 0,
+        "output_tokens": (getattr(provider, "total_output_tokens", 0) - tokens_out_at_start) if provider else 0,
+        "cost_usd": round(running_cost, 6),
+        "estimated": (not scored) or provider_estimated or judge_estimated,
     }
 
     return {
