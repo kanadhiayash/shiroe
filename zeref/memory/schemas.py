@@ -23,6 +23,18 @@ ATOM_TYPES = {
     "error",
     "test",
     "event",
+    # Types that previously existed only as memory-card kinds. The atom store
+    # is the canonical history, so it has to be able to represent every kind
+    # of memory the guarded write path accepts. Adding them here keeps the
+    # conversion lossless — the alternative was folding each onto a nearby
+    # atom type, which would have silently rewritten what the record means.
+    "constraint",
+    "unknown",
+    "assumption",
+    "source_claim",
+    "route_policy",
+    "privacy_rule",
+    "handoff",
 }
 
 EVIDENCE_VALUES = {"A", "B", "C", "D", "F", "unverified"}
@@ -115,6 +127,8 @@ def create_atom(
     valid_until: str | None = None,
     recorded_at: str | None = None,
     superseded_at: str | None = None,
+    superseded_by: str | None = None,
+    supersedes: list[Any] | None = None,
     entities: list[Any] | None = None,
     tags: list[Any] | None = None,
     links: list[Any] | None = None,
@@ -145,6 +159,13 @@ def create_atom(
         # created_at without conflating the two axes.
         "recorded_at": recorded_at or ts,
         "superseded_at": superseded_at,
+        # Which atom replaced this one. superseded_at alone records
+        # *when* a belief was retired but not *by what*, which loses
+        # the chain a reader needs to follow history forward.
+        "superseded_by": superseded_by,
+        # Reverse of superseded_by: the atom ids this one replaces, so
+        # the chain is walkable in both directions.
+        "supersedes": supersedes or [],
         "entities": entities or [],
         "tags": tags or [],
         "links": links or [],
@@ -196,6 +217,13 @@ def validate_atom(atom: dict[str, Any]) -> None:
         value = atom[field]
         if value is not None and not _is_iso_datetime(value):
             errors.append(f"{field} must be ISO-8601 or null")
+
+    # Optional supersession links — absent on atoms written before the fields
+    # existed, which stay valid rather than failing to load.
+    if "supersedes" in atom and not isinstance(atom["supersedes"], list):
+        errors.append("supersedes must be a list")
+    if atom.get("superseded_by") is not None and not isinstance(atom["superseded_by"], str):
+        errors.append("superseded_by must be a string or null")
 
     if errors:
         raise AtomValidationError(errors)

@@ -523,7 +523,7 @@ def cmd_memory(args: argparse.Namespace) -> int:
     from zeref.core.errors import GuardRejection
     from zeref.guards.write_gate import propose_memory, write_from_proposal
     from zeref.memory.atom_store import AtomStore
-    from zeref.memory.schemas import ATOM_TYPES, create_atom
+    from zeref.memory.schemas import ATOM_TYPES, create_atom, utc_now_iso
     from zeref.memory_state import card_to_dict, event_to_dict, item_to_dict, MemoryStore
     from zeref.privacy import scrub
 
@@ -568,20 +568,51 @@ def cmd_memory(args: argparse.Namespace) -> int:
                     print("No memory cards found.")
             return 0
 
+        # show/archive/supersede resolve against the canonical atom store
+        # first and fall back to memory_cards, so ids written before the
+        # convergence stay reachable instead of silently 404-ing.
         if args.memory_command == "show":
+            atom = atom_store.get(args.id)
+            if atom is not None:
+                print(json.dumps(atom, indent=2, sort_keys=True))
+                return 0
             card = store.get_card(args.id)
             if card is None:
-                print(f"✘ memory card {args.id} not found")
+                print(f"✘ memory {args.id} not found")
                 return 1
             print(json.dumps(card_to_dict(card), indent=2, sort_keys=True))
             return 0
 
         if args.memory_command == "archive":
+            if atom_store.get(args.id) is not None:
+                atom = atom_store.patch(args.id, {"status": "archived"})
+                print(json.dumps(atom, indent=2, sort_keys=True) if args.json else f"✔ archived {atom['id']}")
+                return 0
             card = store.archive_card(args.id)
             print(json.dumps(card_to_dict(card), indent=2, sort_keys=True) if args.json else f"✔ archived {card.id}")
             return 0
 
         if args.memory_command == "supersede":
+            replacement = atom_store.get(args.with_id)
+            if atom_store.get(args.id) is not None and replacement is not None:
+                # Both already exist as atoms: close the old row's transaction
+                # interval in place rather than appending a duplicate.
+                old_atom = atom_store.patch(
+                    args.id,
+                    {
+                        "status": "superseded",
+                        "superseded_at": utc_now_iso(),
+                        "superseded_by": replacement["id"],
+                    },
+                )
+                replacement = atom_store.patch(
+                    replacement["id"],
+                    {"supersedes": sorted({*replacement.get("supersedes", []), args.id})},
+                )
+                result = {"superseded": old_atom, "replacement": replacement}
+                print(json.dumps(result, indent=2, sort_keys=True) if args.json
+                      else f"✔ {old_atom['id']} superseded by {replacement['id']}")
+                return 0
             old_card, new_card = store.supersede_card(args.id, args.with_id)
             result = {"superseded": card_to_dict(old_card), "replacement": card_to_dict(new_card)}
             print(json.dumps(result, indent=2, sort_keys=True) if args.json else f"✔ {old_card.id} superseded by {new_card.id}")

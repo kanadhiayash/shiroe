@@ -69,7 +69,9 @@ def test_memory_propose_and_guarded_write(repo_root: Path, tmp_path: Path) -> No
     written = _run(repo_root, tmp_path, ["memory", "write", "--from", "proposal.json", "--json"])
     assert written.returncode == 0, written.stderr
     card = json.loads(written.stdout)
-    assert card["id"].startswith("mem_")
+    # Guarded writes now land in the canonical atom store, whose ids are
+    # `<type>_<digest>` rather than the old card `mem_` prefix.
+    assert card["id"].startswith("preference_")
     assert card["type"] == "preference"
 
     listed = _run(repo_root, tmp_path, ["memory", "list", "--type", "preference", "--json"])

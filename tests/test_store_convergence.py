@@ -72,14 +72,6 @@ def _record_claims(root: Path) -> list[str]:
     return [row[0] for row in rows]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "pre-convergence: the guarded write path still writes memory_cards "
-        "instead of canonical JSONL atoms. strict=True means this flips to a "
-        "build failure the moment convergence lands, forcing the marker off."
-    ),
-)
 def test_guarded_write_lands_in_the_canonical_atom_store(repo: Path) -> None:
     """The guarded write path must write canonical history.
 
@@ -94,14 +86,6 @@ def test_guarded_write_lands_in_the_canonical_atom_store(repo: Path) -> None:
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "pre-convergence: the guarded write path still writes memory_cards "
-        "instead of canonical JSONL atoms. strict=True means this flips to a "
-        "build failure the moment convergence lands, forcing the marker off."
-    ),
-)
 def test_one_fact_is_not_duplicated_across_stores(repo: Path) -> None:
     """Exactly one store may hold a given logical fact.
 
@@ -157,14 +141,6 @@ def test_only_one_sqlite_state_db_exists(repo: Path) -> None:
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "pre-convergence: the guarded write path still writes memory_cards "
-        "instead of canonical JSONL atoms. strict=True means this flips to a "
-        "build failure the moment convergence lands, forcing the marker off."
-    ),
-)
 def test_atom_history_is_append_only_json_lines(repo: Path) -> None:
     """Canonical history stays parseable line-by-line — this is what makes it
     the durable store the projections are rebuilt from.

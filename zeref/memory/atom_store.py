@@ -21,6 +21,13 @@ ATOM_FILES = {
     "error": "errors.jsonl",
     "test": "tests.jsonl",
     "event": "events.jsonl",
+    "constraint": "constraints.jsonl",
+    "unknown": "unknowns.jsonl",
+    "assumption": "assumptions.jsonl",
+    "source_claim": "source_claims.jsonl",
+    "route_policy": "route_policies.jsonl",
+    "privacy_rule": "privacy_rules.jsonl",
+    "handoff": "handoffs.jsonl",
 }
 
 
