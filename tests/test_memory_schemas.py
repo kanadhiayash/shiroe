@@ -52,7 +52,7 @@ def test_validate_atom_rejects_invalid_enums_and_list_shapes() -> None:
         summary="Fact guard should flag unsupported claims.",
         source="manual:test",
     )
-    atom["type"] = "unknown"
+    atom["type"] = "not_a_real_atom_type"
     atom["evidence"] = "Z"
     atom["confidence"] = "certain"
     atom["status"] = "new"
@@ -62,7 +62,7 @@ def test_validate_atom_rejects_invalid_enums_and_list_shapes() -> None:
         validate_atom(atom)
 
     message = str(exc.value)
-    assert "invalid type: unknown" in message
+    assert "invalid type: not_a_real_atom_type" in message
     assert "invalid evidence: Z" in message
     assert "invalid confidence: certain" in message
     assert "invalid status: new" in message

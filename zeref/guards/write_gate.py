@@ -10,9 +10,11 @@ from typing import Any
 from zeref.audit.logger import AuditLogger
 from zeref.core.errors import GuardRejection, ValidationError
 from zeref.core.schema import SOURCE_OPTIONAL_TYPES
-from zeref.guards.contradiction_guard import detect_incoming_conflicts, write_conflicts
+from zeref.memory.contradictions import detect_incoming_conflicts
 from zeref.guards.fact_guard import matched_claim_category
 from zeref.guards.privacy_guard import classify_text
+from zeref.memory.atom_store import AtomStore
+from zeref.memory.schemas import create_atom, utc_now_iso
 from zeref.memory_state import MemoryStore
 
 
@@ -43,35 +45,69 @@ def propose_memory(claim: str, *, output: Path) -> dict[str, Any]:
     return proposal
 
 
+# Card privacy classes are a policy vocabulary; atom privacy values describe
+# how far a record may travel. They are not the same axis, so the mapping is
+# explicit and errs toward the MORE restrictive atom value — a record that is
+# over-restricted is recoverable, one that is under-restricted has already
+# leaked. `secret` and `do_not_store` never reach here: _validate_gate
+# rejects both before any write happens.
+_PRIVACY_CLASS_TO_ATOM = {
+    "public": "public-safe",
+    "internal": "private",
+    "sensitive": "local-only",
+}
+
+
+def proposal_to_atom(proposal: dict[str, Any]) -> dict[str, Any]:
+    """Convert a validated memory proposal into a canonical atom.
+
+    Evidence grade and confidence share a vocabulary with the atom schema and
+    carry over unchanged — notably, nothing here can *raise* an evidence
+    grade. `title` becomes the atom summary, and the source refs become both
+    the atom source and its provenance so the original list survives.
+    """
+    source_refs = [str(ref) for ref in (proposal.get("source_refs") or [])]
+    privacy_class = str(proposal.get("privacy_class", "internal"))
+    return create_atom(
+        atom_type=str(proposal["type"]),
+        claim=str(proposal["claim"]),
+        summary=str(proposal.get("title") or proposal["claim"]),
+        source=source_refs[0] if source_refs else "",
+        source_type="manual",
+        evidence=str(proposal.get("evidence_grade", "unverified")),
+        confidence=str(proposal.get("confidence", "medium")),
+        status="active",
+        valid_from=proposal.get("valid_from"),
+        valid_until=proposal.get("valid_until"),
+        # Transaction time: when Zeref came to believe this. Set explicitly so
+        # the atom participates in bi-temporal ranking from the moment it
+        # lands (see zeref.memory.bitemporal).
+        recorded_at=utc_now_iso(),
+        tags=list(proposal.get("tags") or []),
+        privacy=_PRIVACY_CLASS_TO_ATOM.get(privacy_class, "unknown"),
+        provenance="; ".join(source_refs),
+    )
+
+
 def write_from_proposal(path: Path, store: MemoryStore) -> dict[str, Any]:
     audit = AuditLogger(store.memory_root)
     try:
         proposal = json.loads(path.read_text(encoding="utf-8"))
         _validate_gate(proposal, store)
-        card = store.add_card(
-            type=proposal["type"],
-            title=proposal["title"],
-            claim=proposal["claim"],
-            privacy_class=proposal["privacy_class"],
-            evidence_grade=proposal["evidence_grade"],
-            source_refs=list(proposal.get("source_refs") or []),
-            confidence=proposal.get("confidence", "medium"),
-            tags=list(proposal.get("tags") or []),
-            owner=proposal.get("owner", "zeref"),
-        )
+        atom = AtomStore(store.memory_root.root).append(proposal_to_atom(proposal))
         store.record_event(
             event="memory-write-accepted",
-            payload={"memory_id": card.id, "source": str(path)},
+            payload={"memory_id": atom["id"], "source": str(path)},
         )
         audit.append(
             event_type="memory_write",
             status="accepted",
             reason="accepted guarded write",
             file=str(path),
-            memory_id=card.id,
+            memory_id=atom["id"],
             guards_run=["factguard", "evidenceguard", "privacyguard", "contradictionguard"],
         )
-        return card.to_dict()
+        return atom
     except GuardRejection as exc:
         store.record_event(
             event="memory-write-rejected",
@@ -167,14 +203,42 @@ def _validate_gate(proposal: dict[str, Any], store: MemoryStore) -> None:
         )
 
     title = str(proposal.get("title") or _title_from_claim(claim))
-    conflicts = detect_incoming_conflicts(store, title=title, claim=claim)
+    conflicts = detect_incoming_conflicts(store.memory_root.root, summary=title, claim=claim)
     if conflicts:
-        write_conflicts(store, conflicts)
+        _write_conflicts_md(store, title, conflicts)
         raise GuardRejection(
             "ContradictionGuard",
-            "An active memory card with the same title already has a different claim.",
-            "Resolve or supersede the existing card before writing this claim.",
+            "An active memory atom with the same subject already has a different claim.",
+            "Resolve or supersede the existing atom before writing this claim.",
         )
+
+
+def _write_conflicts_md(store: MemoryStore, title: str, conflicts: list[dict[str, Any]]) -> None:
+    """Append blocked conflicts to memory/CONFLICTS.md for human arbitration.
+
+    Conflicts are surfaced, never auto-resolved (AGENTS.md). Entries are
+    de-duplicated by heading so a repeated blocked write does not grow the
+    file without bound.
+    """
+    path = store.memory_root.layout.memory_dir / "CONFLICTS.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    existing = path.read_text(encoding="utf-8") if path.exists() else ""
+    if not existing.strip():
+        existing = "# Conflicts\n"
+    known = {line.strip() for line in existing.splitlines() if line.startswith("## ")}
+    body = existing.rstrip() + "\n"
+    for conflict in conflicts:
+        heading = f"## {title} vs {conflict['existing_id']}"
+        if heading in known:
+            continue
+        known.add(heading)
+        body += (
+            f"\n{heading}\n\n"
+            f"- existing ({conflict['existing_id']}): {conflict['existing_claim']}\n"
+            f"- incoming: {conflict['incoming_claim']}\n"
+            f"- reason: {conflict['reason']}\n"
+        )
+    path.write_text(body.rstrip() + "\n", encoding="utf-8")
 
 
 def _title_from_claim(claim: str) -> str:

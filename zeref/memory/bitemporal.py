@@ -141,8 +141,11 @@ def supersede_fact(
     now = at or utc_now_iso()
     if new_atom.get("recorded_at") is None:
         new_atom = {**new_atom, "recorded_at": now}
-    old = store.patch(old_id, {"status": "superseded", "superseded_at": now})
     new = store.append(new_atom)
+    old = store.patch(
+        old_id,
+        {"status": "superseded", "superseded_at": now, "superseded_by": new["id"]},
+    )
     return old, new
 
 

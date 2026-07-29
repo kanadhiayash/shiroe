@@ -66,14 +66,24 @@ def test_scan_store_detects_same_title_conflict(tmp_path: Path) -> None:
 
 def test_write_gate_blocks_and_records_conflict(tmp_path: Path) -> None:
     store = _store(tmp_path)
-    store.add_card(
-        type="preference",
-        title="Public copy default",
-        claim="Use public-safe copy by default.",
-        privacy_class="internal",
-        evidence_grade="C",
-        source_refs=["user-input"],
+    # Seed through the guarded path so the existing claim lands in the
+    # canonical atom store — the same store the gate reads when checking an
+    # incoming write.
+    seed = tmp_path / "seed.json"
+    seed.write_text(
+        json.dumps(
+            {
+                "type": "preference",
+                "title": "Public copy default",
+                "claim": "Use public-safe copy by default.",
+                "privacy_class": "internal",
+                "evidence_grade": "C",
+                "source_refs": ["user-input"],
+            }
+        ),
+        encoding="utf-8",
     )
+    write_from_proposal(seed, store)
     proposal = tmp_path / "proposal.json"
     proposal.write_text(
         json.dumps(

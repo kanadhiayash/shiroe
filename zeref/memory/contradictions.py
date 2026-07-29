@@ -337,3 +337,58 @@ def _normalize_qty(match: re.Match) -> str:
     unit = (match[3] or "").strip()
     unit = _UNIT_ALIASES.get(unit, unit)
     return f"{currency}{number}{unit}"
+
+
+# --- incoming-write conflict detection -------------------------------------
+#
+# The structured `detect_conflict` above only fires when both claims yield
+# typed values (dates, quantities, status words). Two atoms can still
+# contradict each other in plain prose — "Use flagship models only for
+# critical tasks" vs "Use flagship models for every task" share a subject
+# and disagree, with nothing typed to extract. That case was previously
+# caught only by the card-based guard, so the rule is ported here rather
+# than dropped: same normalized subject, different normalized claim.
+
+
+def _norm_text(value: str) -> str:
+    return " ".join(str(value).lower().strip().rstrip(".").split())
+
+
+def detect_incoming_conflicts(
+    root: Path | str,
+    *,
+    summary: str,
+    claim: str,
+) -> list[dict[str, Any]]:
+    """Conflicts between an incoming claim and the active atoms already stored.
+
+    Runs both rules: the plain-prose subject match ported from the card guard,
+    and the structured value comparison used by `scan_contradictions`. Returns
+    a list of conflict dicts; empty means the write is clear.
+    """
+    from zeref.memory.atom_store import AtomStore
+
+    incoming = {"claim": claim, "summary": summary, "entities": []}
+    conflicts: list[dict[str, Any]] = []
+    for existing in AtomStore(root).load(status="active"):
+        same_subject = _norm_text(existing.get("summary", "")) == _norm_text(summary)
+        differing_claim = _norm_text(existing.get("claim", "")) != _norm_text(claim)
+        if same_subject and differing_claim:
+            conflicts.append({
+                "existing_id": existing["id"],
+                "existing_claim": existing.get("claim", ""),
+                "incoming_claim": claim,
+                "reason": (
+                    "an active atom records the same subject with a different claim"
+                ),
+            })
+            continue
+        structured = detect_conflict(existing, incoming)
+        if structured is not None:
+            conflicts.append({
+                "existing_id": existing["id"],
+                "existing_claim": existing.get("claim", ""),
+                "incoming_claim": claim,
+                "reason": structured["reason"],
+            })
+    return conflicts
