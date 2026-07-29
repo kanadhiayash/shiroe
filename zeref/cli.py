@@ -219,19 +219,6 @@ def cmd_cost(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_evidence(args: argparse.Namespace) -> int:
-    from zeref.memory.evidence import audit_evidence, grade_claim
-
-    if args.evidence_command == "grade":
-        result = grade_claim(args.claim, source=args.source or "", source_type=args.source_type)
-    elif args.evidence_command == "audit":
-        result = audit_evidence(_project_root())
-    else:
-        return 2
-    print(json.dumps(result, indent=2, sort_keys=True))
-    return 0 if result.get("passed", True) else 1
-
-
 def cmd_facts(args: argparse.Namespace) -> int:
     from zeref.memory.fact_guard import audit_facts
 
@@ -239,31 +226,6 @@ def cmd_facts(args: argparse.Namespace) -> int:
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0 if result["passed"] else 1
 
-
-def cmd_contradictions(args: argparse.Namespace) -> int:
-    from zeref.memory.contradictions import (
-        list_contradictions,
-        propose_resolution,
-        resolve_contradiction,
-        scan_contradictions,
-        show_contradiction,
-    )
-
-    root = _project_root()
-    if args.contradictions_command == "scan":
-        result = scan_contradictions(root)
-    elif args.contradictions_command == "list":
-        result = list_contradictions(root)
-    elif args.contradictions_command == "show":
-        result = show_contradiction(root, args.id)
-    elif args.contradictions_command == "propose":
-        result = propose_resolution(root, args.id)
-    elif args.contradictions_command == "resolve":
-        result = resolve_contradiction(root, args.id, winner=args.winner, reason=args.reason)
-    else:
-        return 2
-    print(json.dumps(result, indent=2, sort_keys=True))
-    return 0
 
 
 def cmd_prompt(args: argparse.Namespace) -> int:
