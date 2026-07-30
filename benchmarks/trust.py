@@ -27,6 +27,24 @@ def _read(rel: str) -> str:
     return p.read_text(errors="ignore") if p.exists() else ""
 
 
+def _ci_runs(command: str) -> bool:
+    """Whether any workflow actually invokes `command`.
+
+    Checked by content rather than by workflow filename. Both callers below
+    previously looked for a specific file (test.yml, version-consistency.yml);
+    CI was later consolidated into a single zrf-verify.yml, so both reported
+    False and capped their sub-scores while CI was in fact running those
+    commands on every pull request. A filename is not evidence — the step is.
+    """
+    workflows = REPO / ".github" / "workflows"
+    if not workflows.is_dir():
+        return False
+    return any(
+        command in path.read_text(encoding="utf-8", errors="ignore")
+        for path in sorted(workflows.glob("*.y*ml"))
+    )
+
+
 def _score_version_consistency() -> tuple[float, str]:
     script = REPO / "scripts" / "check-version-consistency.py"
     if not script.exists():
@@ -35,7 +53,7 @@ def _score_version_consistency() -> tuple[float, str]:
         [sys.executable, str(script), "--root", str(REPO)],
         capture_output=True, text=True,
     )
-    ci_enforced = (REPO / ".github" / "workflows" / "version-consistency.yml").exists()
+    ci_enforced = _ci_runs("check-version-consistency")
     if r.returncode != 0:
         return 4.0, f"checker exits non-zero: {r.stdout[-200:]}"
     score = 10.0 if ci_enforced else 8.0
@@ -48,7 +66,7 @@ def _score_test_suite() -> tuple[float, str]:
         return 0.0, "tests/ missing"
     test_files = list(tests_dir.glob("test_*.py"))
     has_pytest_ini = (REPO / "pytest.ini").exists()
-    has_test_workflow = (REPO / ".github" / "workflows" / "test.yml").exists()
+    has_test_workflow = _ci_runs("pytest")
     # We don't run coverage here (slow); we credit it via workflow existence
     score = 10.0 if (len(test_files) >= 6 and has_pytest_ini and has_test_workflow) else \
             8.0 if len(test_files) >= 5 else \
