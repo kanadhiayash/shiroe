@@ -109,7 +109,7 @@ Skipped axes are reported explicitly and never count as passing evidence.
 | Sub-criterion | Score | Evidence |
 |---|---:|---|
 | `version_consistency` | 8.00 | checker clean; ci_enforced=False |
-| `test_suite` | 8.00 | 74 test files; pytest.ini=True; ci=False |
+| `test_suite` | 8.00 | 75 test files; pytest.ini=True; ci=False |
 | `privacy_patterns` | 10.00 | 9 provider-shaped credential patterns wired |
 | `security_md` | 10.00 | no_public_route=True, pvr=True, pgp=True, window=True |
 | `ci_hardening` | 10.00 | 17/17 action refs SHA-pinned (100%); dependabot=True |

@@ -46,9 +46,15 @@ def register(sub) -> None:
     ext.add_argument("--max-cost", type=float, default=None,
                      help="USD budget ceiling for a --live run (default: conservative; "
                           "hard ceiling: $500, see benchmarks.external.cost.COST_CEILING_USD)")
-    ext.add_argument("--provider", default="gemini", choices=["gemini", "anthropic"],
-                     help="generation backend. gemini needs only GEMINI_API_KEY; "
-                          "anthropic needs an Anthropic account")
+    ext.add_argument("--provider", default="gemini", choices=["gemini", "anthropic", "ollama"],
+                     help="generation backend. ollama runs locally at $0 with no key and no "
+                          "quota, which keeps a free Gemini key available for judging only; "
+                          "gemini needs GEMINI_API_KEY; anthropic needs an Anthropic account")
+    ext.add_argument("--num-ctx", type=int, default=None,
+                     help="ollama only: context window in tokens (default 32768). Ollama "
+                          "otherwise sizes this from VRAM and silently TRUNCATES longer "
+                          "prompts, which would drop retrieved context and score as a model "
+                          "failure. The provider refuses an oversized prompt instead.")
     ext.add_argument("--provider-model", default=None,
                      help="override the generation model id (default: the provider's own)")
     ext.add_argument("--judge", default="gemini", choices=["fake", "gemini"])
@@ -69,6 +75,7 @@ def _load_harness_modules():
     from benchmarks.external.judges.gemini import GeminiJudgeClient
     from benchmarks.external.providers.anthropic import AnthropicProvider
     from benchmarks.external.providers.gemini import GeminiProvider
+    from benchmarks.external.providers.ollama import OllamaProvider
     from benchmarks.external.runner import resolve_arms, run_three_arms, write_results
     from benchmarks.external.schema import DatasetMissingError
 
@@ -80,6 +87,7 @@ def _load_harness_modules():
         "GeminiJudgeClient": GeminiJudgeClient,
         "AnthropicProvider": AnthropicProvider,
         "GeminiProvider": GeminiProvider,
+        "OllamaProvider": OllamaProvider,
         "resolve_arms": resolve_arms,
         "run_three_arms": run_three_arms,
         "write_results": write_results,
@@ -112,11 +120,19 @@ def _make_provider(m, args, *, dry_run: bool):
     # getattr throughout: callers build this Namespace programmatically as well
     # as via argparse, so a missing attribute must fall back rather than raise.
     provider_name = getattr(args, "provider", "gemini")
-    key = "GeminiProvider" if provider_name == "gemini" else "AnthropicProvider"
+    key = {
+        "gemini": "GeminiProvider",
+        "anthropic": "AnthropicProvider",
+        "ollama": "OllamaProvider",
+    }.get(provider_name, "GeminiProvider")
     kwargs = {"dry_run": dry_run}
     model_id = getattr(args, "provider_model", None)
     if model_id:
         kwargs["model_id"] = model_id
+    if provider_name == "ollama":
+        num_ctx = getattr(args, "num_ctx", None)
+        if num_ctx:
+            kwargs["num_ctx"] = num_ctx
     return m[key](**kwargs)
 
 
@@ -183,6 +199,26 @@ def _cmd_external(args: argparse.Namespace) -> int:
         # Only past the budget check AND explicit confirmation do the live
         # clients get built. Everything above this line is network-free.
         provider = _make_provider(m, args, dry_run=False)
+        # Fail before the first task rather than after N of them: a missing
+        # daemon or an unpulled model would otherwise surface as a per-task
+        # failure for every case, and failed cases score as incorrect.
+        if getattr(args, "provider", None) == "ollama":
+            if not provider.available():
+                _error(
+                    f"no Ollama daemon reachable at {provider.host}. Start it with "
+                    "`ollama serve` (set OLLAMA_HOST to override the address)."
+                )
+                return 1
+            installed = provider.installed_models()
+            if installed and provider.model_id not in installed:
+                _error(
+                    f"model {provider.model_id!r} is not pulled. Available: "
+                    f"{', '.join(sorted(installed))}. Run `ollama pull {provider.model_id}`. "
+                    "Not falling back to another model: an arm comparison is only valid "
+                    "when every arm shares one generator."
+                )
+                return 1
+            _info(f"ollama: {provider.model_id} at {provider.host}, num_ctx={provider.num_ctx}, cost $0")
         if args.judge == "gemini":
             judge = m["GeminiJudgeClient"](live=True)
             if not judge.has_key():
