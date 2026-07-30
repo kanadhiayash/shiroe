@@ -35,8 +35,10 @@ from typing import Any
 from benchmarks.external.baselines.bm25 import Bm25Backend
 from benchmarks.external.baselines.full_context import FullContextBackend
 from benchmarks.external.baselines.zeref_backend import ZerefBackend
+from benchmarks.external.checkpoint import CheckpointStore
 from benchmarks.external.cost import CostEstimate, effective_max_cost, estimate_run_cost
 from benchmarks.external.harness import (
+    CHUNK_TARGET_CHARS,
     METRICS,
     PROMPT_TEMPLATE,
     build_prompt,
@@ -81,6 +83,7 @@ def run_three_arms(
     seed: int = 0,
     limit: int | None = None,
     recall_k: int = 5,
+    checkpoint_dir: str | Path | None = None,
 ) -> dict[str, Any]:
     """Run one benchmark across the given arms. `scored=False` (default)
     makes zero network-capable calls. `scored=True` requires both a
@@ -106,6 +109,28 @@ def run_three_arms(
             benchmark, data_path, arm_names, provider, judge, limit=limit, seed=seed
         )
 
+    # Checkpointing. The header pins the run's identity so a resume cannot
+    # silently merge results generated under a different prompt, model, seed
+    # or chunk size — that would be two run series reported as one.
+    store: CheckpointStore | None = None
+    already_done: dict[str, dict[str, Any]] = {}
+    resumed = 0
+    if checkpoint_dir is not None:
+        store = CheckpointStore(checkpoint_dir)
+        store.bind({
+            "benchmark": benchmark,
+            "arms": list(arm_names),
+            "scored": scored,
+            "seed": seed,
+            "limit": limit,
+            "recall_k": recall_k,
+            "chunk_target_chars": CHUNK_TARGET_CHARS,
+            "prompt_template_sha256": sha256_text(PROMPT_TEMPLATE),
+            "provider_model": getattr(provider, "model_id", None),
+            "judge_model": getattr(judge, "model_id", None),
+        })
+        already_done = store.completed()
+
     running_cost = 0.0
     # Snapshot so usage can be reported as a per-run delta (see usage_total).
     tokens_in_at_start = getattr(provider, "total_input_tokens", 0) if provider else 0
@@ -126,6 +151,16 @@ def run_three_arms(
                 exclusions.append({"task_id": task.task_id, "arm": arm, "reason": "cost_ceiling_reached"})
                 continue
 
+            # Resume: a case already on disk is replayed, never regenerated.
+            # On a metered judge that saves money; with local generation it
+            # saves hours, which is the whole point on a multi-day run.
+            if store is not None:
+                done = store.get(task.task_id, arm, already_done)
+                if done is not None:
+                    per_task.append(done)
+                    resumed += 1
+                    continue
+
             ingest_task(backend, task)
             retrieved = backend.recall(task.question, k=recall_k)
             prompt = build_prompt(task, retrieved)
@@ -136,6 +171,10 @@ def run_three_arms(
                 "arm": arm,
                 "metric": task.metric,
                 "retrieved_chunks": len(retrieved),
+                # Digest of the context this arm actually received. Compared
+                # across arms after the run to find tasks where every arm saw
+                # the same thing — see `degenerate_tasks` below.
+                "context_digest": sha256_text("\n---\n".join(retrieved))[:16],
                 "retrieval_hit_proxy": retrieval_hit(retrieved, task.answers),
                 "official_score": None,
                 "prediction": None,
@@ -163,8 +202,13 @@ def run_three_arms(
                     record["judge_score"] = verdict.score
                 except Exception as exc:  # noqa: BLE001 — one task's failure must not sink the run
                     failures.append({"task_id": task.task_id, "arm": arm, "error": str(exc)})
+                    record["error"] = str(exc)
 
             per_task.append(record)
+            # Durable BEFORE the next call starts, so a kill at any instant
+            # loses at most the case in flight.
+            if store is not None:
+                store.append(record)
 
         hits = [r["retrieval_hit_proxy"] for r in per_task]
         scored_records = [r for r in per_task if r["official_score"] is not None]
@@ -183,6 +227,64 @@ def run_three_arms(
             ),
             "tasks": per_task,
         }
+
+    # A task whose whole haystack fits in one chunk hands every arm the same
+    # context, so all three necessarily score the same. That is a property of
+    # the sample, not a finding about Zeref, and counting it as a three-way tie
+    # silently drags every arm's mean toward the others. ConvoMem is ~37%
+    # such tasks. Report them so a comparison can be read with them excluded.
+    degenerate: list[str] = []
+    if len(arm_names) > 1:
+        by_task: dict[str, set[str]] = {}
+        for arm_result in results_by_arm.values():
+            for record in arm_result["tasks"]:
+                by_task.setdefault(record["task_id"], set()).add(record["context_digest"])
+        degenerate = sorted(tid for tid, digests in by_task.items() if len(digests) == 1)
+        for arm_result in results_by_arm.values():
+            degenerate_set = set(degenerate)
+            for record in arm_result["tasks"]:
+                record["identical_context_across_arms"] = record["task_id"] in degenerate_set
+            discriminating = [
+                r for r in arm_result["tasks"] if not r["identical_context_across_arms"]
+            ]
+            # NB: do not name these `scored` — that is the boolean parameter
+            # deciding whether this is a scored or proxy run, and shadowing it
+            # with a (possibly empty, therefore falsy) list silently relabels
+            # the whole run as proxy mode.
+            judged_disc = [r for r in discriminating if r["judge_correct"] is not None]
+            scored_disc = [r for r in discriminating if r["official_score"] is not None]
+            arm_result["discriminating_task_count"] = len(discriminating)
+            arm_result["judge_accuracy_discriminating"] = (
+                sum(1 for r in judged_disc if r["judge_correct"]) / len(judged_disc)
+                if judged_disc else None
+            )
+            arm_result["official_metric_mean_discriminating"] = (
+                sum(r["official_score"] for r in scored_disc) / len(scored_disc)
+                if scored_disc else None
+            )
+
+    # A run that aborted on cost or lost cases to provider errors has not
+    # measured what it claims to measure. Reporting a mean over whatever
+    # happened to finish invites exactly the "final score from an incomplete
+    # run" this program forbids, so the scored means are withheld and the
+    # reason is stated. Retrieval-proxy means survive: they are computed from
+    # ingest+recall, which does not depend on any call succeeding.
+    complete = not aborted and not failures
+    if scored and not complete:
+        reason = (
+            "run aborted at the cost ceiling" if aborted
+            else f"{len(failures)} case(s) failed"
+        )
+        for arm_result in results_by_arm.values():
+            arm_result["official_metric_mean"] = None
+            arm_result["judge_accuracy"] = None
+            arm_result["official_metric_mean_discriminating"] = None
+            arm_result["judge_accuracy_discriminating"] = None
+            arm_result["metrics_withheld_reason"] = (
+                f"incomplete run ({reason}); per-arm means are withheld because a "
+                "verdict computed from partial data is not a result. Per-task "
+                "records are retained for inspection."
+            )
 
     prompts_hash = sha256_text(PROMPT_TEMPLATE + "\n\x00".join(all_prompts))
     model_id = provider.model_id if provider is not None else "none (proxy mode, no provider)"
@@ -219,6 +321,19 @@ def run_three_arms(
         "max_cost_usd": effective_cost,
         "max_cost_clamped_to_ceiling": clamped,
         "cost_estimate": cost_estimate.to_dict() if cost_estimate is not None else None,
+        # Tasks where every arm received identical context and therefore
+        # cannot discriminate between arms. Read `*_discriminating` metrics
+        # alongside the headline means; a large count here means the headline
+        # comparison is mostly measuring tasks that could not tell the arms
+        # apart.
+        "degenerate_task_ids": degenerate,
+        "degenerate_task_count": len(degenerate),
+        "chunk_target_chars": CHUNK_TARGET_CHARS,
+        # False whenever the run aborted or lost cases. Consumers must check
+        # this before quoting any number from the payload.
+        "complete": complete,
+        "resumed_task_count": resumed,
+        "failure_count": len(failures),
         "results_by_arm": results_by_arm,
         "provenance": build_provenance(
             loader, data_path, model_id, prompts_hash, usage_total,

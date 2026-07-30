@@ -34,6 +34,14 @@ def intake_skip(axis: str) -> dict[str, Any] | None:
     fabricated data. Skipping with an explicit reason is the honest
     behavior (ZRF-AUDIT-012): skipped axes are reported in the output and
     never count as passing evidence.
+
+    The reason names the CSV by FILENAME, never by resolved absolute path.
+    `run-all.py` writes this string into docs/BENCHMARK_REPORT.md and
+    benchmarks/results.json, both tracked in a public repo, so an absolute
+    path here commits the operator's home directory (handoff prohibition on
+    private absolute paths; REDACT.md `internal_paths`). A filename is also
+    machine-independent, which keeps the generated artifacts reproducible
+    instead of dirtying the worktree on every developer's machine.
     """
     path = Path(_csv_path())
     if path.exists():
@@ -43,7 +51,7 @@ def intake_skip(axis: str) -> dict[str, Any] | None:
         "score": None,
         "skipped": True,
         "reason": (
-            f"lineage intake CSV not found at {path}. The 64-row intake "
+            f"lineage intake CSV {path.name} not found. The 64-row intake "
             "dataset is local-only and intentionally not committed. Set "
             "ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to "
             "run this axis. Skipped axes are reported explicitly and do not "

@@ -27,7 +27,15 @@ def run() -> dict:
     return axis_result("loop_control", {
         "bounded_contract": (10.0 if contract_ok else 0.0, f"max={contract['budget']['max_iterations']}"),
         "run_stops": (10.0 if run_ok else 0.0, f"iterations={result['iterations']}"),
-        "no_direct_memory_write": (10.0 if proposal_ok else 0.0, f"proposal={proposal}"),
+        # Report the two fields proposal_ok actually asserts, not the whole
+        # dict: it carries a random loop_id, and this evidence string is
+        # written into benchmarks/results.json and docs/BENCHMARK_REPORT.md,
+        # both tracked — a fresh id per run dirties the worktree every time.
+        "no_direct_memory_write": (
+            10.0 if proposal_ok else 0.0,
+            f"direct_memory_write={proposal['direct_memory_write']} "
+            f"proposed_atoms={len(proposal['proposed_atoms'])}",
+        ),
         "status_available": (10.0 if status_ok else 0.0, "latest status read"),
         "report_available": (10.0 if report_ok else 0.0, "report read"),
     })

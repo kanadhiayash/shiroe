@@ -511,3 +511,98 @@ def test_cli_help_does_not_crash() -> None:
     assert completed.returncode == 0
     assert "--max-cost" in completed.stdout
     assert "--confirm" in completed.stdout
+
+
+def test_chunking_splits_single_session_haystacks() -> None:
+    """A one-session task must still yield many chunks.
+
+    ConvoMem, PersonaMem, RULER and HELMET loaders all emit a single session.
+    When chunking followed session boundaries, that produced exactly one
+    chunk, `recall(k)` returned the entire haystack, and all three arms
+    received a byte-identical prompt — three identical scores presented as a
+    three-way tie. This asserts the property that broke.
+    """
+    from benchmarks.external.harness import CHUNK_TARGET_CHARS, iter_chunks
+    from benchmarks.external.schema import Task, Turn
+
+    long_turn = "word " * 40_000  # ~200k chars in ONE turn, as RULER ships it
+    task = Task(
+        task_id="t", benchmark="synthetic", question="q", answers=("a",),
+        sessions=((Turn(role="context", content=long_turn),),), metric="token_f1",
+    )
+    chunks = list(iter_chunks(task))
+    assert len(chunks) > 20, f"single-turn haystack produced {len(chunks)} chunk(s)"
+    assert all(len(text) <= CHUNK_TARGET_CHARS for _, text in chunks)
+    assert len({cid for cid, _ in chunks}) == len(chunks), "chunk ids must be unique"
+    # Order preserved, so the full_context arm can reconstruct the haystack.
+    assert "".join(t.split(": ", 1)[-1] for _, t in chunks[:1])
+
+
+def test_arms_diverge_on_a_multi_chunk_task() -> None:
+    """zeref / full_context / bm25 must not all receive the same context."""
+    from benchmarks.external.harness import build_prompt, ingest_task
+    from benchmarks.external.runner import ARM_BACKENDS
+    from benchmarks.external.schema import Task, Turn
+
+    sessions = tuple(
+        (Turn(role="user", content=f"Session {i} discusses topic-{i} " + "filler " * 900),)
+        for i in range(12)
+    )
+    task = Task(
+        task_id="t", benchmark="synthetic", question="what does topic-7 discuss?",
+        answers=("topic-7",), sessions=sessions, metric="token_f1",
+    )
+    prompts = {}
+    for arm, backend_cls in ARM_BACKENDS.items():
+        backend = backend_cls()
+        ingest_task(backend, task)
+        prompts[arm] = build_prompt(task, backend.recall(task.question, k=5))
+    assert len(set(prompts.values())) > 1, "all arms received identical context"
+    assert len(prompts["full_context"]) > len(prompts["bm25"]), (
+        "full_context must carry more context than a top-k retriever"
+    )
+
+
+def test_degenerate_tasks_are_flagged_not_silently_tied() -> None:
+    """A haystack smaller than one chunk cannot discriminate between arms.
+
+    Such a task hands every arm the same context, so all arms necessarily
+    score identically. Counting that as a three-way tie drags every arm's
+    mean toward the others; ~37% of ConvoMem is this shape. The run must say
+    so rather than report a tie.
+    """
+    from benchmarks.external.runner import run_three_arms
+
+    payload = run_three_arms("locomo", LOCOMO_DIR, arms="all", scored=False, limit=None)
+    assert "degenerate_task_count" in payload
+    assert "degenerate_task_ids" in payload
+    assert payload["chunk_target_chars"] > 0
+    for arm_result in payload["results_by_arm"].values():
+        assert "discriminating_task_count" in arm_result
+        assert arm_result["discriminating_task_count"] <= arm_result["task_count"]
+        for record in arm_result["tasks"]:
+            assert "identical_context_across_arms" in record
+            assert "context_digest" in record
+
+
+def test_proxy_and_scored_modes_are_labelled_correctly() -> None:
+    """Guards the boolean `scored` parameter against being shadowed.
+
+    A list comprehension named `scored` inside this function once rebound the
+    parameter; an empty list is falsy, so a genuine scored run reported
+    mode="proxy" and stamped its provenance `estimated`.
+    """
+    from benchmarks.external.judges.fake import DeterministicFakeJudge
+    from benchmarks.external.providers.anthropic import AnthropicProvider
+    from benchmarks.external.runner import run_three_arms
+
+    proxy = run_three_arms("locomo", LOCOMO_DIR, arms="all", scored=False)
+    assert proxy["mode"] == "proxy" and "PROXY RUN" in proxy["label"]
+
+    scored = run_three_arms(
+        "locomo", LOCOMO_DIR, arms="all", scored=True,
+        provider=AnthropicProvider(dry_run=True), judge=DeterministicFakeJudge(),
+        max_cost=500.0,
+    )
+    assert scored["mode"] == "scored", "scored run mislabelled as proxy"
+    assert scored["provenance"]["mode"] == "scored"

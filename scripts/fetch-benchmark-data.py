@@ -20,10 +20,14 @@ download starts. You are responsible for complying with them.
 from __future__ import annotations
 
 import argparse
+import ast
+import csv
+import http.client
 import json
 import os
 import ssl
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -75,25 +79,63 @@ def _get(url: str, timeout: int = 120) -> bytes:
         return response.read()
 
 
+# A multi-thousand-file dataset pull will meet at least one dropped
+# connection. Retrying here, in the one function every fetcher calls, keeps
+# a single transient failure from aborting the remaining files — which is
+# what happened to a ConvoMem pull that died at 1890/2500 on
+# "[Errno 54] Connection reset by peer" and lost the rest of the run.
+DOWNLOAD_RETRIES = 4
+RETRY_BACKOFF_S = 2.0
+# 429 and 5xx are transient. 401/403/404 are not, and retrying them just
+# burns time on a request that will never succeed.
+RETRYABLE_STATUS = frozenset({429, 500, 502, 503, 504})
+_TRANSIENT = (
+    urllib.error.URLError,
+    TimeoutError,
+    ConnectionError,          # covers ConnectionResetError (Errno 54)
+    http.client.IncompleteRead,
+)
+
+
 def _download(url: str, dest: Path, timeout: int = 300) -> bool:
     """Download to `dest`. Returns True if fetched, False if already present.
 
     Writes via a .part file and renames, so an interrupted run never leaves a
-    truncated file that looks complete on the next pass.
+    truncated file that looks complete on the next pass. Transient network
+    failures are retried with backoff; the partial .part is discarded between
+    attempts so a resumed byte stream can never be spliced onto a stale one.
     """
     if dest.exists() and dest.stat().st_size > 0:
         return False
     dest.parent.mkdir(parents=True, exist_ok=True)
     part = dest.with_suffix(dest.suffix + ".part")
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=timeout, **_opener_kwargs()) as response, part.open("wb") as handle:
-        while True:
-            chunk = response.read(1 << 20)
-            if not chunk:
-                break
-            handle.write(chunk)
-    part.rename(dest)
-    return True
+
+    last_error: Exception | None = None
+    for attempt in range(DOWNLOAD_RETRIES):
+        try:
+            request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+            with urllib.request.urlopen(request, timeout=timeout, **_opener_kwargs()) as response, part.open("wb") as handle:
+                while True:
+                    chunk = response.read(1 << 20)
+                    if not chunk:
+                        break
+                    handle.write(chunk)
+            part.rename(dest)
+            return True
+        except urllib.error.HTTPError as exc:
+            last_error = exc
+            if exc.code not in RETRYABLE_STATUS:
+                part.unlink(missing_ok=True)
+                raise
+        except _TRANSIENT as exc:
+            last_error = exc
+        part.unlink(missing_ok=True)
+        if attempt < DOWNLOAD_RETRIES - 1:
+            time.sleep(RETRY_BACKOFF_S * (2 ** attempt))
+
+    raise RuntimeError(
+        f"failed to download {dest.name} after {DOWNLOAD_RETRIES} attempts: {last_error}"
+    )
 
 
 def _hf_tree(repo: str) -> list[dict]:
@@ -181,6 +223,114 @@ def fetch_convomem(root: Path) -> dict:
     }
 
 
+def fetch_personamem(root: Path) -> dict:
+    """PersonaMem v1, 32k tier, converted to the shape the loader reads.
+
+    v1 (MIT) rather than v2 (CC-BY-4.0, multimodal, ~400 MB of CSV): the
+    loader's PINNED_VERSION names v1, and the two releases carry different
+    terms, so mixing them would make the recorded licence wrong.
+
+    The release ships `questions_<tier>.csv` plus `shared_contexts_<tier>.jsonl`,
+    NOT the flat `personamem.json` the loader expects, so this converts. Field
+    names below were read off the real download, not inferred — the sibling
+    ConvoMem loader records what guessing a schema cost last time.
+
+    Two details the conversion must not get wrong:
+
+    * `correct_answer` is a LABEL ("(c)"), not answer prose. It is passed
+      through verbatim because the axis metric is `choice_accuracy`, which
+      normalises "(c)" to "c" and compares against the model's choice.
+    * `end_index_in_shared_context` truncates the haystack. Every row's index
+      lands strictly inside its context, and the turn at that index is the
+      response being asked about — so the slice is `[:end_index]`. Ingesting
+      the whole context would feed the answer back as retrievable memory and
+      silently inflate every arm.
+
+    Only the 32k tier is fetched. It is a complete released condition of the
+    benchmark (589 questions over 37 contexts), not a sample of one. The 128k
+    and 1M tiers are separate context-length conditions; add them when a run
+    needs them rather than pulling 240 MB nothing reads yet.
+    """
+    target = root / "personamem"
+    repo = "bowen-upenn/PersonaMem"
+    tier = "32k"
+    questions_csv = f"questions_{tier}.csv"
+    contexts_jsonl = f"shared_contexts_{tier}.jsonl"
+
+    new = 0
+    for name in (questions_csv, contexts_jsonl):
+        new += int(_download(f"{HF}/datasets/{repo}/resolve/main/{name}", target / name))
+
+    def parse_options(raw: str) -> list:
+        """`all_options` is not consistently JSON in the release.
+
+        286 of the 589 rows in the 32k tier are JSON-quoted; the other 303 are
+        Python reprs with single quotes. `ast.literal_eval` reads both and,
+        unlike `eval`, evaluates literals only — no code can run from dataset
+        text. Anything neither parser accepts raises rather than degrading to
+        an empty option list, which would turn a parse bug into a
+        model-looking failure.
+        """
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            pass
+        try:
+            parsed = ast.literal_eval(raw)
+        except (ValueError, SyntaxError) as exc:
+            raise RuntimeError(f"personamem: unparseable all_options: {raw[:120]!r}") from exc
+        if not isinstance(parsed, list):
+            raise RuntimeError(f"personamem: all_options is not a list: {raw[:120]!r}")
+        return parsed
+
+    shared: dict[str, list] = {}
+    with (target / contexts_jsonl).open(encoding="utf-8") as handle:
+        for line in handle:
+            if line.strip():
+                shared.update(json.loads(line))
+
+    items, unresolved = [], 0
+    with (target / questions_csv).open(newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            context = shared.get(row["shared_context_id"])
+            if context is None:
+                # Never silently drop to an empty haystack: that would score as
+                # a retrieval miss and read as a model failure, not a data bug.
+                unresolved += 1
+                continue
+            end = int(row["end_index_in_shared_context"])
+            items.append({
+                "question_id": row["question_id"],
+                "persona_id": row["persona_id"],
+                "question": row["user_question_or_message"],
+                "correct_answer": row["correct_answer"],
+                "options": parse_options(row["all_options"]),
+                "context": context[:end],
+                "question_type": row["question_type"],
+                "topic": row["topic"],
+            })
+
+    if unresolved:
+        raise RuntimeError(
+            f"personamem: {unresolved} question row(s) reference a shared_context_id "
+            f"absent from {contexts_jsonl}; refusing to write a partial dataset"
+        )
+
+    (target / "personamem.json").write_text(
+        json.dumps(items, indent=2) + "\n", encoding="utf-8"
+    )
+    return {
+        "dataset": "personamem",
+        "path": str(target),
+        "new_files": new,
+        "tier": tier,
+        "questions": len(items),
+        "shared_contexts": len(shared),
+        "revision": _hf_revision(repo),
+        "note": f"v1 {tier} tier converted to personamem.json; licence MIT (v1), NOT v2's CC-BY-4.0",
+    }
+
+
 DATASETS = {
     "locomo": (
         fetch_locomo,
@@ -191,7 +341,18 @@ DATASETS = {
     "convomem": (
         fetch_convomem,
         "CC-BY-NC-4.0 — NON-COMMERCIAL; attribute Salesforce/ConvoMem",
-        "~925 MB",
+        # Measured, not estimated: ~1,890 of ~2,500 files already occupy 18 GB
+        # on disk, most of it core_benchmark/pre_mixed_testcases (individual
+        # files exceed 50 MB). The previous "~925 MB" understated this by more
+        # than an order of magnitude and would strand a fetch part-way on a
+        # machine provisioned against it.
+        "~25 GB",
+    ),
+    "personamem": (
+        fetch_personamem,
+        "MIT (PersonaMem v1). NOT the v2 release, which is CC-BY-4.0 — "
+        "record which version a run used; the terms differ",
+        "~7 MB (32k tier)",
     ),
 }
 

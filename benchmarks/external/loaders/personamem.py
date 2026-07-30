@@ -16,8 +16,19 @@ from benchmarks.external.schema import DatasetCheck, Task, Turn, read_json
 
 NAME = "personamem"
 OFFICIAL_URL = "https://github.com/bowen-upenn/PersonaMem"
-PINNED_VERSION = "PersonaMem v1 (pin HF dataset revision at download time)"
-PINNED_SHA256: str | None = None  # record via check() after manual download
+PINNED_VERSION = (
+    "PersonaMem v1, 32k tier, HF bowen-upenn/PersonaMem rev "
+    "73dfd752d477d0c466cd441f1669397f5726d7ab (2026-07-29); 589 tasks over "
+    "37 shared contexts"
+)
+# Hash of the DERIVED personamem.json, not of an upstream file: the release
+# ships questions_32k.csv + shared_contexts_32k.jsonl, and
+# scripts/fetch-benchmark-data.py:fetch_personamem converts them into the flat
+# shape this loader reads. The conversion is deterministic (CSV row order,
+# json.dumps indent=2), so the hash is stable — but it pins the CONVERTER as
+# well as the source. Changing fetch_personamem invalidates this pin, and it
+# should: a different conversion is a different dataset.
+PINNED_SHA256: str | None = "408c8d197fa84dfb73e0caacdffc4f1940cc8e70f2fa2d6c23ffc7239988df36"
 LICENSE = 'CC-BY-4.0 (PersonaMem-v2) / MIT (PersonaMem-v1)'
 LICENSE_NOTE = 'Verified 2026-07-29: HF bowen-upenn/PersonaMem-v2 is cc-by-4.0, PersonaMem-v1 is mit, and the GitHub code repo bowen-upenn/PersonaMem is MIT. Record WHICH version a run used — the terms differ between v1 and v2.'
 DATA_FILENAME = "personamem.json"

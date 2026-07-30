@@ -1,5 +1,7 @@
 {
   "label": "internal quality axes \u2014 fixture-based self-checks, not external benchmarks",
+  "evidence_namespace": "conformance",
+  "evidence_tier": "fixture_tested",
   "passed": true,
   "pass_bar": {
     "axis_min": 9.0
@@ -152,15 +154,15 @@
     },
     {
       "axis": "trust",
-      "score": 10.0,
+      "score": 9.2,
       "sub": {
         "version_consistency": {
-          "score": 10.0,
-          "evidence": "checker clean; ci_enforced=True"
+          "score": 8.0,
+          "evidence": "checker clean; ci_enforced=False"
         },
         "test_suite": {
-          "score": 10.0,
-          "evidence": "53 test files; pytest.ini=True; ci=True"
+          "score": 8.0,
+          "evidence": "74 test files; pytest.ini=True; ci=False"
         },
         "privacy_patterns": {
           "score": 10.0,
@@ -172,7 +174,7 @@
         },
         "ci_hardening": {
           "score": 10.0,
-          "evidence": "9/9 action refs SHA-pinned (100%); dependabot=True"
+          "evidence": "17/17 action refs SHA-pinned (100%); dependabot=True"
         }
       },
       "note": "Deterministic trust scorer. Use an independent high-effort security review before making any public final trust verdict."
@@ -195,7 +197,7 @@
         },
         "deterministic_estimator": {
           "score": 10.0,
-          "evidence": "estimate=4 deterministic=True"
+          "evidence": "estimate=6 deterministic=True"
         },
         "target_aware_reduction": {
           "score": 10.0,
@@ -209,11 +211,11 @@
       "sub": {
         "sqlite_indexed_recall": {
           "score": 10.0,
-          "evidence": "top=decision_b87d4b26c96d2a34"
+          "evidence": "top=expected-decision"
         },
         "jsonl_fallback_recall": {
           "score": 10.0,
-          "evidence": "top=decision_b87d4b26c96d2a34"
+          "evidence": "top=expected-decision"
         },
         "explain_search": {
           "score": 10.0,
@@ -231,7 +233,7 @@
         },
         "arbitration_required": {
           "score": 10.0,
-          "evidence": "User arbitration required. Pick a winner with resolve --winner and provide --reason."
+          "evidence": "User arbitration required. Pick a winner with resolve --winner and provide --reason. Evidence grades are equal; no auto-suggestion."
         },
         "no_silent_resolution": {
           "score": 10.0,
@@ -327,7 +329,7 @@
         },
         "no_direct_memory_write": {
           "score": 10.0,
-          "evidence": "proposal={'direct_memory_write': False, 'loop_id': 'loop_ce2728c3edc0', 'note': 'Loop runtime emits proposals only; durable memory writes require separate commands.', 'proposed_atoms': []}"
+          "evidence": "direct_memory_write=False proposed_atoms=0"
         },
         "status_available": {
           "score": 10.0,
@@ -369,63 +371,63 @@
       "axis": "lineage_import_coverage",
       "score": null,
       "skipped": true,
-      "reason": "lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
+      "reason": "lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
       "sub": {}
     },
     {
       "axis": "foreign_code_containment",
       "score": null,
       "skipped": true,
-      "reason": "lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
+      "reason": "lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
       "sub": {}
     },
     {
       "axis": "critical_adoption_coverage",
       "score": null,
       "skipped": true,
-      "reason": "lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
+      "reason": "lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
       "sub": {}
     },
     {
       "axis": "high_adoption_coverage",
       "score": null,
       "skipped": true,
-      "reason": "lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
+      "reason": "lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
       "sub": {}
     },
     {
       "axis": "reference_only_guardrails",
       "score": null,
       "skipped": true,
-      "reason": "lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
+      "reason": "lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
       "sub": {}
     },
     {
       "axis": "adapter_value",
       "score": null,
       "skipped": true,
-      "reason": "lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
+      "reason": "lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
       "sub": {}
     },
     {
       "axis": "minimality_pressure",
       "score": null,
       "skipped": true,
-      "reason": "lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
+      "reason": "lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
       "sub": {}
     },
     {
       "axis": "security_containment",
       "score": null,
       "skipped": true,
-      "reason": "lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
+      "reason": "lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
       "sub": {}
     },
     {
       "axis": "license_boundary",
       "score": null,
       "skipped": true,
-      "reason": "lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
+      "reason": "lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).",
       "sub": {}
     }
   ],
