@@ -154,15 +154,15 @@
     },
     {
       "axis": "trust",
-      "score": 9.2,
+      "score": 10.0,
       "sub": {
         "version_consistency": {
-          "score": 8.0,
-          "evidence": "checker clean; ci_enforced=False"
+          "score": 10.0,
+          "evidence": "checker clean; ci_enforced=True"
         },
         "test_suite": {
-          "score": 8.0,
-          "evidence": "74 test files; pytest.ini=True; ci=False"
+          "score": 10.0,
+          "evidence": "76 test files; pytest.ini=True; ci=True"
         },
         "privacy_patterns": {
           "score": 10.0,

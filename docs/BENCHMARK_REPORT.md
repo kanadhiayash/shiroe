@@ -6,7 +6,7 @@
 > External-dataset benchmarking lives in [`benchmarks/external/`](../benchmarks/external/README.md);
 > no external scores are claimed until full-dataset runs are published.
 
-_Generated: 2026-07-29. Rubric: [`benchmarks/RUBRIC.md`](benchmarks/RUBRIC.md)._
+_Generated: 2026-07-30. Rubric: [`benchmarks/RUBRIC.md`](benchmarks/RUBRIC.md)._
 
 ## Verdict
 
@@ -26,7 +26,7 @@ Lineage axes validate local intake metadata, implementation registries, and guar
 | adaptivity | 9.00 | pass |  |
 | scalability | 10.00 | pass |  |
 | retrieval | 10.00 | pass |  |
-| trust | 9.20 | pass |  |
+| trust | 10.00 | pass |  |
 | token_efficiency | 10.00 | pass |  |
 | retrieval_accuracy | 10.00 | pass |  |
 | contradiction_detection | 10.00 | pass |  |
@@ -104,12 +104,12 @@ Skipped axes are reported explicitly and never count as passing evidence.
 > _Deterministic lexical/FTS5 retrieval benchmark; external adapters are fixture-only unless marked verified._
 
 
-## Trust - 9.20 / 10
+## Trust - 10.00 / 10
 
 | Sub-criterion | Score | Evidence |
 |---|---:|---|
-| `version_consistency` | 8.00 | checker clean; ci_enforced=False |
-| `test_suite` | 8.00 | 76 test files; pytest.ini=True; ci=False |
+| `version_consistency` | 10.00 | checker clean; ci_enforced=True |
+| `test_suite` | 10.00 | 76 test files; pytest.ini=True; ci=True |
 | `privacy_patterns` | 10.00 | 9 provider-shaped credential patterns wired |
 | `security_md` | 10.00 | no_public_route=True, pvr=True, pgp=True, window=True |
 | `ci_hardening` | 10.00 | 17/17 action refs SHA-pinned (100%); dependabot=True |

@@ -122,3 +122,38 @@ def test_run_all_is_idempotent(repo_root: Path, tmp_path: Path) -> None:
         assert digests[0] == digests[1], "run-all.py output differs between consecutive runs"
     finally:
         results.write_bytes(original)
+
+
+def test_ci_detection_matches_workflow_content_not_filename() -> None:
+    """CI presence must be judged by what a workflow runs, not its name.
+
+    Both trust sub-scores used to look for a specific file (test.yml,
+    version-consistency.yml). CI was later consolidated into a single
+    zrf-verify.yml, so both reported False and capped their sub-scores while
+    CI was in fact running those commands on every pull request — a false
+    statement in a tracked, published report.
+    """
+    from benchmarks.trust import _ci_runs
+
+    repo_root = Path(__file__).resolve().parent.parent
+    workflows = sorted((repo_root / ".github" / "workflows").glob("*.y*ml"))
+    assert workflows, "no workflows found; this test would pass vacuously"
+    # No workflow is named for either command, so a filename-based check fails.
+    assert not any(w.stem in {"test", "version-consistency"} for w in workflows)
+
+    assert _ci_runs("pytest") is True
+    assert _ci_runs("check-version-consistency") is True
+    assert _ci_runs("a-command-no-workflow-runs") is False
+
+
+def test_trust_evidence_strings_reflect_reality() -> None:
+    """The published evidence string is a factual claim and must hold."""
+    from benchmarks.trust import _score_test_suite, _score_version_consistency
+
+    test_score, test_evidence = _score_test_suite()
+    assert "ci=True" in test_evidence
+    assert test_score == 10.0
+
+    version_score, version_evidence = _score_version_consistency()
+    assert "ci_enforced=True" in version_evidence
+    assert version_score == 10.0
