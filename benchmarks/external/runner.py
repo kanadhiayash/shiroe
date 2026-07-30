@@ -35,6 +35,7 @@ from typing import Any
 from benchmarks.external.baselines.bm25 import Bm25Backend
 from benchmarks.external.baselines.full_context import FullContextBackend
 from benchmarks.external.baselines.zeref_backend import ZerefBackend
+from benchmarks.external.checkpoint import CheckpointStore
 from benchmarks.external.cost import CostEstimate, effective_max_cost, estimate_run_cost
 from benchmarks.external.harness import (
     CHUNK_TARGET_CHARS,
@@ -82,6 +83,7 @@ def run_three_arms(
     seed: int = 0,
     limit: int | None = None,
     recall_k: int = 5,
+    checkpoint_dir: str | Path | None = None,
 ) -> dict[str, Any]:
     """Run one benchmark across the given arms. `scored=False` (default)
     makes zero network-capable calls. `scored=True` requires both a
@@ -107,6 +109,28 @@ def run_three_arms(
             benchmark, data_path, arm_names, provider, judge, limit=limit, seed=seed
         )
 
+    # Checkpointing. The header pins the run's identity so a resume cannot
+    # silently merge results generated under a different prompt, model, seed
+    # or chunk size — that would be two run series reported as one.
+    store: CheckpointStore | None = None
+    already_done: dict[str, dict[str, Any]] = {}
+    resumed = 0
+    if checkpoint_dir is not None:
+        store = CheckpointStore(checkpoint_dir)
+        store.bind({
+            "benchmark": benchmark,
+            "arms": list(arm_names),
+            "scored": scored,
+            "seed": seed,
+            "limit": limit,
+            "recall_k": recall_k,
+            "chunk_target_chars": CHUNK_TARGET_CHARS,
+            "prompt_template_sha256": sha256_text(PROMPT_TEMPLATE),
+            "provider_model": getattr(provider, "model_id", None),
+            "judge_model": getattr(judge, "model_id", None),
+        })
+        already_done = store.completed()
+
     running_cost = 0.0
     # Snapshot so usage can be reported as a per-run delta (see usage_total).
     tokens_in_at_start = getattr(provider, "total_input_tokens", 0) if provider else 0
@@ -126,6 +150,16 @@ def run_three_arms(
             if aborted:
                 exclusions.append({"task_id": task.task_id, "arm": arm, "reason": "cost_ceiling_reached"})
                 continue
+
+            # Resume: a case already on disk is replayed, never regenerated.
+            # On a metered judge that saves money; with local generation it
+            # saves hours, which is the whole point on a multi-day run.
+            if store is not None:
+                done = store.get(task.task_id, arm, already_done)
+                if done is not None:
+                    per_task.append(done)
+                    resumed += 1
+                    continue
 
             ingest_task(backend, task)
             retrieved = backend.recall(task.question, k=recall_k)
@@ -168,8 +202,13 @@ def run_three_arms(
                     record["judge_score"] = verdict.score
                 except Exception as exc:  # noqa: BLE001 — one task's failure must not sink the run
                     failures.append({"task_id": task.task_id, "arm": arm, "error": str(exc)})
+                    record["error"] = str(exc)
 
             per_task.append(record)
+            # Durable BEFORE the next call starts, so a kill at any instant
+            # loses at most the case in flight.
+            if store is not None:
+                store.append(record)
 
         hits = [r["retrieval_hit_proxy"] for r in per_task]
         scored_records = [r for r in per_task if r["official_score"] is not None]
@@ -224,6 +263,29 @@ def run_three_arms(
                 if scored_disc else None
             )
 
+    # A run that aborted on cost or lost cases to provider errors has not
+    # measured what it claims to measure. Reporting a mean over whatever
+    # happened to finish invites exactly the "final score from an incomplete
+    # run" this program forbids, so the scored means are withheld and the
+    # reason is stated. Retrieval-proxy means survive: they are computed from
+    # ingest+recall, which does not depend on any call succeeding.
+    complete = not aborted and not failures
+    if scored and not complete:
+        reason = (
+            "run aborted at the cost ceiling" if aborted
+            else f"{len(failures)} case(s) failed"
+        )
+        for arm_result in results_by_arm.values():
+            arm_result["official_metric_mean"] = None
+            arm_result["judge_accuracy"] = None
+            arm_result["official_metric_mean_discriminating"] = None
+            arm_result["judge_accuracy_discriminating"] = None
+            arm_result["metrics_withheld_reason"] = (
+                f"incomplete run ({reason}); per-arm means are withheld because a "
+                "verdict computed from partial data is not a result. Per-task "
+                "records are retained for inspection."
+            )
+
     prompts_hash = sha256_text(PROMPT_TEMPLATE + "\n\x00".join(all_prompts))
     model_id = provider.model_id if provider is not None else "none (proxy mode, no provider)"
     judge_model = judge.model_id if judge is not None else None
@@ -267,6 +329,11 @@ def run_three_arms(
         "degenerate_task_ids": degenerate,
         "degenerate_task_count": len(degenerate),
         "chunk_target_chars": CHUNK_TARGET_CHARS,
+        # False whenever the run aborted or lost cases. Consumers must check
+        # this before quoting any number from the payload.
+        "complete": complete,
+        "resumed_task_count": resumed,
+        "failure_count": len(failures),
         "results_by_arm": results_by_arm,
         "provenance": build_provenance(
             loader, data_path, model_id, prompts_hash, usage_total,
