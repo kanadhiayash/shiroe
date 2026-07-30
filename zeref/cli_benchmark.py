@@ -61,6 +61,11 @@ def register(sub) -> None:
     ext.add_argument("--seed", type=int, default=0)
     ext.add_argument("--limit", type=int, default=None,
                      help="randomly sample at most N tasks (seeded by --seed)")
+    ext.add_argument("--checkpoint-dir", default=None,
+                     help="record each finished (task, arm) here and skip them on a rerun. "
+                          "Pass the SAME directory to resume an interrupted run; a rerun "
+                          "with different parameters is refused rather than merged. "
+                          "Essential for multi-day runs.")
     ext.add_argument("--out", default=None, help="write results JSON here instead of stdout")
     ext.add_argument("--format", choices=["text", "json"], default="text")
 
@@ -70,6 +75,7 @@ def _load_harness_modules():
     repo_root = Path(__file__).resolve().parents[1]
     if str(repo_root) not in sys.path:
         sys.path.insert(0, str(repo_root))
+    from benchmarks.external.checkpoint import CheckpointMismatchError
     from benchmarks.external.cost import COST_CEILING_USD, effective_max_cost, estimate_run_cost
     from benchmarks.external.judges.fake import DeterministicFakeJudge
     from benchmarks.external.judges.gemini import GeminiJudgeClient
@@ -80,6 +86,7 @@ def _load_harness_modules():
     from benchmarks.external.schema import DatasetMissingError
 
     return {
+        "CheckpointMismatchError": CheckpointMismatchError,
         "COST_CEILING_USD": COST_CEILING_USD,
         "effective_max_cost": effective_max_cost,
         "estimate_run_cost": estimate_run_cost,
@@ -238,13 +245,20 @@ def _cmd_external(args: argparse.Namespace) -> int:
                 args.benchmark, args.data, arms=arm_names, scored=True,
                 provider=provider, judge=judge, max_cost=effective_cost,
                 seed=args.seed, limit=args.limit,
+                checkpoint_dir=getattr(args, "checkpoint_dir", None),
             )
         else:
             payload = m["run_three_arms"](
                 args.benchmark, args.data, arms=arm_names, scored=False,
                 seed=args.seed, limit=args.limit,
+                checkpoint_dir=getattr(args, "checkpoint_dir", None),
             )
     except m["DatasetMissingError"] as exc:
+        _error(str(exc))
+        return 1
+    except m["CheckpointMismatchError"] as exc:
+        # A configuration change against an existing checkpoint is operator
+        # error with an obvious fix, not a crash worth a traceback.
         _error(str(exc))
         return 1
 
@@ -260,7 +274,13 @@ def _cmd_external(args: argparse.Namespace) -> int:
     else:
         print(payload["label"])
         print(f"benchmark={payload['benchmark']} arms={payload['arms']} "
-              f"mode={payload['mode']} tasks={payload['task_count']}")
+              f"mode={payload['mode']} tasks={payload['task_count']} "
+              f"complete={payload.get('complete')}")
+        if payload.get("resumed_task_count"):
+            print(f"  resumed {payload['resumed_task_count']} case(s) from checkpoint")
+        if payload.get("degenerate_task_count"):
+            print(f"  {payload['degenerate_task_count']} task(s) gave every arm identical "
+                  f"context and cannot discriminate between arms")
         for arm, res in payload["results_by_arm"].items():
             print(
                 f"  {arm}: retrieval_hit_proxy_mean={res['retrieval_hit_proxy_mean']} "
