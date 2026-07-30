@@ -117,7 +117,7 @@ def scan_contradictions(root: Path | str = Path(".")) -> dict[str, Any]:
 def _write_conflicts_md(root: Path, created: list[dict[str, Any]]) -> str:
     """Surface newly detected contradictions in memory/CONFLICTS.md.
 
-    Uses the ``**Side A/B**`` block format that zeref.db._parse_conflicts
+    Uses the ``**Side A/B**`` block format that the conflict parser
     understands, so surfaced conflicts also flow into snapshots.
     """
     memory_dir = root / "memory"

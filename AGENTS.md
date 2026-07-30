@@ -128,7 +128,7 @@ All skills' `reasoning_class` fields in `zeref-registry.json` audited against we
 | `pattern-observer` | background | Watches `memory/patterns/PATTERNS.jsonl` for repeats |
 | `handoff-orchestrator` | on `/stop` / model switch | Packages cross-harness handoff |
 
-## Skills (14)
+## Skills (15)
 
 | Skill | Activation |
 |---|---|
