@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
-from zeref.lock import MemoryLock
+from zeref.lock import MemoryLock, atomic_append
 from zeref.privacy import scrub
 
 
@@ -183,11 +183,22 @@ class EventLog:
             env = envelope._prepared(previous_hash=head)
             validate_envelope(env)
             target = self._current_path(env["timestamp"])
-            with target.open("a", encoding="utf-8") as fh:
-                fh.write(_canonical_json(env) + "\n")
+            # fsync'd O_APPEND, same helper the legacy log uses. A plain
+            # buffered write left the canonical event log less durable than
+            # the v1 store it replaced: a crash could lose events that the
+            # caller had already been told were sealed.
+            target.parent.mkdir(parents=True, exist_ok=True)
+            atomic_append(target, _canonical_json(env) + "\n")
             self._write_head(env["hash"], env["event_id"])
             if self._mirror is not None:
                 _mirror_row(self._mirror, env)
+                # Commit here, not in the caller. The mirror insert rides the
+                # caller's connection, and every caller closes that connection
+                # without committing -- sqlite3 discards a pending transaction
+                # on close, so the final event of each session silently
+                # vanished from the SQLite mirror while surviving in the JSONL
+                # chain. The two stores disagreed by exactly one row.
+                self._mirror.commit()
         return env
 
     # ------------------------------------------------------------------

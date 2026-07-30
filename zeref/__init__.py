@@ -8,4 +8,4 @@ try:
 except OSError:
     __version__ = "0.0.0+unknown"
 
-__all__ = ["privacy", "cli", "core", "db", "memory", "memory_state", "__version__"]
+__all__ = ["privacy", "cli", "core", "memory", "memory_state", "__version__"]
