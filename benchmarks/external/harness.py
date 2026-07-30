@@ -204,6 +204,10 @@ def build_provenance(
             "path": str(data_dir),
         },
         "model_id": model_id,
+        # Retrieval granularity decides what every arm can retrieve, so it is
+        # part of the run's identity: a result produced at a different chunk
+        # size is not comparable to this one.
+        "chunk_target_chars": CHUNK_TARGET_CHARS,
         "judge_model": judge_model,
         # Generator and judge sharing one model family biases absolute scores
         # (LLM judges prefer their own family) but not the RELATIVE ranking
@@ -221,13 +225,83 @@ def build_provenance(
     }
 
 
+# --- chunking ------------------------------------------------------------------
+
+# Retrieval granularity, in characters (~2k tokens at the 4-chars-per-token
+# heuristic used for cost estimates). This is a FROZEN benchmark parameter:
+# it decides what a "retrieved chunk" is for every arm, so changing it changes
+# every score and starts a new run series. It is recorded in provenance.
+CHUNK_TARGET_CHARS = 8000
+
+
+def _split_oversized(line: str, limit: int) -> list[str]:
+    """Break one over-long line, preferring a newline then a space boundary.
+
+    Needed because RULER and HELMET carry their entire haystack as a single
+    turn — at long context lengths that is one multi-megabyte line, and
+    without splitting it there is nothing for a retriever to choose between.
+    """
+    pieces: list[str] = []
+    remaining = line
+    while len(remaining) > limit:
+        window = remaining[:limit]
+        cut = window.rfind("\n")
+        if cut < limit // 2:
+            cut = window.rfind(" ")
+        if cut < limit // 2:  # no usable boundary: hard cut rather than loop
+            cut = limit
+        pieces.append(remaining[:cut])
+        remaining = remaining[cut:].lstrip()
+    if remaining:
+        pieces.append(remaining)
+    return pieces
+
+
+def iter_chunks(task: Task, limit: int = CHUNK_TARGET_CHARS):
+    """Yield ``(chunk_id, text)`` for one task, in original order.
+
+    Chunking is deliberately NOT the same thing as session splitting. Session
+    boundaries alone produce exactly one chunk for any benchmark whose loader
+    emits a single session — ConvoMem, PersonaMem, RULER and HELMET all do —
+    and a single chunk makes `recall(k)` a no-op: every arm receives the whole
+    haystack and the three-arm comparison silently degrades into three
+    identical prompts and three identical scores.
+
+    So sessions are the primary unit (they carry conversational meaning for
+    LoCoMo and LongMemEval), and any session over ``limit`` is packed into
+    sub-chunks at turn boundaries, never mid-turn, so speaker attribution and
+    temporal order survive. Order is preserved throughout, which is what lets
+    the full_context arm reconstruct the original haystack.
+    """
+    for session_idx, session in enumerate(task.sessions):
+        lines: list[str] = []
+        for turn in session:
+            rendered = f"{turn.role}: {turn.content}"
+            if len(rendered) > limit:
+                lines.extend(_split_oversized(rendered, limit))
+            else:
+                lines.append(rendered)
+
+        buffer: list[str] = []
+        size = 0
+        chunk_idx = 0
+        for line in lines:
+            if buffer and size + len(line) + 1 > limit:
+                yield f"{task.task_id}:s{session_idx}:c{chunk_idx}", "\n".join(buffer)
+                chunk_idx += 1
+                buffer, size = [], 0
+            buffer.append(line)
+            size += len(line) + 1
+        if buffer:
+            yield f"{task.task_id}:s{session_idx}:c{chunk_idx}", "\n".join(buffer)
+
+
 # --- runner --------------------------------------------------------------------
 
-def ingest_task(backend: MemoryBackend, task: Task) -> None:
+def ingest_task(backend: MemoryBackend, task: Task, chunk_chars: int = CHUNK_TARGET_CHARS) -> None:
     backend.reset()
-    for session_idx, session in enumerate(task.sessions):
-        text = "\n".join(f"{turn.role}: {turn.content}" for turn in session)
-        backend.ingest(f"{task.task_id}:s{session_idx}", text)
+    for chunk_id, text in iter_chunks(task, chunk_chars):
+        backend.ingest(chunk_id, text)
 
 
 def build_prompt(task: Task, retrieved: list[str]) -> str:

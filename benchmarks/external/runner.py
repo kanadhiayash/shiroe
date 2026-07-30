@@ -37,6 +37,7 @@ from benchmarks.external.baselines.full_context import FullContextBackend
 from benchmarks.external.baselines.zeref_backend import ZerefBackend
 from benchmarks.external.cost import CostEstimate, effective_max_cost, estimate_run_cost
 from benchmarks.external.harness import (
+    CHUNK_TARGET_CHARS,
     METRICS,
     PROMPT_TEMPLATE,
     build_prompt,
@@ -136,6 +137,10 @@ def run_three_arms(
                 "arm": arm,
                 "metric": task.metric,
                 "retrieved_chunks": len(retrieved),
+                # Digest of the context this arm actually received. Compared
+                # across arms after the run to find tasks where every arm saw
+                # the same thing — see `degenerate_tasks` below.
+                "context_digest": sha256_text("\n---\n".join(retrieved))[:16],
                 "retrieval_hit_proxy": retrieval_hit(retrieved, task.answers),
                 "official_score": None,
                 "prediction": None,
@@ -184,6 +189,41 @@ def run_three_arms(
             "tasks": per_task,
         }
 
+    # A task whose whole haystack fits in one chunk hands every arm the same
+    # context, so all three necessarily score the same. That is a property of
+    # the sample, not a finding about Zeref, and counting it as a three-way tie
+    # silently drags every arm's mean toward the others. ConvoMem is ~37%
+    # such tasks. Report them so a comparison can be read with them excluded.
+    degenerate: list[str] = []
+    if len(arm_names) > 1:
+        by_task: dict[str, set[str]] = {}
+        for arm_result in results_by_arm.values():
+            for record in arm_result["tasks"]:
+                by_task.setdefault(record["task_id"], set()).add(record["context_digest"])
+        degenerate = sorted(tid for tid, digests in by_task.items() if len(digests) == 1)
+        for arm_result in results_by_arm.values():
+            degenerate_set = set(degenerate)
+            for record in arm_result["tasks"]:
+                record["identical_context_across_arms"] = record["task_id"] in degenerate_set
+            discriminating = [
+                r for r in arm_result["tasks"] if not r["identical_context_across_arms"]
+            ]
+            # NB: do not name these `scored` — that is the boolean parameter
+            # deciding whether this is a scored or proxy run, and shadowing it
+            # with a (possibly empty, therefore falsy) list silently relabels
+            # the whole run as proxy mode.
+            judged_disc = [r for r in discriminating if r["judge_correct"] is not None]
+            scored_disc = [r for r in discriminating if r["official_score"] is not None]
+            arm_result["discriminating_task_count"] = len(discriminating)
+            arm_result["judge_accuracy_discriminating"] = (
+                sum(1 for r in judged_disc if r["judge_correct"]) / len(judged_disc)
+                if judged_disc else None
+            )
+            arm_result["official_metric_mean_discriminating"] = (
+                sum(r["official_score"] for r in scored_disc) / len(scored_disc)
+                if scored_disc else None
+            )
+
     prompts_hash = sha256_text(PROMPT_TEMPLATE + "\n\x00".join(all_prompts))
     model_id = provider.model_id if provider is not None else "none (proxy mode, no provider)"
     judge_model = judge.model_id if judge is not None else None
@@ -219,6 +259,14 @@ def run_three_arms(
         "max_cost_usd": effective_cost,
         "max_cost_clamped_to_ceiling": clamped,
         "cost_estimate": cost_estimate.to_dict() if cost_estimate is not None else None,
+        # Tasks where every arm received identical context and therefore
+        # cannot discriminate between arms. Read `*_discriminating` metrics
+        # alongside the headline means; a large count here means the headline
+        # comparison is mostly measuring tasks that could not tell the arms
+        # apart.
+        "degenerate_task_ids": degenerate,
+        "degenerate_task_count": len(degenerate),
+        "chunk_target_chars": CHUNK_TARGET_CHARS,
         "results_by_arm": results_by_arm,
         "provenance": build_provenance(
             loader, data_path, model_id, prompts_hash, usage_total,
