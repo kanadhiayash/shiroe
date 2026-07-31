@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 import sqlite3
 import unicodedata
@@ -315,15 +316,16 @@ def _search_jsonl(
     as_of: str | None = None,
 ) -> dict[str, Any]:
     atoms = AtomStore(root).load(atom_type=atom_type, status=status)
+    direct_scores, _ = _score_corpus(atoms, tokens)
     scored = []
     for atom in atoms:
-        score = _score_atom(atom, tokens)
+        score = direct_scores.get(atom["id"], 0.0)
         if score > 0:
             scored.append({
                 "atom": atom,
                 "score": score,
                 "matched_via": "direct",
-                "why": _why(atom, tokens, "JSONL token scan"),
+                "why": _why(atom, tokens, "JSONL BM25 scan"),
             })
     # Bi-temporal validity/supersession outranks raw text score (a superseded
     # or not-yet/no-longer-valid fact must not outrank a current one just
@@ -348,17 +350,18 @@ def _search_jsonl(
     remaining = limit - len(matches)
     if remaining > 0 and expansion["tokens"]:
         exclude_ids = {m["atom"]["id"] for m in matches}
+        expansion_scores, _ = _score_corpus(atoms, expansion["tokens"])
         extra = []
         for atom in atoms:
             if atom["id"] in exclude_ids:
                 continue
-            score = _score_atom(atom, expansion["tokens"])
+            score = expansion_scores.get(atom["id"], 0.0)
             if score > 0:
                 extra.append({
                     "atom": atom,
                     "score": score,
                     "matched_via": "expansion",
-                    "why": _why(atom, expansion["tokens"], "JSONL token scan (expansion)"),
+                    "why": _why(atom, expansion["tokens"], "JSONL BM25 scan (expansion)"),
                 })
         # Same dominance -> relevance -> recency -> stable-tiebreaker order
         # as the direct-match sort above -- see bitemporal.rank_key and
@@ -383,17 +386,88 @@ def _search_jsonl(
     }
 
 
-def _score_atom(atom: dict[str, Any], tokens: list[str]) -> int:
-    # Tokens are already NFKC-normalized (via tokenize()); normalize the
-    # haystack the same way so e.g. a precomposed vs. combining-mark "é"
-    # in stored text still substring-matches the query.
-    haystack = _normalize(" ".join([
+# Okapi BM25 parameters. Same values the SQLite FTS5 path uses internally and
+# the same the bm25 benchmark baseline uses, so the two retrieval paths are
+# comparable to each other and to the baseline.
+_BM25_K1 = 1.5
+_BM25_B = 0.75
+
+
+def _atom_terms(atom: dict[str, Any]) -> list[str]:
+    """Word-level terms for an atom, tokenized exactly like the query.
+
+    Tokens are already NFKC-normalized (via tokenize()); running the atom
+    text through the same tokenizer keeps query and document in one term
+    space, including the CJK bigram handling.
+    """
+    return tokenize(" ".join([
         atom.get("claim", ""),
         atom.get("summary", ""),
         atom.get("source", ""),
         " ".join(str(tag) for tag in atom.get("tags", [])),
     ]))
-    return sum(haystack.count(token) for token in tokens)
+
+
+def _score_corpus(
+    atoms: list[dict[str, Any]], tokens: list[str],
+) -> tuple[dict[str, float], dict[str, list[str]]]:
+    """Okapi BM25 over the whole loaded corpus.
+
+    This used to be `sum(haystack.count(token) for token in tokens)` -- a raw
+    substring occurrence count. Three things were wrong with it, and all three
+    push ranking the wrong way on real corpora:
+
+    - **No IDF.** A term appearing in every atom counted as much as the one
+      rare term that actually identifies the answer, so common words drowned
+      out the discriminating one.
+    - **No length normalization and no term-frequency saturation.** Score grew
+      without bound with document length, so a long atom won by repetition
+      alone.
+    - **Substring, not word, matching.** `haystack.count("cat")` also matched
+      inside "category" and "concatenate".
+
+    It also double-counted: `summary` is conventionally a prefix of `claim`,
+    so a hit in the first ~200 characters scored twice.
+
+    The corpus is already fully loaded by `_search_jsonl`, so document
+    frequency and average length are free here -- no index, no extra pass over
+    storage.
+
+    Returns (score by atom id, terms by atom id); the terms are reused by
+    `_why` so the explanation reflects what was actually scored.
+    """
+    terms_by_id: dict[str, list[str]] = {a["id"]: _atom_terms(a) for a in atoms}
+    n_docs = len(atoms)
+    if n_docs == 0:
+        return {}, terms_by_id
+
+    lengths = {aid: len(t) or 1 for aid, t in terms_by_id.items()}
+    avg_len = sum(lengths.values()) / n_docs
+
+    # Document frequency per query term, computed once for the whole corpus.
+    doc_freq: dict[str, int] = {}
+    for term in set(tokens):
+        doc_freq[term] = sum(1 for t in terms_by_id.values() if term in t)
+
+    scores: dict[str, float] = {}
+    for atom in atoms:
+        aid = atom["id"]
+        terms = terms_by_id[aid]
+        doc_len = lengths[aid]
+        score = 0.0
+        for term in tokens:
+            df = doc_freq.get(term, 0)
+            if df == 0:
+                continue
+            tf = terms.count(term)
+            if tf == 0:
+                continue
+            idf = math.log((n_docs - df + 0.5) / (df + 0.5) + 1)
+            denom = tf + _BM25_K1 * (1 - _BM25_B + _BM25_B * doc_len / avg_len)
+            score += idf * (tf * (_BM25_K1 + 1)) / denom
+        if score > 0:
+            scores[aid] = score
+    return scores, terms_by_id
 
 
 def _why(atom: dict[str, Any], tokens: list[str], method: str) -> str:

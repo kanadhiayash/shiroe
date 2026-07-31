@@ -162,7 +162,7 @@
         },
         "test_suite": {
           "score": 10.0,
-          "evidence": "79 test files; pytest.ini=True; ci=True"
+          "evidence": "82 test files; pytest.ini=True; ci=True"
         },
         "privacy_patterns": {
           "score": 10.0,
