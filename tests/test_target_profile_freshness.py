@@ -1,6 +1,6 @@
 """Source-authority freshness grading (issue #175).
 
-Direct unit coverage for zeref.prompt.target_profile.grade_profile_freshness:
+Direct unit coverage for shiroe.prompt.target_profile.grade_profile_freshness:
 the branch a stale `official` profile hard-fails on, the branch a stale
 `third_party`/`derived` profile only warns on, the schema-invalid branch,
 and the clean-pass branch. tests/test_route_release_doctor.py only exercises
@@ -13,7 +13,7 @@ from __future__ import annotations
 from datetime import date
 from pathlib import Path
 
-from zeref.prompt.target_profile import (
+from shiroe.prompt.target_profile import (
     ProfileSchemaError,
     grade_profile_freshness,
     load_profile,

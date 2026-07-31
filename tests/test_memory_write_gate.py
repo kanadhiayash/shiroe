@@ -17,7 +17,7 @@ def _env(repo_root: Path) -> dict:
 
 def _run(repo_root: Path, cwd: Path, args: list[str]) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, "-m", "zeref", *args],
+        [sys.executable, "-m", "shiroe", *args],
         cwd=str(cwd),
         capture_output=True,
         text=True,
@@ -206,11 +206,11 @@ def test_write_gate_rejects_every_factguard_blocked_phrase(tmp_path: Path) -> No
     pass", "fully verified", ...) were refused by `zeref fact check` but still
     accepted into memory. This pins the two to one shared table.
     """
-    from zeref.core.errors import GuardRejection
-    from zeref.guards.fact_guard import BLOCKED_PATTERNS
-    from zeref.guards.write_gate import _validate_gate
-    from zeref.memory.core import scaffold_project
-    from zeref.memory_state import MemoryStore
+    from shiroe.core.errors import GuardRejection
+    from shiroe.guards.fact_guard import BLOCKED_PATTERNS
+    from shiroe.guards.write_gate import _validate_gate
+    from shiroe.memory.core import scaffold_project
+    from shiroe.memory_state import MemoryStore
 
     (tmp_path / "AGENTS.md").write_text("# AGENTS.md\n", encoding="utf-8")
     scaffold_project(tmp_path, name="factguard-parity", privacy="abstract",

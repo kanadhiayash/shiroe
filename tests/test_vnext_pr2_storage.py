@@ -13,10 +13,10 @@ from pathlib import Path
 
 import pytest
 
-from zeref.storage import EventEnvelope, EventLog, StateDB
-from zeref.storage import events as events_mod
-from zeref.storage import importer as importer_mod
-from zeref.storage import views as views_mod
+from shiroe.storage import EventEnvelope, EventLog, StateDB
+from shiroe.storage import events as events_mod
+from shiroe.storage import importer as importer_mod
+from shiroe.storage import views as views_mod
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -233,7 +233,7 @@ def test_importer_rollback_restores_backup(tmp_path: Path) -> None:
 def test_no_stale_markdown_is_canonical_wording() -> None:
     banned = "Markdown stays canonical"
     offenders: list[str] = []
-    for path in (REPO_ROOT / "zeref").rglob("*.py"):
+    for path in (REPO_ROOT / "shiroe").rglob("*.py"):
         if "__pycache__" in path.parts:
             continue
         text = path.read_text(encoding="utf-8", errors="ignore")

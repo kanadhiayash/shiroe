@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from zeref.adapters.capabilities import (
+from shiroe.adapters.capabilities import (
     AdapterNotFoundError,
     EnforcementLevel,
     list_adapters,
@@ -16,20 +16,20 @@ from zeref.adapters.capabilities import (
     record_status,
     resolve_adapter,
 )
-from zeref.adapters.capabilities.agent import AgentAdapter
-from zeref.adapters.capabilities.base import HealthReport
-from zeref.adapters.capabilities.cli import CLIAdapter
-from zeref.adapters.capabilities.generic_skill import GenericSkillAdapter
-from zeref.adapters.capabilities.mcp_server import MCPServerAdapter
-from zeref.adapters.capabilities.repository_tool import RepositoryToolAdapter
-from zeref.capabilities import (
+from shiroe.adapters.capabilities.agent import AgentAdapter
+from shiroe.adapters.capabilities.base import HealthReport
+from shiroe.adapters.capabilities.cli import CLIAdapter
+from shiroe.adapters.capabilities.generic_skill import GenericSkillAdapter
+from shiroe.adapters.capabilities.mcp_server import MCPServerAdapter
+from shiroe.adapters.capabilities.repository_tool import RepositoryToolAdapter
+from shiroe.capabilities import (
     approve,
     inspect_source,
     register_discovery,
 )
-from zeref.capabilities.discovery import DiscoveredCapability
-from zeref.storage import EventLog, StateDB
-from zeref.storage import events as events_mod
+from shiroe.capabilities.discovery import DiscoveredCapability
+from shiroe.storage import EventLog, StateDB
+from shiroe.storage import events as events_mod
 
 
 # ---------------------------------------------------------------------------

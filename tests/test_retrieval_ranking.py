@@ -14,14 +14,14 @@ from pathlib import Path
 
 import pytest
 
-from zeref.memory.agent_retrieval import AgentRetrieval
-from zeref.memory.atom_store import AtomStore
-from zeref.memory.cost_router import estimate_tokens
-from zeref.memory.expand import expand_tokens, stem
-from zeref.memory.indexer import rebuild_index
-from zeref.memory.schemas import create_atom
-from zeref.memory.search import search_atoms, tokenize
-from zeref.memory.triples import extract_triples, query_triples
+from shiroe.memory.agent_retrieval import AgentRetrieval
+from shiroe.memory.atom_store import AtomStore
+from shiroe.memory.cost_router import estimate_tokens
+from shiroe.memory.expand import expand_tokens, stem
+from shiroe.memory.indexer import rebuild_index
+from shiroe.memory.schemas import create_atom
+from shiroe.memory.search import search_atoms, tokenize
+from shiroe.memory.triples import extract_triples, query_triples
 
 
 def _fact(claim: str, provenance: str) -> dict:

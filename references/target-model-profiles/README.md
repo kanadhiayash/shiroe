@@ -81,7 +81,7 @@ Every profile MUST carry:
 4. Cite `last_verified_catalog_sha` (see
    `gh api repos/asgeirtj/system_prompts_leaks/commits/main -q '.sha'`).
 5. Commit under `references/target-model-profiles/<target_id>.md`.
-6. Re-run `python3 scripts/zeref-validate.py` (validator will lint schema
+6. Re-run `python3 scripts/shiroe-validate.py` (validator will lint schema
    once extended in R7 follow-on).
 
 ## Non-negotiables

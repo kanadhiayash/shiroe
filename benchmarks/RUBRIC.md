@@ -31,7 +31,7 @@ process.
 | Per-harness stubs exist and defer to `AGENTS.md` | 2 | <3 stubs | 3–4 | 5–6 | ≥7 stubs (claude/codex/cursor/windsurf/aider/gemini/llama) |
 | `scripts/harness-probe.py` reports stub + binary status | 2 | missing | partial | works for some | works for all |
 | `docs/HARNESS_MATRIX.md` documents per-harness boot result | 2 | missing | aspirational only | partial evidence | every row verified |
-| CLI works headless (`python3 -m zeref status` on any host) | 2 | crashes | partial | runs but unclear | clean exit + readable output |
+| CLI works headless (`python3 -m shiroe status` on any host) | 2 | crashes | partial | runs but unclear | clean exit + readable output |
 
 **Score = weighted sum / 2** (range 0–10).
 
@@ -79,7 +79,7 @@ process.
 | Sub-criterion | Weight | 0–3 | 4–6 | 7–8 | 9–10 |
 |---|---|---|---|---|---|
 | Version consistency across all surfaces (machine-checked) | 2 | drift | manual check | scripted check | scripted + CI-enforced |
-| Reproducible `tests/` directory ≥ 85% coverage on `zeref/` | 2 | none | exists | covers most | ≥85% + matrix |
+| Reproducible `tests/` directory ≥ 85% coverage on `shiroe/` | 2 | none | exists | covers most | ≥85% + matrix |
 | Privacy scrubber catches the 11 documented patterns | 2 | catches <5 | 5–8 | 9–10 | all 11 + tested |
 | `SECURITY.md` routes vuln reports privately (no public-issue path) | 2 | public path only | mixed | private path | private + 90-day window + PGP |
 | CI workflows pinned to commit SHAs + dependabot upkeep | 2 | floating tags | partial pin | full pin | full pin + weekly refresh PRs |

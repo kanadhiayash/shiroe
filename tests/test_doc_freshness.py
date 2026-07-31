@@ -5,7 +5,7 @@ Two checks, both driven off the repo's actual state so they stay correct
 across version bumps and future operator-record splits:
 
 1. Live public surfaces (README badge, docs/wiki/Installation.md) name the
-   version that `zeref/VERSION` declares, and don't advertise some *other*
+   version that `shiroe/VERSION` declares, and don't advertise some *other*
    `vX.Y.Z`-shaped version as the product's current release.
 2. No operator-record files are tracked back under docs/. Operator records
    are maintained outside this repository (see docs/audits/README.md), so
@@ -14,7 +14,7 @@ across version bumps and future operator-record splits:
    besides the pointer stub, and any date-stamped artifact filename (the
    operator-record naming grammar carries an ISO date; published doc
    surfaces do not).
-   Only git-tracked files count: zeref/release/checks.py legitimately
+   Only git-tracked files count: shiroe/release/checks.py legitimately
    writes local evidence blobs under docs/audits/release-evidence/ at
    runtime, and .gitignore keeps them out of the public tree.
 """
@@ -48,8 +48,8 @@ DATE_STAMPED_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
 def _current_version(repo_root: Path) -> str:
-    version_file = repo_root / "zeref" / "VERSION"
-    assert version_file.exists(), "zeref/VERSION is missing"
+    version_file = repo_root / "shiroe" / "VERSION"
+    assert version_file.exists(), "shiroe/VERSION is missing"
     return version_file.read_text(encoding="utf-8").strip()
 
 
@@ -72,13 +72,13 @@ def test_live_surfaces_mention_current_version_and_no_other(repo_root: Path) -> 
         found = {m.group(1) for m in VERSION_RE.finditer(text)}
         assert current in found, (
             f"{rel} does not mention the current version v{current} "
-            f"(zeref/VERSION). Found version strings: {sorted(found) or 'none'}"
+            f"(shiroe/VERSION). Found version strings: {sorted(found) or 'none'}"
         )
 
         stale = found - {current}
         assert not stale, (
             f"{rel} advertises other version string(s) as current: "
-            f"{sorted(stale)}. Only v{current} (from zeref/VERSION) should "
+            f"{sorted(stale)}. Only v{current} (from shiroe/VERSION) should "
             "appear as a current-release claim; historical version mentions "
             "belong in CHANGELOG.md, not live surfaces."
         )

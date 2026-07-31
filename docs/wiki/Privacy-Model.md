@@ -1,6 +1,6 @@
 # Privacy Model
 
-Privacy in Zeref is deterministic and code-enforced. The `zeref/privacy.py` runtime applies redaction rules before any write, and `zeref/guards/privacy_guard.py` sits on the write path. Nothing depends on a model remembering to be careful.
+Privacy in Zeref is deterministic and code-enforced. The `shiroe/privacy.py` runtime applies redaction rules before any write, and `shiroe/guards/privacy_guard.py` sits on the write path. Nothing depends on a model remembering to be careful.
 
 That distinction is the whole design. A model asked to redact is a model that can be talked out of redacting. A regex cannot be persuaded.
 
@@ -90,7 +90,7 @@ Under `local-only`, the path is blocked entirely and staging does not proceed.
 ## Verify it yourself
 
 ```bash
-python3 -m zeref audit      # structural validation and privacy audit
+python3 -m shiroe audit      # structural validation and privacy audit
 python3 -m pytest -q        # includes redaction and export tests
 ```
 

@@ -25,7 +25,7 @@ ecc is a global-scope Claude Code plugin exposing multi-language reviewers, buil
 
 ## Boundary
 
-No source vendored. Zeref invokes ecc skills and MCP tools only through the host harness. ecc surfaces may **not** write to `memory/` or `zeref/` canonical paths.
+No source vendored. Zeref invokes ecc skills and MCP tools only through the host harness. ecc surfaces may **not** write to `memory/` or `shiroe/` canonical paths.
 
 ## Allowed use inside Zeref sessions
 

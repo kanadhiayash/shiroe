@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from zeref.policy import (
+from shiroe.policy import (
     ALWAYS_REQUIRE_APPROVAL,
     Action,
     ActionKind,
@@ -19,8 +19,8 @@ from zeref.policy import (
     evaluate,
     load_policy_stack,
 )
-from zeref.policy.precedence import LAYER_ORDER, resolve
-from zeref.policy.schema import PolicyLayer
+from shiroe.policy.precedence import LAYER_ORDER, resolve
+from shiroe.policy.schema import PolicyLayer
 
 
 def _stack(**layers: dict) -> list[PolicyLayer]:

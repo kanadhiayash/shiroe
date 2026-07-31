@@ -1,0 +1,13 @@
+{
+  "_comment_privacy_audit": "privacy-audit: allow-file — canonical identity metadata (product/module/repo naming). No user data.",
+  "product": "Zeref Memory Engine",
+  "product_short": "Zeref",
+  "distribution": "shiroe",
+  "module": "shiroe",
+  "cli": "shiroe",
+  "repo": "kanadhiayash/shiroe",
+  "repo_url": "https://github.com/kanadhiayash/shiroe",
+  "registry_manifest": "shiroe-registry.json",
+  "workspace_dir": ".zeref",
+  "work_item_prefix": "SHR"
+}

@@ -114,7 +114,7 @@ def test_records_are_durable_per_case(tmp_path: Path) -> None:
     """Each record is flushed and fsynced before the next call begins."""
     store = CheckpointStore(tmp_path / "run")
     store.bind({"benchmark": "x"})
-    store.append({"task_id": "t1", "arm": "zeref", "official_score": 1.0})
+    store.append({"task_id": "t1", "arm": "shiroe", "official_score": 1.0})
     # Read from a separate handle without closing the writer.
     reread = CheckpointStore(tmp_path / "run").completed()
     assert len(reread) == 1

@@ -94,7 +94,7 @@ def test_all_three_arms_are_constructible() -> None:
     """
     from benchmarks.external.runner import ALL_ARMS, ARM_BACKENDS
 
-    assert set(ALL_ARMS) == {"zeref", "full_context", "bm25"}
+    assert set(ALL_ARMS) == {"shiroe", "full_context", "bm25"}
     for arm in ALL_ARMS:
         backend = ARM_BACKENDS[arm]()
         backend.ingest("probe", "SYNTHETIC: the sky is cerulean")

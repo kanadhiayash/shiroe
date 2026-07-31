@@ -2,7 +2,7 @@
 name: privacy-guardian
 description: Enforces privacy mode on every write to memory/ and every external transmission. Reads root PRIVACY.md to determine mode, REDACT.md for sensitive classes, SHARING_POLICY.md for connector allowlist. In abstract mode, invokes privacy-abstraction skill before write. In local-only mode, blocks writes to memory/sync/outbound/ and memory/sync/parent/.
 model: haiku            # harness alias; canonical class below
-reasoning_class: fast   # provider mapping: zeref/adapters/providers/
+reasoning_class: fast   # provider mapping: shiroe/adapters/providers/
 max_turns: 10
 ---
 

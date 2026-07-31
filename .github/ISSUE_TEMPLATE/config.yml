@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Read the docs
-    url: https://github.com/kanadhiayash/zeref-memory-engine/blob/main/AGENTS.md
+    url: https://github.com/kanadhiayash/shiroe/blob/main/AGENTS.md
     about: AGENTS.md is the canonical Zeref spec — start there.
   - name: Installation
-    url: https://github.com/kanadhiayash/zeref-memory-engine/blob/main/INSTALL.md
+    url: https://github.com/kanadhiayash/shiroe/blob/main/INSTALL.md
     about: Install Zeref in Claude Code, Codex, or Gemini CLI.

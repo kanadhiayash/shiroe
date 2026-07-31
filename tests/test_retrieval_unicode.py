@@ -1,7 +1,7 @@
 """Unicode-aware retrieval — tokenizer coverage, fail-open regression, and
 round-trip recall across scripts on both the SQLite FTS and JSONL paths.
 
-Refs ZRF-65.
+Refs SHR-65.
 """
 
 from __future__ import annotations
@@ -11,10 +11,10 @@ from pathlib import Path
 
 import pytest
 
-from zeref.memory.atom_store import AtomStore
-from zeref.memory.indexer import INDEX_PATH, rebuild_index
-from zeref.memory.schemas import create_atom
-from zeref.memory.search import _index_stale, search_atoms, tokenize
+from shiroe.memory.atom_store import AtomStore
+from shiroe.memory.indexer import INDEX_PATH, rebuild_index
+from shiroe.memory.schemas import create_atom
+from shiroe.memory.search import _index_stale, search_atoms, tokenize
 
 
 # ---------------------------------------------------------------------------

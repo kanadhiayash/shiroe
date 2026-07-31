@@ -155,7 +155,7 @@ def test_installed_models_lists_exact_tags(monkeypatch) -> None:
 def test_cli_routes_provider_ollama_to_the_local_backend() -> None:
     import argparse
 
-    from zeref import cli_benchmark
+    from shiroe import cli_benchmark
 
     modules = cli_benchmark._load_harness_modules()
     args = argparse.Namespace(provider="ollama", provider_model="qwen2.5:7b", num_ctx=65536)

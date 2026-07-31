@@ -37,9 +37,9 @@
 Paste command outputs:
 
     python3 -m pytest -q
-    python3 scripts/zeref-validate.py
-    python3 -m zeref audit
-    python3 -m zeref audit-privacy --strict
+    python3 scripts/shiroe-validate.py
+    python3 -m shiroe audit
+    python3 -m shiroe audit-privacy --strict
     python3 scripts/check-version-consistency.py
     python3 benchmarks/run-all.py
     git diff --check

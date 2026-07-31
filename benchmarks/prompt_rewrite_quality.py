@@ -8,9 +8,9 @@ from __future__ import annotations
 import sys
 
 from benchmarks.helpers import axis_result, print_json_result
-from zeref.prompt.classify import classify_prompt
-from zeref.prompt.inject import inject_prompt
-from zeref.prompt.rewrite import build_brief, rewrite_prompt
+from shiroe.prompt.classify import classify_prompt
+from shiroe.prompt.inject import inject_prompt
+from shiroe.prompt.rewrite import build_brief, rewrite_prompt
 
 
 SAMPLE = "I want to change the dashboard screen buttons just like we did on settings page."

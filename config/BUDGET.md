@@ -33,7 +33,7 @@ The `budget-governor` skill scales output verbosity and read patterns to the act
 | `gemini-flash`, `mistral-*`, `ollama/*` | `fast` → Free |
 | unknown | Standard (safe default) |
 
-**Note:** Provider adapters in `zeref/adapters/providers/` map reasoning classes to concrete model IDs per provider. Override tier above by setting `model_tier:` to `free` / `standard` / `god-mode`.
+**Note:** Provider adapters in `shiroe/adapters/providers/` map reasoning classes to concrete model IDs per provider. Override tier above by setting `model_tier:` to `free` / `standard` / `god-mode`.
 
 ## Targets
 

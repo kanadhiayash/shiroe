@@ -9,7 +9,7 @@ body:
         Do not disclose vulnerabilities in public issues.
 
         Use GitHub Private Vulnerability Reporting from the Security tab:
-        https://github.com/kanadhiayash/zeref-memory-engine/security
+        https://github.com/kanadhiayash/shiroe/security
   - type: checkboxes
     id: confirm
     attributes:

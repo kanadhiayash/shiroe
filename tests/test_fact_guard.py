@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from zeref.guards.fact_guard import check_claim, classify_claim, scan_path, suggest_rewrite
+from shiroe.guards.fact_guard import check_claim, classify_claim, scan_path, suggest_rewrite
 
 
 def test_unsupported_superlative_detection() -> None:

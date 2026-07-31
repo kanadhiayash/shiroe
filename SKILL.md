@@ -31,7 +31,7 @@ Zeref is a local-first context and memory engine that plugs *into* your existing
 
 ## Architecture
 
-See `AGENTS.md` (canonical), `CLAUDE.md` (Claude shim), `GEMINI.md` (Gemini shim), `.cursor/rules/zeref.mdc`, `.windsurfrules`, `.aider.conf.yml.example`.
+See `AGENTS.md` (canonical), `CLAUDE.md` (Claude shim), `GEMINI.md` (Gemini shim), `.cursor/rules/shiroe.mdc`, `.windsurfrules`, `.aider.conf.yml.example`.
 
 ## Memory layout (flat)
 

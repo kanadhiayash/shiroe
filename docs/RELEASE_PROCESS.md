@@ -13,12 +13,12 @@ Use:
 Run:
 
     python3 -m pytest -q
-    python3 scripts/zeref-validate.py
-    python3 -m zeref audit
-    python3 -m zeref audit-privacy --strict
+    python3 scripts/shiroe-validate.py
+    python3 -m shiroe audit
+    python3 -m shiroe audit-privacy --strict
     python3 scripts/check-version-consistency.py
     python3 benchmarks/run-all.py
-    python3 -m zeref release check
+    python3 -m shiroe release check
     git diff --check
 
 ## Release notes
@@ -41,8 +41,8 @@ even though the source repository has moved on.
 
 Every change that ships to the plugin marketplace (any edit under
 `.claude-plugin/`, `agents/`, `commands/`, `skills/`, `references/`,
-`team/`, `team-packs/`, or `zeref/`) must bump the version in lockstep
-across `zeref/VERSION`, `pyproject.toml`, `zeref-registry.json`,
+`team/`, `team-packs/`, or `shiroe/`) must bump the version in lockstep
+across `shiroe/VERSION`, `pyproject.toml`, `shiroe-registry.json`,
 `.claude-plugin/plugin.json`, the README badge, and `docs/wiki/Installation.md`
 — enforced by `scripts/check-version-consistency.py` (a required gate,
 above). Skipping the bump is the single most common cause of a stale

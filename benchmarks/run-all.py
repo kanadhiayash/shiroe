@@ -14,7 +14,7 @@ Exit code:
     1  otherwise
 Skipped axes (e.g. missing lineage intake CSV on a clean clone) are recorded
 explicitly in the report and results.json and do NOT inflate the
-passed-verdict (see ZRF-AUDIT-012).
+passed-verdict (see SHR-AUDIT-012).
 
 Usage:
     python3 benchmarks/run-all.py
@@ -57,7 +57,7 @@ from benchmarks import (  # noqa: E402
     token_efficiency,
     trust,
 )
-from zeref.benchmark.failure_analysis import collect_failures, write_failure_report  # noqa: E402
+from shiroe.benchmark.failure_analysis import collect_failures, write_failure_report  # noqa: E402
 
 AXES = [
     portability,
@@ -90,7 +90,7 @@ def _apply_verified_overrides(results: list[dict]) -> list[dict]:
 
     Refuses the override unless docs/TRUST_AUDIT.md carries a Bound-commit-SHA
     equal to the current HEAD. Prevents stale trust scores from silently applying
-    to newer code (see ZRF-AUDIT-013).
+    to newer code (see SHR-AUDIT-013).
     """
     trust_audit = REPO / "docs" / "TRUST_AUDIT.md"
     if not trust_audit.exists():
@@ -128,7 +128,7 @@ def _apply_verified_overrides(results: list[dict]) -> list[dict]:
             if result.get("axis") == "trust":
                 result.setdefault("note", (
                     f"TRUST_AUDIT.md Bound-commit-SHA {bound_sha} does not match HEAD "
-                    f"{head_sha[:12]}; deterministic draft score published (see ZRF-AUDIT-013)."
+                    f"{head_sha[:12]}; deterministic draft score published (see SHR-AUDIT-013)."
                 ))
         return results
 
@@ -307,7 +307,7 @@ def main() -> int:
     (REPO / args.out_json).write_text(
         json.dumps({
             "label": "internal quality axes — fixture-based self-checks, not external benchmarks",
-            # ZRF-66 / issue #172: machine-readable evidence class, so any
+            # SHR-66 / issue #172: machine-readable evidence class, so any
             # consumer (claim gate, docs generator) can tell at a glance this
             # is NOT external_benchmark evidence without parsing prose.
             "evidence_namespace": "conformance",

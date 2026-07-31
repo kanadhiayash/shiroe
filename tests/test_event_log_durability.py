@@ -16,8 +16,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from zeref.storage.events import EventEnvelope, EventLog  # noqa: E402
-from zeref.storage.state import StateDB  # noqa: E402
+from shiroe.storage.events import EventEnvelope, EventLog  # noqa: E402
+from shiroe.storage.state import StateDB  # noqa: E402
 
 
 def _envelope(n: int) -> EventEnvelope:
@@ -82,7 +82,7 @@ def test_append_uses_the_fsynced_helper(tmp_path: Path) -> None:
     the fsync'd helper is used is the only check available without staging a
     real power loss.
     """
-    import zeref.storage.events as events_mod
+    import shiroe.storage.events as events_mod
 
     calls: list[Path] = []
     original = events_mod.atomic_append

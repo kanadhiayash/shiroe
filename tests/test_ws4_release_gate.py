@@ -17,11 +17,11 @@ from pathlib import Path
 
 import pytest
 
-from zeref.memory import scaffold_project
-from zeref.release import checks as release_checks
-from zeref.release.checks import release_passed, run_release_check
-from zeref.release.doctor import doctor_passed, run_doctor
-from zeref.security.policy import (
+from shiroe.memory import scaffold_project
+from shiroe.release import checks as release_checks
+from shiroe.release.checks import release_passed, run_release_check
+from shiroe.release.doctor import doctor_passed, run_doctor
+from shiroe.security.policy import (
     NetworkDeniedError,
     load_policy,
     require_network,

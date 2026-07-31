@@ -14,11 +14,11 @@ from pathlib import Path
 
 import pytest
 
-from zeref.lock import LockError, MemoryLock
-from zeref.memory.atom_store import AtomStore
-from zeref.memory.contradictions import detect_conflict, scan_contradictions, suggest_winner
-from zeref.memory.recall import recall
-from zeref.memory.schemas import create_atom
+from shiroe.lock import LockError, MemoryLock
+from shiroe.memory.atom_store import AtomStore
+from shiroe.memory.contradictions import detect_conflict, scan_contradictions, suggest_winner
+from shiroe.memory.recall import recall
+from shiroe.memory.schemas import create_atom
 
 
 def _env(repo_root: Path) -> dict:
@@ -29,7 +29,7 @@ def _env(repo_root: Path) -> dict:
 
 def _run(repo_root: Path, cwd: Path, args: list[str]) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, "-m", "zeref", *args],
+        [sys.executable, "-m", "shiroe", *args],
         capture_output=True,
         text=True,
         cwd=str(cwd),

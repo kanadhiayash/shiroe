@@ -26,7 +26,7 @@ sys.path.insert(0, str(REPO))
 
 from benchmarks.external.baselines.bm25 import Bm25Backend
 from benchmarks.external.baselines.full_context import FullContextBackend
-from benchmarks.external.baselines.zeref_backend import ZerefBackend
+from benchmarks.external.baselines.shiroe_backend import ShiroeBackend
 from benchmarks.external.cost import (
     COST_CEILING_USD,
     DEFAULT_MAX_COST_USD,
@@ -76,7 +76,7 @@ def test_convomem_missing_dataset_fails_clearly(tmp_path: Path) -> None:
 
 # --- Backends: ingest/recall/reset contract ----------------------------------
 
-@pytest.mark.parametrize("backend_cls", [FullContextBackend, Bm25Backend, ZerefBackend])
+@pytest.mark.parametrize("backend_cls", [FullContextBackend, Bm25Backend, ShiroeBackend])
 def test_backend_contract(backend_cls) -> None:
     backend = backend_cls()
     backend.reset()
@@ -107,13 +107,13 @@ def test_bm25_ranks_by_relevance() -> None:
 # --- Runner: three arms end-to-end -------------------------------------------
 
 def test_runner_all_arms_registered() -> None:
-    assert set(ALL_ARMS) == {"zeref", "full_context", "bm25"}
+    assert set(ALL_ARMS) == {"shiroe", "full_context", "bm25"}
 
 
 def test_resolve_arms() -> None:
     assert resolve_arms(None) == ALL_ARMS
     assert resolve_arms("all") == ALL_ARMS
-    assert resolve_arms("zeref,bm25") == ("zeref", "bm25")
+    assert resolve_arms("shiroe,bm25") == ("shiroe", "bm25")
     with pytest.raises(KeyError):
         resolve_arms("not-a-real-arm")
     with pytest.raises(ValueError):
@@ -130,7 +130,7 @@ def test_proxy_mode_runs_all_arms_zero_calls(monkeypatch) -> None:
 
     payload = run_three_arms("locomo", LOCOMO_DIR, scored=False)
     assert payload["mode"] == "proxy"
-    assert set(payload["results_by_arm"]) == {"zeref", "full_context", "bm25"}
+    assert set(payload["results_by_arm"]) == {"shiroe", "full_context", "bm25"}
     assert payload["task_count"] > 0
     for arm, result in payload["results_by_arm"].items():
         assert result["task_count"] == payload["task_count"]
@@ -147,7 +147,7 @@ def test_scored_mode_drives_three_arms_with_fake_judge() -> None:
         "locomo", LOCOMO_DIR, scored=True, provider=provider, judge=judge, max_cost=500,
     )
     assert payload["mode"] == "scored"
-    assert set(payload["results_by_arm"]) == {"zeref", "full_context", "bm25"}
+    assert set(payload["results_by_arm"]) == {"shiroe", "full_context", "bm25"}
     assert payload["aborted"] is False
     for arm, result in payload["results_by_arm"].items():
         for record in result["tasks"]:
@@ -167,11 +167,11 @@ def test_runner_limit_is_seeded_and_deterministic() -> None:
     provider = AnthropicProvider(dry_run=True)
     judge = DeterministicFakeJudge()
     p1 = run_three_arms("locomo", LOCOMO_DIR, scored=True, provider=provider, judge=judge,
-                        max_cost=500, seed=7, limit=2, arms="zeref")
+                        max_cost=500, seed=7, limit=2, arms="shiroe")
     p2 = run_three_arms("locomo", LOCOMO_DIR, scored=True, provider=provider, judge=judge,
-                        max_cost=500, seed=7, limit=2, arms="zeref")
-    ids1 = [t["task_id"] for t in p1["results_by_arm"]["zeref"]["tasks"]]
-    ids2 = [t["task_id"] for t in p2["results_by_arm"]["zeref"]["tasks"]]
+                        max_cost=500, seed=7, limit=2, arms="shiroe")
+    ids1 = [t["task_id"] for t in p1["results_by_arm"]["shiroe"]["tasks"]]
+    ids2 = [t["task_id"] for t in p2["results_by_arm"]["shiroe"]["tasks"]]
     assert ids1 == ids2
     assert len(ids1) == 2
 
@@ -182,7 +182,7 @@ def test_cost_estimate_math_matches_manual_sum() -> None:
     provider = AnthropicProvider(dry_run=True)
     judge = DeterministicFakeJudge()
     tasks = get_loader("locomo").load(LOCOMO_DIR)
-    arms = ("zeref", "full_context", "bm25")
+    arms = ("shiroe", "full_context", "bm25")
 
     estimate = estimate_run_cost("locomo", LOCOMO_DIR, arms, provider, judge)
 
@@ -364,13 +364,13 @@ def test_api_key_never_emitted(monkeypatch, capsys) -> None:
 
 
 def test_api_key_never_emitted_via_cli(monkeypatch, capsys, tmp_path: Path) -> None:
-    from zeref import cli_benchmark
+    from shiroe import cli_benchmark
 
     monkeypatch.setenv("GEMINI_API_KEY", SENTINEL_KEY)
     out_path = tmp_path / "results.json"
     args = argparse.Namespace(
         benchmark_command="external", benchmark="locomo", data=str(LOCOMO_DIR),
-        arms="zeref", dry_run=False, live=True, confirm=True, max_cost=500.0,
+        arms="shiroe", dry_run=False, live=True, confirm=True, max_cost=500.0,
         provider="anthropic", judge="gemini", seed=0, limit=None,
         out=str(out_path), format="text",
     )
@@ -386,7 +386,7 @@ def test_api_key_never_emitted_via_cli(monkeypatch, capsys, tmp_path: Path) -> N
 # --- CLI ------------------------------------------------------------------
 
 def test_cli_registers_benchmark_command() -> None:
-    from zeref.cli import _build_parser
+    from shiroe.cli import _build_parser
 
     parser = _build_parser()
     args = parser.parse_args([
@@ -401,7 +401,7 @@ def test_cli_registers_benchmark_command() -> None:
 def test_cli_default_is_proxy_mode_and_json_stdout_is_clean(capsys) -> None:
     """--format json must print ONLY the payload to stdout — cost-estimate
     and other diagnostics go to stderr so stdout stays pipeable."""
-    from zeref import cli_benchmark
+    from shiroe import cli_benchmark
 
     args = argparse.Namespace(
         benchmark_command="external", benchmark="locomo", data=str(LOCOMO_DIR),
@@ -417,7 +417,7 @@ def test_cli_default_is_proxy_mode_and_json_stdout_is_clean(capsys) -> None:
 
 
 def test_cli_missing_dataset_fails_clearly(capsys) -> None:
-    from zeref import cli_benchmark
+    from shiroe import cli_benchmark
 
     args = argparse.Namespace(
         benchmark_command="external", benchmark="locomo", data="/nonexistent/zeref-bench-path",
@@ -431,7 +431,7 @@ def test_cli_missing_dataset_fails_clearly(capsys) -> None:
 
 
 def test_cli_live_without_confirm_refuses(capsys) -> None:
-    from zeref import cli_benchmark
+    from shiroe import cli_benchmark
 
     args = argparse.Namespace(
         benchmark_command="external", benchmark="locomo", data=str(LOCOMO_DIR),
@@ -444,7 +444,7 @@ def test_cli_live_without_confirm_refuses(capsys) -> None:
 
 
 def test_cli_live_over_budget_refuses(capsys) -> None:
-    from zeref import cli_benchmark
+    from shiroe import cli_benchmark
 
     args = argparse.Namespace(
         benchmark_command="external", benchmark="locomo", data=str(LOCOMO_DIR),
@@ -458,7 +458,7 @@ def test_cli_live_over_budget_refuses(capsys) -> None:
 
 def test_cli_dry_run_flag_wins_over_live(capsys) -> None:
     """Passing both --live and --dry-run must stay in (zero-network) proxy mode."""
-    from zeref import cli_benchmark
+    from shiroe import cli_benchmark
 
     args = argparse.Namespace(
         benchmark_command="external", benchmark="locomo", data=str(LOCOMO_DIR),
@@ -471,7 +471,7 @@ def test_cli_dry_run_flag_wins_over_live(capsys) -> None:
 
 
 def test_cli_live_confirmed_scored_run_with_fake_judge(capsys, tmp_path: Path) -> None:
-    from zeref import cli_benchmark
+    from shiroe import cli_benchmark
 
     out_path = tmp_path / "out.json"
     args = argparse.Namespace(
@@ -488,7 +488,7 @@ def test_cli_live_confirmed_scored_run_with_fake_judge(capsys, tmp_path: Path) -
 
 
 def test_cli_unknown_benchmark(capsys) -> None:
-    from zeref import cli_benchmark
+    from shiroe import cli_benchmark
 
     args = argparse.Namespace(
         benchmark_command="external", benchmark="not-a-benchmark", data=str(LOCOMO_DIR),
@@ -505,7 +505,7 @@ def test_cli_help_does_not_crash() -> None:
     import subprocess
 
     completed = subprocess.run(
-        [sys.executable, "-m", "zeref.cli", "benchmark", "external", "--help"],
+        [sys.executable, "-m", "shiroe.cli", "benchmark", "external", "--help"],
         capture_output=True, text=True, cwd=str(REPO),
     )
     assert completed.returncode == 0

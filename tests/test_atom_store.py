@@ -4,8 +4,8 @@ import json
 
 import pytest
 
-from zeref.memory.atom_store import AtomStore
-from zeref.memory.schemas import AtomValidationError, create_atom
+from shiroe.memory.atom_store import AtomStore
+from shiroe.memory.schemas import AtomValidationError, create_atom
 
 
 def _atom(claim: str = "Use atom JSONL before rendered markdown.") -> dict:

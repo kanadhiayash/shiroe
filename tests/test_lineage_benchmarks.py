@@ -14,10 +14,10 @@ from benchmarks import (
     reference_only_guardrails,
     security_containment,
 )
-from zeref.lineage.critical import CRITICAL_IMPLEMENTATIONS
-from zeref.lineage.high import HIGH_IMPLEMENTATIONS
-from zeref.lineage.intake import REQUIRED_COLUMNS
-from zeref.lineage.reference import REFERENCE_IMPLEMENTATIONS
+from shiroe.lineage.critical import CRITICAL_IMPLEMENTATIONS
+from shiroe.lineage.high import HIGH_IMPLEMENTATIONS
+from shiroe.lineage.intake import REQUIRED_COLUMNS
+from shiroe.lineage.reference import REFERENCE_IMPLEMENTATIONS
 
 
 LINEAGE_AXES = [

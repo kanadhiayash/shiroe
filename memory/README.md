@@ -5,7 +5,7 @@ Local memory layer. Populated per-user-project — never bundled in this repo.
 Bootstrap a fresh memory tree with:
 
 ```bash
-python3 -m zeref init
+python3 -m shiroe init
 ```
 
 After init, this directory holds:

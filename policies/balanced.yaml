@@ -1,4 +1,4 @@
-schema: zeref.policy/v1
+schema: shiroe.policy/v1
 id: balanced
 version: 1
 

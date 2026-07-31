@@ -1,4 +1,4 @@
-"""ZRF-62: provider-aware token accounting.
+"""SHR-62: provider-aware token accounting.
 
 The old estimator counted whitespace-separated runs (``\\S+``), so any dense
 or non-Latin-script text (CJK, Devanagari, Arabic, minified JSON/code,
@@ -11,9 +11,9 @@ reports which layer actually produced the number via ``method``.
 
 from __future__ import annotations
 
-from zeref.memory.cost_router import DEFAULT_POLICY, estimate_tokens, route_operation
+from shiroe.memory.cost_router import DEFAULT_POLICY, estimate_tokens, route_operation
 
-# Same content classes as the ZRF-62 baseline reproduction.
+# Same content classes as the SHR-62 baseline reproduction.
 CONTENT_CLASSES = {
     "cjk": "你好" * 200,
     "devanagari": "नमस्तेदुनिया" * 100,
@@ -76,11 +76,11 @@ def test_dense_non_latin_text_now_exceeds_the_memory_write_budget() -> None:
     a plain no-write decision because it looked like ~2 tokens; now it
     must be recognized as exceeding the memory-write budget.
 
-    ZRF-63 note: the original probe used the operation name "some-view",
+    SHR-63 note: the original probe used the operation name "some-view",
     which is not a real operation route_operation() recognizes anywhere
     else in this codebase — it only reached the budget check because
     unrecognized operations used to fall through to the generic
-    budget-or-no-write path (the exact defect ZRF-63 closes: unknown
+    budget-or-no-write path (the exact defect SHR-63 closes: unknown
     operations now fail closed instead). Swapped to "memory-add", a real
     operation, so this test still exercises the token-estimate regression
     it was written for without depending on that now-fixed loophole.
@@ -99,7 +99,7 @@ def test_existing_route_operation_decisions_still_hold() -> None:
     assert route_operation("memory-add", duplicate=True)["ladder_step"] == "link-existing"
     assert route_operation("patch", status_change=True)["ladder_step"] == "atom-patch"
     assert route_operation("memory-add", public_claim=True)["executor"] == "flagship"
-    # ZRF-63 note: empty-string was previously used here to assert a
+    # SHR-63 note: empty-string was previously used here to assert a
     # "no-write" decision for "no operation, no text". That relied on the
     # same defect fixed above — an unrecognized operation (empty string is
     # not a real operation name) falling through to a generic no-write

@@ -87,7 +87,7 @@ Assumptions must appear at the top of any output that relies on them. See `refer
 The following must be copied verbatim from the source. Never paraphrase, normalize, or reformat:
 
 - **File paths:** `<repo>/subdir/file.ext` — preserve every slash, capitalization, and space (paths in examples must be repo-relative or clearly-abstracted; never leak absolute host paths).
-- **Shell commands:** `python3 zeref-validate.py --verbose` — preserve flags, spacing, quoting.
+- **Shell commands:** `python3 shiroe-validate.py --verbose` — preserve flags, spacing, quoting.
 - **URLs:** Preserve protocol, subdomain, path, and query parameters exactly.
 - **Error messages:** Copy the full error text, including error codes and stack trace lines.
 - **Configuration values:** Preserve key names, data types, and nesting.

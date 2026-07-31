@@ -9,7 +9,7 @@
 > context layer that plugs into your existing AI harness. See
 > [`README.md`](README.md) for the full disclaimer set.
 
-This is the canonical agent specification for **Zeref**. All harness-specific files (`CLAUDE.md`, `CODEX.md`, `GEMINI.md`, `LLAMA.md`, `.cursor/rules/zeref.mdc`, `.windsurfrules`, `.aider.conf.yml`) defer to this document.
+This is the canonical agent specification for **Zeref**. All harness-specific files (`CLAUDE.md`, `CODEX.md`, `GEMINI.md`, `LLAMA.md`, `.cursor/rules/shiroe.mdc`, `.windsurfrules`, `.aider.conf.yml`) defer to this document.
 
 ## Identity
 
@@ -48,7 +48,7 @@ Do NOT read individual wiki pages for general coding questions or things already
 11. **Two-Strikes Rule**: do not codify a rule on the first occurrence of an error. See `references/two-strikes-rule.md`.
 12. **Harness Agnosticism**: AGENTS.md is source of truth; per-harness stubs defer. See `references/harness-translation-map.md`.
 13. **Cost-Weight Auto-Gate**: `budget-governor` runs before every major task; CRITICAL / HIGH cannot proceed without stated tier. See `skills/budget-governor/SKILL.md` §Auto-Activation Rule.
-14. **Task-Weight Reasoning Routing**: weight maps to a provider-neutral reasoning class — LOW→`fast`, MEDIUM→`balanced`, HIGH→`deep`, CRITICAL→`frontier`. `frontier` is CRITICAL-only; LOW never above `fast`. Concrete model ids live only in `zeref/adapters/providers/`. See `## Reasoning-Class Routing` below.
+14. **Task-Weight Reasoning Routing**: weight maps to a provider-neutral reasoning class — LOW→`fast`, MEDIUM→`balanced`, HIGH→`deep`, CRITICAL→`frontier`. `frontier` is CRITICAL-only; LOW never above `fast`. Concrete model ids live only in `shiroe/adapters/providers/`. See `## Reasoning-Class Routing` below.
 
 ## Auto-Activation Gates
 
@@ -78,8 +78,8 @@ See `skills/prompt-context-engine/SKILL.md`.
 ## Reasoning-Class Routing
 
 Per Core Principle 14. Weight (from `budget-governor`) maps to a provider-neutral
-reasoning class (`zeref/core/reasoning.py`). Provider adapters
-(`zeref/adapters/providers/<provider>.json`) map classes to concrete models at
+reasoning class (`shiroe/core/reasoning.py`). Provider adapters
+(`shiroe/adapters/providers/<provider>.json`) map classes to concrete models at
 the edge — core surfaces never name provider models.
 
 | Weight | Reasoning class | Effort | Typical $ / task | Examples |
@@ -106,7 +106,7 @@ Default: orchestrator on `balanced` — the cost-balanced default unless task
 weight escalates or de-escalates. The top class exists for critical, ambitious
 work only; everything routine rides the cheapest class that clears its QA gate.
 
-### Hard constraints (enforced by `zeref.core.reasoning.validate_request`)
+### Hard constraints (enforced by `shiroe.core.reasoning.validate_request`)
 
 - **LOW never above `fast`** — flag mismatch via `budget-governor` Step 4. Propose downgrade.
 - **CRITICAL never below `balanced`; `frontier` reserved for CRITICAL** — hard block in code, not prose.
@@ -115,7 +115,7 @@ work only; everything routine rides the cheapest class that clears its QA gate.
 
 ### Per-skill routing audit (current state)
 
-All skills' `reasoning_class` fields in `zeref-registry.json` audited against weight per the matrix above. No LOW→`deep`+ or CRITICAL→`fast` mismatches detected. Borderline call: `privacy-abstraction` (`risk_level: high`, `reasoning_class: fast`) — kept on `fast` because redaction follows deterministic REDACT.md rules; bump to `balanced` if a future PATTERNS.jsonl event shows redaction misses on adversarial input. Tracked as forward signal for `pattern-observer`.
+All skills' `reasoning_class` fields in `shiroe-registry.json` audited against weight per the matrix above. No LOW→`deep`+ or CRITICAL→`fast` mismatches detected. Borderline call: `privacy-abstraction` (`risk_level: high`, `reasoning_class: fast`) — kept on `fast` because redaction follows deterministic REDACT.md rules; bump to `balanced` if a future PATTERNS.jsonl event shows redaction misses on adversarial input. Tracked as forward signal for `pattern-observer`.
 
 ## Agents (6)
 
@@ -241,7 +241,7 @@ Zeref ships with **zero** bundled MCP tools. Recommendation-only after `pattern-
 |---|---|---|
 | Claude Code | `CLAUDE.md` | See @AGENTS.md |
 | Codex | native | AGENTS.md |
-| Cursor | `.cursor/rules/zeref.mdc` | rules format → AGENTS.md |
+| Cursor | `.cursor/rules/shiroe.mdc` | rules format → AGENTS.md |
 | Gemini CLI / Antigravity | `GEMINI.md` | native AGENTS.md |
 | Windsurf | `.windsurfrules` | rules format → AGENTS.md |
 | Aider | `.aider.conf.yml.example` | convention-based |

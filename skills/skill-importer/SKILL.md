@@ -15,7 +15,7 @@ triggers:
 deliverables:
   - skills/<name>/SKILL.md copied with provenance frontmatter
   - skills/<name>/PROVENANCE.md created (source path, source repo, import date, checksum)
-  - skill registered in zeref-registry.json with model + risk_level
+  - skill registered in shiroe-registry.json with model + risk_level
   - skill NOT auto-activated — awaits /review-skill
 ---
 
@@ -57,7 +57,7 @@ This skill is the destination side of "adaptivity". When the user says
    ```
 6. **Write `skills/<name>/PROVENANCE.md`** with: source path, source
    project, original author (if known), import date, source SHA-256.
-7. **Append to `zeref-registry.json`** with `risk_level: medium` and the
+7. **Append to `shiroe-registry.json`** with `risk_level: medium` and the
    declared trigger phrases — but with an `activation: false` flag so
    `skill-router` does **not** pick it up.
 8. **Notify the user**: "Imported `<name>` to `skills/<name>/`. Run

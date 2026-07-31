@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from zeref.adapters.harnesses.hermes import HermesAdapter
+from shiroe.adapters.harnesses.hermes import HermesAdapter
 
 
 def test_hermes_sidecar_when_detected(monkeypatch) -> None:
     monkeypatch.setenv("HERMES_VERSION", "2.0")
-    monkeypatch.setattr("zeref.adapters.harnesses.hermes.which",
+    monkeypatch.setattr("shiroe.adapters.harnesses.hermes.which",
                          lambda cmd: None)
     r = HermesAdapter().detect()
     assert r.detected
@@ -19,7 +19,7 @@ def test_hermes_sidecar_when_detected(monkeypatch) -> None:
 
 def test_hermes_context_only_when_absent(monkeypatch) -> None:
     monkeypatch.delenv("HERMES_VERSION", raising=False)
-    monkeypatch.setattr("zeref.adapters.harnesses.hermes.which",
+    monkeypatch.setattr("shiroe.adapters.harnesses.hermes.which",
                          lambda cmd: None)
     r = HermesAdapter().detect()
     assert not r.detected

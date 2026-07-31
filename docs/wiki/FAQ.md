@@ -60,17 +60,17 @@ Each adapter declares an enforcement level — embedded, sidecar/proxy, or conte
 
 Zeref does not call model APIs at all; it is a memory engine, not an inference layer. What it does is decide which *class* of model a task is entitled to.
 
-Core code names reasoning classes (`fast`, `balanced`, `deep`, `frontier`, plus the `local` and `private` placement constraints) and never vendor model IDs. Concrete IDs are resolved at the edge from declarative JSON descriptors in `zeref/adapters/providers/`, shipped for `anthropic` and `openai`. Adding a provider is a config file, not a code change.
+Core code names reasoning classes (`fast`, `balanced`, `deep`, `frontier`, plus the `local` and `private` placement constraints) and never vendor model IDs. Concrete IDs are resolved at the edge from declarative JSON descriptors in `shiroe/adapters/providers/`, shipped for `anthropic` and `openai`. Adding a provider is a config file, not a code change.
 
 ## Can two sessions write to the same memory file at once?
 
-No. Writes go through a single-writer path with an advisory lock in `zeref/lock.py`; a second concurrent writer aborts with a clear error rather than interleaving.
+No. Writes go through a single-writer path with an advisory lock in `shiroe/lock.py`; a second concurrent writer aborts with a clear error rather than interleaving.
 
 Writes are atomic, so an interrupted write does not leave a half-written file.
 
 ## How does redaction work?
 
-Deterministically, in code. `zeref/privacy.py` applies redaction rules before a write; nothing depends on a model choosing to be careful.
+Deterministically, in code. `shiroe/privacy.py` applies redaction rules before a write; nothing depends on a model choosing to be careful.
 
 Input is NFKC-normalized, homoglyphs are folded to ASCII, and base64 payloads are decoded before pattern matching, so a credential cannot slip past a rule by changing its encoding.
 
@@ -90,7 +90,7 @@ Five checks on the write path: `fact_guard`, `evidence_guard`, `privacy_guard`, 
 
 Prefer not to write one by hand. Let `pattern-observer` surface a candidate from repeated work, let `pattern-to-skill` draft it, then approve it via `/review-skill`. Drafts land in `skills/drafts/` and are never auto-activated.
 
-If you do write one manually, add it under `skills/<name>/SKILL.md` with proper frontmatter, register it, and run `python3 scripts/zeref-validate.py`.
+If you do write one manually, add it under `skills/<name>/SKILL.md` with proper frontmatter, register it, and run `python3 scripts/shiroe-validate.py`.
 
 ## How are team packs different from skill stacks?
 

@@ -19,26 +19,26 @@ These harnesses read `AGENTS.md` natively.
    ```bash
    git clone https://github.com/kanadhiayash/zeref-memory-engine.git .zeref
    ```
-2. Point your harness at `.zeref/AGENTS.md` as the canonical agent spec.
+2. Point your harness at `.shiroe/AGENTS.md` as the canonical agent spec.
 3. (Optional) Symlink the relevant harness stub to your project root:
-   - Gemini → `.zeref/GEMINI.md`
-   - Claude → `.zeref/CLAUDE.md`
+   - Gemini → `.shiroe/GEMINI.md`
+   - Claude → `.shiroe/CLAUDE.md`
 
 ## Cursor
 
 ```bash
 git clone https://github.com/kanadhiayash/zeref-memory-engine.git .zeref
 mkdir -p .cursor/rules
-cp .zeref/.cursor/rules/zeref.mdc .cursor/rules/
+cp .shiroe/.cursor/rules/shiroe.mdc .cursor/rules/
 ```
 
-Cursor auto-loads `.cursor/rules/zeref.mdc` which points to `.zeref/AGENTS.md`.
+Cursor auto-loads `.cursor/rules/shiroe.mdc` which points to `.shiroe/AGENTS.md`.
 
 ## Windsurf
 
 ```bash
 git clone https://github.com/kanadhiayash/zeref-memory-engine.git .zeref
-cp .zeref/.windsurfrules .
+cp .shiroe/.windsurfrules .
 ```
 
 Windsurf auto-loads `.windsurfrules` at project root.
@@ -47,7 +47,7 @@ Windsurf auto-loads `.windsurfrules` at project root.
 
 ```bash
 git clone https://github.com/kanadhiayash/zeref-memory-engine.git .zeref
-cp .zeref/.aider.conf.yml.example .aider.conf.yml
+cp .shiroe/.aider.conf.yml.example .aider.conf.yml
 # Edit .aider.conf.yml as needed
 ```
 
@@ -75,14 +75,14 @@ Re-run `/zeref-os:start` after to boot the session. Default privacy mode is **ab
 ## Verify
 
 ```bash
-python3 .zeref/scripts/zeref-validate.py
+python3 .shiroe/scripts/shiroe-validate.py
 ```
 
 Expect output like the following (counts are derived from the tree and
-`zeref-registry.json` at run time, so exact numbers track the current release):
+`shiroe-registry.json` at run time, so exact numbers track the current release):
 ```
 Zeref validator — /path/to/your/project
-Skills:           15/15 (from zeref-registry.json)
+Skills:           15/15 (from shiroe-registry.json)
 Agents:           6/6 (filesystem vs registry)
 Commands:         8/8 (filesystem vs registry)
 Team packs:       9/9 (filesystem vs registry)

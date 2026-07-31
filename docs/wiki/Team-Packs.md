@@ -29,7 +29,7 @@ Size packs set the cost envelope: token targets and hard caps, the default reaso
 | `medium` | Memory writer, privacy guardian, evidence curator, sync coordinator | Typical project work. Top tier reserved for critical-weight tasks. |
 | `enterprise` | All background agents | Widest budget. Adversarial verification panels enabled. |
 
-Size packs constrain cost; they do not grant capability. The per-task skill cap applies globally regardless of which size pack is active, and the reasoning-class entitlement rule in `zeref/core/reasoning.py` still governs what any given task may buy. A wider envelope raises the ceiling, not the floor.
+Size packs constrain cost; they do not grant capability. The per-task skill cap applies globally regardless of which size pack is active, and the reasoning-class entitlement rule in `shiroe/core/reasoning.py` still governs what any given task may buy. A wider envelope raises the ceiling, not the floor.
 
 ## Activation
 

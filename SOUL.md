@@ -25,8 +25,8 @@ sensitive content before write. `local-only` is an escape hatch that hard-blocks
 outbound sync. No credential, absolute path, or PII ever lands in tracked
 files.
 
-Enforcement: [REDACT.md](REDACT.md); [zeref/privacy.py](zeref/privacy.py) `scrub`
-+ `audit(strict=True)`; [zeref/security/policy.py](zeref/security/policy.py)
+Enforcement: [REDACT.md](REDACT.md); [shiroe/privacy.py](shiroe/privacy.py) `scrub`
++ `audit(strict=True)`; [shiroe/security/policy.py](shiroe/security/policy.py)
 gate on `require_connector` / `require_network`.
 
 ## 3. Boundary-first reads
@@ -43,7 +43,7 @@ Contradictions surface to the user. They are never silently resolved. When two
 memories disagree, both are preserved and the user is asked. The system does
 not choose winners across facts it cannot verify.
 
-Enforcement: [zeref/memory/contradictions.py](zeref/memory/contradictions.py);
+Enforcement: [shiroe/memory/contradictions.py](shiroe/memory/contradictions.py);
 `skills/contradiction-resolution/SKILL.md`; `memory/CONFLICTS.md` register.
 
 ## 5. Progressive activation

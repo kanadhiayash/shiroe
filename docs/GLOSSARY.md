@@ -4,14 +4,14 @@ Canonical term definitions. Where a term names a code construct, the module is c
 
 | Term | Definition |
 |---|---|
-| **Reasoning class** | Provider-neutral cost/capability tier a task is entitled to. Core code and schemas name only the class, never a vendor model id. Defined in `zeref/core/reasoning.py`. |
+| **Reasoning class** | Provider-neutral cost/capability tier a task is entitled to. Core code and schemas name only the class, never a vendor model id. Defined in `shiroe/core/reasoning.py`. |
 | — `fast` | Cheapest class. Entitlement floor for LOW-criticality tasks; always available. |
 | — `balanced` | Default working tier for MEDIUM-criticality tasks and routine orchestration. |
 | — `deep` | Higher-cost tier for HIGH-criticality tasks needing more deliberation. |
 | — `frontier` | Top-cost tier. CRITICAL-only, enforced in code by `ReasoningPolicyError` — no prose-only guardrail. |
 | — `local` | Placement constraint: run on-device / offline. Not a cost tier; permitted at any criticality. |
 | — `private` | Placement constraint: run in a privacy-restricted execution context. Not a cost tier; permitted at any criticality. |
-| **Provider adapter** | The only place a concrete vendor model id may appear. A declarative `<provider>.json` file (`zeref/adapters/providers/`) mapping each reasoning class to a model id + effort for one provider. Loaded via `JsonProviderAdapter` and resolved with `resolve_model()`. |
+| **Provider adapter** | The only place a concrete vendor model id may appear. A declarative `<provider>.json` file (`shiroe/adapters/providers/`) mapping each reasoning class to a model id + effort for one provider. Loaded via `JsonProviderAdapter` and resolved with `resolve_model()`. |
 | **Harness** | The external AI CLI/IDE surface Zeref plugs into. Registered harness adapters: `claude-code`, `codex`, `gemini-cli`, `hermes`, `kimi-code`, `odysseus`, `grok`. Zeref is not itself a harness — it is the memory/governance layer a harness reads and writes through. |
 | **Capability** | Any external unit of specialist execution Zeref can discover and govern: skill, agent, plugin, MCP server, CLI, repository tool, script, workflow, evaluator, or API service. |
 | **Capability lifecycle states** | The only path from discovery to execution. No state may be skipped and no execution happens before `approved`. |
@@ -24,7 +24,7 @@ Canonical term definitions. Where a term names a code construct, the module is c
 | — `stale` | Approved/benchmarked but not refreshed within policy freshness window; excluded from selection until refreshed. |
 | — `revoked` | Trust withdrawn; execution blocked until re-approved. |
 | — `compromised` | Failed a trust or security check; blocked and flagged for review. |
-| **Mission blueprint** | A schema (`zeref.mission/v1`) declaring the functional seats, required outputs, execution graph, and completion criteria for a task type (e.g. `build`, `research`, `red`, `audit`, `ship`, `solo`). Defines *what* is needed, never *who* by fixed name. |
+| **Mission blueprint** | A schema (`shiroe.mission/v1`) declaring the functional seats, required outputs, execution graph, and completion criteria for a task type (e.g. `build`, `research`, `red`, `audit`, `ship`, `solo`). Defines *what* is needed, never *who* by fixed name. |
 | **Execution policy** | A named envelope controlling cost, parallelism, assurance, and autonomy for a compiled team. Envelopes ship as size team packs in `team-packs/`: `small` (tightest budget, lowest default tier, memory writer only), `medium` (typical project work, top tier reserved for critical-weight tasks), `enterprise` (widest budget, all background agents, adversarial verification panels enabled). An envelope raises the cost ceiling; it does not grant capability, and reasoning-class entitlement still applies. |
 | **Compiled team** | The concrete, persisted plan produced by matching a mission blueprint against approved capabilities under an execution policy: seat assignments, versions/digests, permissions, execution graph, retry/timeout/stop rules, verification requirements, cost envelope, and codec selection. |
 | **Enforcement level** | The honesty label on how strongly Zeref can actually govern a given integration — never claimed beyond what the active execution path supports. |

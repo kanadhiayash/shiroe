@@ -5,8 +5,8 @@ from __future__ import annotations
 import sys
 
 from benchmarks.helpers import add_atom, axis_result, print_json_result, temp_memory_root
-from zeref.memory.refine import build_health_report, refine_memory
-from zeref.memory.render import render_memory_view
+from shiroe.memory.refine import build_health_report, refine_memory
+from shiroe.memory.render import render_memory_view
 
 
 def run() -> dict:

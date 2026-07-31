@@ -32,7 +32,7 @@ def _ci_runs(command: str) -> bool:
 
     Checked by content rather than by workflow filename. Both callers below
     previously looked for a specific file (test.yml, version-consistency.yml);
-    CI was later consolidated into a single zrf-verify.yml, so both reported
+    CI was later consolidated into a single shr-verify.yml, so both reported
     False and capped their sub-scores while CI was in fact running those
     commands on every pull request. A filename is not evidence — the step is.
     """
@@ -75,7 +75,7 @@ def _score_test_suite() -> tuple[float, str]:
 
 
 def _score_privacy_patterns() -> tuple[float, str]:
-    from zeref.privacy import _PROVIDER_PATTERNS  # type: ignore
+    from shiroe.privacy import _PROVIDER_PATTERNS  # type: ignore
     n = len(_PROVIDER_PATTERNS)
     score = 10.0 if n >= 9 else 7.0 if n >= 5 else 4.0
     return score, f"{n} provider-shaped credential patterns wired"

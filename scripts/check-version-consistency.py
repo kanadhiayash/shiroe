@@ -2,17 +2,17 @@
 """
 check-version-consistency.py — Fail CI on any drift across version surfaces.
 
-Single source of truth: zeref/VERSION
+Single source of truth: shiroe/VERSION
 Surfaces verified:
-    - zeref/VERSION                       (the canonical file)
-    - zeref/__init__.py:__version__       (loaded at import time)
+    - shiroe/VERSION                       (the canonical file)
+    - shiroe/__init__.py:__version__       (loaded at import time)
     - pyproject.toml:[project].version
-    - zeref-registry.json:.version
+    - shiroe-registry.json:.version
     - .claude-plugin/plugin.json:.version
     - README.md:badge URL + alt text
     - docs/wiki/Installation.md:grep example
 
-Identity block — single source of truth: zeref/IDENTITY.json
+Identity block — single source of truth: shiroe/IDENTITY.json
 Surfaces verified:
     - pyproject.toml:[project].name             == .distribution
     - pyproject.toml:[project.scripts]           has a .cli key -> "<module>.cli:main"
@@ -40,8 +40,8 @@ import re
 import sys
 from pathlib import Path
 
-CANONICAL_FILE = "zeref/VERSION"
-IDENTITY_FILE = "zeref/IDENTITY.json"
+CANONICAL_FILE = "shiroe/VERSION"
+IDENTITY_FILE = "shiroe/IDENTITY.json"
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][\w.\-]+)?$")
 
 
@@ -69,15 +69,15 @@ def _check_pyproject(root: Path, expected: str) -> tuple[str, str | None]:
 
 def _check_init(root: Path, expected: str) -> tuple[str, str | None]:
     # We do not exec the file; we treat VERSION as the canonical and check the loader is intact.
-    text = _read(root, "zeref/__init__.py")
+    text = _read(root, "shiroe/__init__.py")
     if "_VERSION_FILE" not in text or "VERSION" not in text:
-        return ("zeref/__init__.py loader", None)
-    return ("zeref/__init__.py loader", expected)
+        return ("shiroe/__init__.py loader", None)
+    return ("shiroe/__init__.py loader", expected)
 
 
 def _check_registry(root: Path, expected: str) -> tuple[str, str | None]:
-    data = json.loads(_read(root, "zeref-registry.json"))
-    return ("zeref-registry.json:.version", data.get("version"))
+    data = json.loads(_read(root, "shiroe-registry.json"))
+    return ("shiroe-registry.json:.version", data.get("version"))
 
 
 def _check_plugin(root: Path, expected: str) -> tuple[str, str | None]:
@@ -221,7 +221,7 @@ def main() -> int:
                 print(f"  - {name}: expected {id_expected!r}, found {observed!r}", file=sys.stderr)
         return 1
 
-    # R8 (ZRF-AUDIT-020): also compare against the latest git tag.
+    # R8 (SHR-AUDIT-020): also compare against the latest git tag.
     # Semantics:
     #   - `tag > VERSION` (backwards drift) — always fail unless CHANGELOG.md
     #     names the lineage restart with a `restart-from-<version>` marker.
@@ -255,7 +255,7 @@ def main() -> int:
             else:
                 print(f"\nTag divergence: latest tag {latest_tag!r} exceeds VERSION {expected!r}.",
                       file=sys.stderr)
-                print("Either bump zeref/VERSION or document the intentional lineage restart in "
+                print("Either bump shiroe/VERSION or document the intentional lineage restart in "
                       "CHANGELOG.md with a `restart-from-<version>` marker.", file=sys.stderr)
                 return 1
         elif tag_tuple < expected_tuple:

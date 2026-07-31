@@ -103,8 +103,8 @@ Derived-summary schema — no source text vendored. See
 for policy.
 
 Consumers:
-- `zeref/prompt/inject.py` — target-aware wrapper
-- `zeref/memory/cost_router.py` — length-aware cost
+- `shiroe/prompt/inject.py` — target-aware wrapper
+- `shiroe/memory/cost_router.py` — length-aware cost
 - `skills/caveman-handoff/SKILL.md` — target-aware skip list
 - `skills/prompt-context-engine/SKILL.md` — profile-aware classification
 - `_shared/model-resolver.md` — cross-linked row

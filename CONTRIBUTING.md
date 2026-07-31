@@ -52,16 +52,16 @@ Keep PRs focused. Prefer several clear commits over one large mixed commit.
 Run before requesting review:
 
     python3 -m pytest -q
-    python3 scripts/zeref-validate.py
-    python3 -m zeref audit
-    python3 -m zeref audit-privacy --strict
+    python3 scripts/shiroe-validate.py
+    python3 -m shiroe audit
+    python3 -m shiroe audit-privacy --strict
     python3 scripts/check-version-consistency.py
     python3 benchmarks/run-all.py
     git diff --check
 
 For release-facing changes, also run:
 
-    python3 -m zeref release check
+    python3 -m shiroe release check
 
 ## Public claims
 

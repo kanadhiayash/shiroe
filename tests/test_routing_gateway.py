@@ -1,4 +1,4 @@
-"""ZRF-59: the model-call gateway is mandatory, not advisory.
+"""SHR-59: the model-call gateway is mandatory, not advisory.
 
 The AST scan at the bottom is the actual guarantee. The gateway is only a
 helper until something fails the build when a caller steps around it.
@@ -11,8 +11,8 @@ from pathlib import Path
 
 import pytest
 
-from zeref.core.reasoning import ReasoningPolicyError
-from zeref.routing.gateway import (
+from shiroe.core.reasoning import ReasoningPolicyError
+from shiroe.routing.gateway import (
     ModelCallRequest,
     RouteDecision,
     RoutingError,
@@ -22,11 +22,11 @@ from zeref.routing.gateway import (
 REPO = Path(__file__).resolve().parents[1]
 
 # Only these modules may resolve a provider model directly. Everything else
-# goes through zeref.routing.gateway.route().
+# goes through shiroe.routing.gateway.route().
 DIRECT_RESOLUTION_ALLOWLIST = {
-    "zeref/routing/gateway.py",  # the gateway itself
-    "zeref/adapters/providers/__init__.py",  # resolve_model's own definition
-    "zeref/adapters/providers/base.py",  # ProviderAdapter.resolve's definition
+    "shiroe/routing/gateway.py",  # the gateway itself
+    "shiroe/adapters/providers/__init__.py",  # resolve_model's own definition
+    "shiroe/adapters/providers/base.py",  # ProviderAdapter.resolve's definition
 }
 
 GUARDED_NAMES = {"resolve_model"}
@@ -102,7 +102,7 @@ def test_criticality_survives_privacy_class() -> None:
 
 def test_decision_carries_provenance() -> None:
     decision = route(ModelCallRequest(criticality="MEDIUM", purpose="write a test"))
-    assert decision.policy_version == "zeref.routing.gateway/v1"
+    assert decision.policy_version == "shiroe.routing.gateway/v1"
     assert len(decision.task_digest) == 16
     assert decision.purpose == "write a test"
 
@@ -154,6 +154,6 @@ def test_no_module_resolves_a_model_outside_the_gateway() -> None:
             offenders[rel] = hits
     assert not offenders, (
         "these modules resolve a provider model without passing through "
-        "zeref.routing.gateway.route(); route them or add a reviewed entry to "
+        "shiroe.routing.gateway.route(); route them or add a reviewed entry to "
         f"DIRECT_RESOLUTION_ALLOWLIST: {offenders}"
     )

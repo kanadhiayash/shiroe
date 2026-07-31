@@ -11,8 +11,8 @@ import tempfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from zeref.memory import scaffold_project
-from zeref.memory_state import MemoryStore
+from shiroe.memory import scaffold_project
+from shiroe.memory_state import MemoryStore
 
 REPO = Path(__file__).resolve().parent.parent
 FIXTURES = REPO / "benchmarks" / "fixtures" / "adapter_cases.json"

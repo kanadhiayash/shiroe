@@ -17,7 +17,7 @@ and two honest baselines against real external datasets:
 - Explicitly unsupported, with reasons: see [`UNSUPPORTED.md`](UNSUPPORTED.md).
 - Baselines (`baselines/`): `plain_files` and `sqlite_fts` are legacy
   infrastructure checks. The three arms every scored run reports are
-  `zeref` (the real `zeref.memory` search stack), `full_context` (no memory
+  `zeref` (the real `shiroe.memory` search stack), `full_context` (no memory
   system — the honest floor), and `bm25` (a plain Okapi BM25 ranker).
   Phase B publishes zeref numbers **next to** `full_context` and `bm25`
   or not at all.
@@ -80,7 +80,7 @@ id, prompts hash, token/cost record, timestamp, and mode (`dry_run`/`live`).
 The single-backend `harness.py` invocation above still works for
 infrastructure spot-checks. For an actual comparison, use the CLI, which
 always runs the `zeref`, `full_context`, and `bm25` arms together (a Zeref
-number alone is meaningless — see `zeref/release/claim_gate.py`'s
+number alone is meaningless — see `shiroe/release/claim_gate.py`'s
 `missing_baseline_pair` constraint):
 
 ```bash

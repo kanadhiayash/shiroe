@@ -8,9 +8,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-from zeref.guards.evidence_guard import check_card, check_public_docs, grade_text
-from zeref.memory import scaffold_project
-from zeref.memory_state import MemoryStore
+from shiroe.guards.evidence_guard import check_card, check_public_docs, grade_text
+from shiroe.memory import scaffold_project
+from shiroe.memory_state import MemoryStore
 
 
 def _env(repo_root: Path) -> dict:
@@ -21,7 +21,7 @@ def _env(repo_root: Path) -> dict:
 
 def _run(repo_root: Path, cwd: Path, args: list[str]) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, "-m", "zeref", *args],
+        [sys.executable, "-m", "shiroe", *args],
         cwd=str(cwd),
         capture_output=True,
         text=True,
