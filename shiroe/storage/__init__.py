@@ -2,7 +2,7 @@
 
 Invariant enforced here:
 
-    SQLite = canonical current state (memory/state/zeref2.sqlite)
+    SQLite = canonical current state (memory/state/shiroe.sqlite)
     JSONL  = canonical append-only history (memory/events/*.jsonl)
     Markdown = generated human view (memory/views/*.md)
     TOON / Parquet = optional generated model / analytical exports
