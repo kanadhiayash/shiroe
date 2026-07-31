@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "zeref-os"
-version = "2.0.0-alpha.3"
+version = "3.0.0-alpha.1"
 description = "Zeref Memory Engine — local-first context and memory engine for AI harnesses"
 readme = "README.md"
 license = { text = "MIT" }
@@ -44,7 +44,7 @@ all       = ["litellm>=1.0", "duckdb>=0.10", "pyyaml>=6.0", "tiktoken>=0.5"]
 zeref = "zeref.cli:main"
 
 [project.urls]
-Homepage  = "https://github.com/kanadhiayash/zeref-memory-engine"
+Homepage  = "https://github.com/kanadhiayash/shiroe"
 Changelog = "https://github.com/kanadhiayash/zeref-memory-engine/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]

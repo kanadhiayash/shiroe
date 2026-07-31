@@ -17,7 +17,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 # Version consistency across all surfaces
 # ---------------------------------------------------------------------------
 
-EXPECTED_VERSION = "2.0.0-alpha.3"
+EXPECTED_VERSION = (REPO_ROOT / "zeref" / "VERSION").read_text(encoding="utf-8").strip()
 
 
 def _read(path: Path) -> str:
@@ -25,7 +25,14 @@ def _read(path: Path) -> str:
 
 
 def test_zeref_version_file() -> None:
-    assert (REPO_ROOT / "zeref" / "VERSION").read_text().strip() == EXPECTED_VERSION
+    # The other version tests compare their surface against EXPECTED_VERSION,
+    # which is read from this file — so this one cannot also compare against
+    # it without becoming a tautology. It asserts the canonical file's own
+    # contract instead: present, and parseable as SemVer.
+    assert EXPECTED_VERSION, "zeref/VERSION is empty"
+    assert re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][\w.\-]+)?", EXPECTED_VERSION), (
+        f"zeref/VERSION is not SemVer: {EXPECTED_VERSION!r}"
+    )
 
 
 def test_pyproject_version() -> None:
