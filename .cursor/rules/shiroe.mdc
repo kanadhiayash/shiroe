@@ -11,7 +11,7 @@ Canonical agent spec: **AGENTS.md**
 
 On every session start, load `AGENTS.md` FIRST.
 
-## Reading order (per AGENTS.md §0 / ZEREF_OS §0)
+## Reading order (per AGENTS.md §0 / SHIROE_OS §0)
 
 1. `memory/hot.md` — last 3 sessions, ≤500 words
 2. `memory/index.md` — if hot insufficient

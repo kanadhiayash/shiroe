@@ -53,7 +53,7 @@ def intake_skip(axis: str) -> dict[str, Any] | None:
         "reason": (
             f"lineage intake CSV {path.name} not found. The 64-row intake "
             "dataset is local-only and intentionally not committed. Set "
-            "ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to "
+            "SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to "
             "run this axis. Skipped axes are reported explicitly and do not "
             "count as passing (SHR-AUDIT-012)."
         ),

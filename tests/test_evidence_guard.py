@@ -59,11 +59,11 @@ def test_evidence_upgrade_command(repo_root: Path, tmp_path: Path) -> None:
         evidence_grade="C",
     )
 
-    upgraded = _run(repo_root, tmp_path, ["evidence", "upgrade", card.id, "--source", "docs/plans/ZEREF_HARDENING_RECON.md"])
+    upgraded = _run(repo_root, tmp_path, ["evidence", "upgrade", card.id, "--source", "docs/plans/SHIROE_HARDENING_RECON.md"])
     assert upgraded.returncode == 0, upgraded.stderr
     data = json.loads(upgraded.stdout)
     assert data["evidence_grade"] == "B"
-    assert "docs/plans/ZEREF_HARDENING_RECON.md" in data["source_refs"]
+    assert "docs/plans/SHIROE_HARDENING_RECON.md" in data["source_refs"]
 
 
 def test_evidence_list_and_report(repo_root: Path, tmp_path: Path) -> None:

@@ -20,7 +20,7 @@ Open WebUI, and any harness that fronts a Llama-family model).
 ## First action every session
 
 Identical to AGENTS.md §"First action every session" (reading order per
-ZEREF_OS §0):
+SHIROE_OS §0):
 
 1. Read `config/PROJECT.md`
 2. Read `memory/hot.md` (≤500 words)
@@ -32,7 +32,7 @@ ZEREF_OS §0):
 
 ## Safety
 
-See `references/zeref-safety-principles.md`. Irreversible actions always
+See `references/shiroe-safety-principles.md`. Irreversible actions always
 require explicit user confirmation. Local Llama harnesses do **not**
 exempt you from this rule — confirmation prompts must still surface in
 the wrapping UI.

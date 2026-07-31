@@ -6,7 +6,6 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/version-3.0.0--alpha.1-blueviolet" alt="version 3.0.0-alpha.1">
-  <img src="assets/zeref-os-hero.png" alt="Shiroe" width="720">
 </p>
 
 <p align="center">

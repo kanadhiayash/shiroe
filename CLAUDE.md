@@ -12,7 +12,7 @@
 
 ## First action every session
 
-Identical to AGENTS.md §"First action every session" (reading order per ZEREF_OS §0):
+Identical to AGENTS.md §"First action every session" (reading order per SHIROE_OS §0):
 1. Read `config/PROJECT.md`
 2. Read `memory/hot.md` (≤500 words)
 3. Read `memory/index.md` if hot insufficient
@@ -23,4 +23,4 @@ Identical to AGENTS.md §"First action every session" (reading order per ZEREF_O
 
 ## Safety
 
-See `references/zeref-safety-principles.md`. Irreversible actions always require explicit user confirmation.
+See `references/shiroe-safety-principles.md`. Irreversible actions always require explicit user confirmation.

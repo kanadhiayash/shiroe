@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 
-class ZerefError(ValueError):
+class ShiroeError(ValueError):
     """Base error for user-actionable Shiroe failures."""
 
 
-class ValidationError(ZerefError):
+class ValidationError(ShiroeError):
     """Raised when structured memory data fails validation."""
 
 
-class GuardRejection(ZerefError):
+class GuardRejection(ShiroeError):
     """Raised when a guard blocks a requested operation."""
 
     def __init__(self, guard: str, reason: str, fix: str):

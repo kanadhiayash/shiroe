@@ -11,7 +11,7 @@ This is the canonical agent specification for **Shiroe**. All harness-specific f
 
 Shiroe is a local-first AI work control plane. Harness-agnostic, model-agnostic, privacy-first. Per-project canonical wiki (flat `memory/` layout) + append-only pattern log + snapshots.
 
-## First action every session (reading order — ZEREF_OS §0)
+## First action every session (reading order — SHIROE_OS §0)
 
 0. Read `SOUL.md` (5 operating principles — shapes every decision this session).
 1. Read `config/PROJECT.md`. If missing, run `/start` (triggers project-setup interview).
@@ -150,9 +150,9 @@ All skills' `reasoning_class` fields in `shiroe-registry.json` audited against w
 - `/sync-parent` — manual parent rollup
 - `/reset-permissions` — clear session overrides, restore defaults from PERMISSIONS + SHARING_POLICY
 - `/review-skill` — review pattern-detected skill drafts in `skills/drafts/`
-- `/team [solo|build|research|red|audit|ship]` — activate on-demand team pack (per ZEREF_OS §8)
+- `/team [solo|build|research|red|audit|ship]` — activate on-demand team pack (per SHIROE_OS §8)
 
-## Memory model (flat layout per ZEREF_OS §12)
+## Memory model (flat layout per SHIROE_OS §12)
 
 - `memory/hot.md` — last 3 sessions, ≤500 words (read first)
 - `memory/index.md` — domain index (boundary file)
@@ -168,7 +168,7 @@ All skills' `reasoning_class` fields in `shiroe-registry.json` audited against w
 - `memory/sync/outbound/` — staged parent updates
 - `memory/sync/parent/` — received parent updates
 
-## Privacy & sharing (per ZEREF_OS §4)
+## Privacy & sharing (per SHIROE_OS §4)
 
 Three root files:
 
@@ -210,9 +210,9 @@ When `memory-keeper` detects a conflict between an incoming write and existing w
 
 ## Pattern detection
 
-`pattern-observer` runs background scan of `memory/patterns/PATTERNS.jsonl` over rolling 48–80h window (per ZEREF_OS §3.5 / D4). If ≥3 semantically similar events (n-gram similarity ≥ 0.8), surface as candidate skill via `pattern-to-skill`. Draft written to `skills/drafts/<draft-name>/SKILL.md`. User reviews via `/review-skill`. Never auto-activate.
+`pattern-observer` runs background scan of `memory/patterns/PATTERNS.jsonl` over rolling 48–80h window (per SHIROE_OS §3.5 / D4). If ≥3 semantically similar events (n-gram similarity ≥ 0.8), surface as candidate skill via `pattern-to-skill`. Draft written to `skills/drafts/<draft-name>/SKILL.md`. User reviews via `/review-skill`. Never auto-activate.
 
-## Team Packs (on-demand per ZEREF_OS §8)
+## Team Packs (on-demand per SHIROE_OS §8)
 
 | Team | Agents | Use |
 |---|---|---|
@@ -225,11 +225,11 @@ When `memory-keeper` detects a conflict between an incoming write and existing w
 
 Max 4 agents per pack. Outputs land in `team/`. Activate via `/team [type]`. Definitions in `team-packs/`.
 
-## Connector Advisory (per ZEREF_OS §9)
+## Connector Advisory (per SHIROE_OS §9)
 
 Shiroe ships with **zero** bundled MCP tools. Recommendation-only after `pattern-observer` detects repeated manual behavior. All connectors OFF by default in `SHARING_POLICY.md`. Recommended free stack documented in `references/connector-advisory.md`.
 
-## Harness Translation Map (per ZEREF_OS §10)
+## Harness Translation Map (per SHIROE_OS §10)
 
 | Harness | Stub | Load |
 |---|---|---|

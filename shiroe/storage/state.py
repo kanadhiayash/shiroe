@@ -13,7 +13,11 @@ from pathlib import Path
 from shiroe.migrations import current_version, migrate
 
 
-DB_RELPATH = Path("memory") / "state" / "zeref2.sqlite"
+DB_RELPATH = Path("memory") / "state" / "shiroe.sqlite"
+# Pre-rebrand filename. This is canonical state, not a cache, so an existing
+# project's database is renamed into place on first open -- leaving it behind
+# would present as total memory loss rather than as a rename.
+_LEGACY_DB_RELPATH = Path("memory") / "state" / "zeref2.sqlite"
 
 
 class StateDB:
@@ -21,7 +25,24 @@ class StateDB:
         self.root = Path(root)
         self.path = self.root / DB_RELPATH
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._adopt_legacy_db()
         self._conn: sqlite3.Connection | None = None
+
+    def _adopt_legacy_db(self) -> None:
+        """Rename a pre-rebrand database into place, once.
+
+        Only when the new path does not exist: if both are present the new
+        one is authoritative and the old is left untouched for the operator
+        to inspect rather than silently overwritten.
+        """
+        legacy = self.root / _LEGACY_DB_RELPATH
+        if self.path.exists() or not legacy.exists():
+            return
+        legacy.rename(self.path)
+        for suffix in ("-wal", "-shm"):
+            side = legacy.with_name(legacy.name + suffix)
+            if side.exists():
+                side.rename(self.path.with_name(self.path.name + suffix))
 
     def connect(self) -> sqlite3.Connection:
         if self._conn is None:

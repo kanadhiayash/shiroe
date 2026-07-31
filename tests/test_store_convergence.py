@@ -54,7 +54,7 @@ def _record_claims(root: Path) -> list[str]:
     """Claims in the vNext ``memory_records`` table, or [] when that store is
     absent — its absence is the desired end state, not a test error.
     """
-    db = root / "memory" / "state" / "zeref2.sqlite"
+    db = root / "memory" / "state" / "shiroe.sqlite"
     if not db.exists():
         return []
     import sqlite3
@@ -130,7 +130,7 @@ def test_markdown_views_are_generated_not_authored(repo: Path) -> None:
 def test_only_one_sqlite_state_db_exists(repo: Path) -> None:
     """One derived current-state database, not three.
 
-    ``memory/indexes/zeref.sqlite`` is the rebuildable index and is allowed.
+    ``memory/indexes/shiroe.sqlite`` is the rebuildable index and is allowed.
     Two *state* databases under ``memory/state/`` means two schemas claiming
     to be current state.
     """

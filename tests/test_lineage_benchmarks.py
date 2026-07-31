@@ -36,7 +36,7 @@ LINEAGE_AXES = [
 def test_lineage_benchmark_axes_pass(tmp_path: Path, monkeypatch) -> None:
     csv_path = tmp_path / "lineage.csv"
     _write_csv(csv_path)
-    monkeypatch.setenv("ZEREF_LINEAGE_INTAKE_CSV", str(csv_path))
+    monkeypatch.setenv("SHIROE_LINEAGE_INTAKE_CSV", str(csv_path))
 
     results = [axis.run() for axis in LINEAGE_AXES]
 

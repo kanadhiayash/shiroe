@@ -72,9 +72,9 @@ def test_audit_enforces_lineage_counts(tmp_path: Path) -> None:
 
 
 def test_lineage_audit_cli_accepts_project_csv() -> None:
-    csv_env = os.environ.get("ZEREF_LINEAGE_INTAKE_CSV")
+    csv_env = os.environ.get("SHIROE_LINEAGE_INTAKE_CSV")
     if not csv_env:
-        pytest.skip("Set ZEREF_LINEAGE_INTAKE_CSV to run the local full intake CSV smoke test.")
+        pytest.skip("Set SHIROE_LINEAGE_INTAKE_CSV to run the local full intake CSV smoke test.")
     csv_path = Path(csv_env)
     result = subprocess.run(
         [sys.executable, "-m", "shiroe.cli", "lineage", "audit", "--csv", str(csv_path)],

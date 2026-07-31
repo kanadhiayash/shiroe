@@ -1,5 +1,5 @@
 ---
-mode: abstract                  # exact | abstract | local-only — DEFAULT abstract per ZEREF_OS §4.3
+mode: abstract                  # exact | abstract | local-only — DEFAULT abstract per SHIROE_OS §4.3
 abstract_rules:
   strip_pii: true
   strip_internal_paths: true
@@ -8,7 +8,7 @@ abstract_rules:
 local_only_blocks:
   - memory/sync/outbound/
   - memory/sync/parent/
-connectors_default: off         # per ZEREF_OS §4.3 — all OFF unless enabled in SHARING_POLICY.md
+connectors_default: off         # per SHIROE_OS §4.3 — all OFF unless enabled in SHARING_POLICY.md
 external_transmission: off      # never transmit wiki content externally without explicit per-action approval
 ---
 

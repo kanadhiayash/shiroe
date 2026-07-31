@@ -1,6 +1,6 @@
 <!-- privacy-audit: allow-file "Sharing-policy spec enumerates connector names + example redact classes; no user data." -->
 ---
-# Per-connector sharing allowlist — all OFF by default per ZEREF_OS §4.3 + D8 + D11.
+# Per-connector sharing allowlist — all OFF by default per SHIROE_OS §4.3 + D8 + D11.
 # Shiroe recommends a connector only after detecting repeated manual behavior. User must enable here before use.
 defaults:
   read_project_context: false   # may a connector read PROJECT.md, INDEX.md, decisions?
