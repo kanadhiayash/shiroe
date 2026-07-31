@@ -5,10 +5,6 @@
 > One governed project state across every human, agent, model, harness, and device.
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-3.0.0--alpha.1-blueviolet" alt="version 3.0.0-alpha.1">
-</p>
-
-<p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license"></a>
   <a href="AGENTS.md"><img src="https://img.shields.io/badge/AGENTS.md-canonical-blue" alt="AGENTS.md canonical spec"></a>
   <a href="SECURITY.md"><img src="https://img.shields.io/badge/security-private%20reporting-critical" alt="private vulnerability reporting"></a>

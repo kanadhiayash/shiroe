@@ -9,7 +9,6 @@ Surfaces verified:
     - pyproject.toml:[project].version
     - shiroe-registry.json:.version
     - .claude-plugin/plugin.json:.version
-    - README.md:badge URL + alt text
     - docs/wiki/Installation.md:grep example
 
 Identity block — single source of truth: shiroe/IDENTITY.json
@@ -85,15 +84,6 @@ def _check_plugin(root: Path, expected: str) -> tuple[str, str | None]:
     return (".claude-plugin/plugin.json:.version", data.get("version"))
 
 
-def _check_readme(root: Path, expected: str) -> tuple[str, str | None]:
-    text = _read(root, "README.md")
-    m = re.search(r"version-(\d+\.\d+\.\d+(?:[-+][\w.\-]+)?)-blueviolet", text)
-    if m:
-        # shields.io escapes a literal dash as "--" inside badge segments
-        return ("README.md:badge", m.group(1).replace("--", "-"))
-    return ("README.md:badge", m.group(1) if m else None)
-
-
 def _check_wiki_install(root: Path, expected: str) -> tuple[str, str | None]:
     text = _read(root, "docs/wiki/Installation.md")
     m = re.search(r"shiroe@shiroe\s+v(\d+\.\d+\.\d+(?:[-+][\w.\-]+)?)", text)
@@ -105,7 +95,6 @@ CHECKS = [
     _check_init,
     _check_registry,
     _check_plugin,
-    _check_readme,
     _check_wiki_install,
 ]
 
