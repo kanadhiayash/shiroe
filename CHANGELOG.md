@@ -1,8 +1,103 @@
-# Changelog — Zeref OS
+# Changelog — Shiroe
 
-All notable changes to **Zeref OS** are documented here.
+All notable changes to **Shiroe AI Tactician** are documented here.
 
 Versioning: [Semantic Versioning](https://semver.org/) — `MAJOR.MINOR.PATCH`.
+
+## Naming lineage
+
+The project shipped as **Zeref OS** / **Zeref Memory Engine** through
+`2.0.0-alpha.3`, and as **Shiroe AI Tactician** from `3.0.0-alpha.1`. Entries
+at or before `2.0.0-alpha.3` keep the old name — they record what was true
+when written, and rewriting them would falsify the record. The same applies
+to `docs/adr/`, `docs/audits/release-evidence/`, and the `ZRF-AUDIT-###`
+work-item identifiers cited in closed issues and pull requests; new work
+items use the `SHR-` prefix.
+
+---
+
+## [3.0.0-alpha.1] — 2026-07-31 — Shiroe: rebrand, namespace migration, retrieval fix
+
+Renames every identity surface from Zeref to Shiroe and fixes the retrieval
+defect behind issue #196. Major version because the Python module, the CLI,
+and the distribution name all change — importing `zeref` or invoking `zeref`
+no longer works.
+
+### Changed — breaking
+
+- **Python module** `zeref` → `shiroe`; **CLI** `zeref` → `shiroe`;
+  **distribution** `zeref-os` → `shiroe`; **plugin/marketplace id**
+  `zeref-os` → `shiroe`; slash commands `/zeref-os:<cmd>` → `/shiroe:<cmd>`.
+  No compatibility shim: alpha software, clean break. Reinstall the plugin.
+- **Repository** renamed to `kanadhiayash/shiroe`. GitHub redirects the old
+  slug, so existing links keep resolving.
+- **Environment variables** `ZEREF_*` → `SHIROE_*`. The old names still work
+  and emit a `DeprecationWarning` (`shiroe/env.py`). They live in shell
+  profiles and CI configs this repo cannot rewrite, and an unset variable
+  does not error — it falls back to its default, so dropping
+  `ZEREF_ALLOW_NETWORK` outright would have silently re-armed a network
+  guard an operator had deliberately opened.
+- **Canonical state DB** `memory/state/zeref2.sqlite` → `shiroe.sqlite`,
+  adopted by rename on first open. Left un-migrated it would present as
+  total memory loss rather than a rename. When both exist the new one wins.
+- **Workspace directory** `.zeref/` → `.shiroe/`, still reading the old
+  location when the new one has no file at that path. These are deny rules
+  and write scopes; a rename that stopped loading them would not error, the
+  guard would just quietly stop denying.
+- **Search index** `memory/indexes/zeref.sqlite` → `shiroe.sqlite`. Derived
+  from the JSONL atoms, so the stale file is deleted, not migrated.
+- `ZerefError` → `ShiroeError`. Workflow `zrf-verify.yml` → `shr-verify.yml`
+  — **re-select the required status checks in branch protection**, GitHub
+  binds them per workflow file and the old binding does not follow a rename.
+
+### Fixed
+
+- **Retrieval ranked by substring counts, not BM25** (#196). `search_atoms`
+  used the SQLite FTS5 `bm25()` path only when the index existed, and
+  nothing on the ingest path ever built it — so every recall fell through to
+  a raw `haystack.count(token)` sum with no IDF, no length normalisation, no
+  term-frequency saturation, and substring rather than word matching. It also
+  double-counted, `summary` being conventionally a prefix of `claim`. Now
+  real Okapi BM25 over the already-loaded corpus. This also closes a
+  coherence bug: the two paths ranked the same corpus by different functions,
+  so results changed depending on whether anyone had run `shiroe memory
+  index`. Not re-measured against datasets — benchmark runs are parked —
+  so #196 stays open pending re-measurement.
+- **Target-profile check failed open** (#153) when the profiles directory was
+  absent. Profiles ship now, so a missing or unreadable directory fails
+  closed. Source-authority grading (#175) is preserved.
+- **Append-scaling test was timing-based and flaky** (#191). It asserted a
+  wall-clock ratio and failed CI at 20.6 against a threshold of 20 on one
+  runner while passing on two others. It now counts bytes scanned through
+  `AtomStore._ids_from_bytes`, the invariant it was always about.
+- `fact_guard`'s superlative blocklist had been narrowed by a bulk
+  substitution to a single unreachable literal. Replaced with a generic
+  pattern.
+
+### Added
+
+- **Canonical identity manifest** (`shiroe/IDENTITY.json`) with
+  `check-version-consistency.py` validating 8 identity surfaces alongside the
+  6 version surfaces, so no manifest can drift unnoticed.
+- **A registry schema that exists.** `$schema` pointed at
+  `zeref-os.dev/registry.schema.json` — a host the project does not own,
+  serving a file that never existed, validating nothing. There is now a
+  committed draft 2020-12 schema, a `$schema` URL that resolves, and
+  enforcement in `shiroe-validate.py` via a stdlib checker (no new
+  dependency).
+
+### Removed
+
+- **Unevidenced self-ratings.** `MODEL_DEBATE.md` scored the product out of
+  10 across ten parameters with nothing measuring any of them, two rows
+  claiming "Best-in-class" and "Strongest differentiator vs. comparable
+  systems" against no named comparison. Removed, with a note recording why.
+  The claim gate now scans `references/` and blocks unverified superiority
+  claims anywhere on a public surface — no claim of superiority ships
+  without a public benchmark-verified result, and none exists yet.
+- **Franchise references.** No Fairy Tail, no Dragneel, no origin story.
+- **Zeref-branded hero and icon art**, and the "not an operating system"
+  disclaimer set, which the new name makes moot.
 
 ---
 
