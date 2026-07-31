@@ -128,3 +128,35 @@ def test_run_claim_gate_reports_pass_and_fail(tmp_path: Path) -> None:
     passed, findings = run_claim_gate(tmp_path)
     assert passed is False
     assert findings
+
+
+def test_superiority_claim_under_references_is_caught(tmp_path: Path) -> None:
+    """references/ was unscanned until now.
+
+    An unevidenced self-rating table lived in
+    references/v4x-canon/MODEL_DEBATE.md claiming "Best-in-class" and
+    "Strongest differentiator vs. comparable systems". The gate never saw it
+    because only README.md and docs/ were scanned. The table is gone; this
+    pins the blind spot shut.
+    """
+    canon = tmp_path / "references" / "v4x-canon"
+    canon.mkdir(parents=True)
+    (canon / "MODEL_DEBATE.md").write_text(
+        "| Privacy | 9.5 | Shiroe is best-in-class. |\n", encoding="utf-8",
+    )
+    findings = scan_public_claims(tmp_path)
+    assert any(f.constraint == "unverified_superiority_claim" for f in findings)
+
+
+def test_banned_wording_lists_are_not_themselves_claims(tmp_path: Path) -> None:
+    """PUBLIC_SURFACE.md lists these phrases as forbidden. Naming a banned
+    phrase is not making the claim, so the gate must not trip on the policy
+    that defines it -- otherwise the rule cannot be written down."""
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    (docs / "PUBLIC_SURFACE.md").write_text(
+        "Not allowed: best-in-class, world top, 10/10, production-grade.\n",
+        encoding="utf-8",
+    )
+    findings = scan_public_claims(tmp_path)
+    assert not any(f.constraint == "unverified_superiority_claim" for f in findings)
