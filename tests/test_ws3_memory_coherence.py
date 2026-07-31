@@ -242,24 +242,51 @@ def test_duplicate_atom_id_still_rejected(tmp_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Scale: appending atom N must not rewrite the N-1 prior atoms
+# Scale: appending atom N must not re-read the N-1 prior atoms
 # ---------------------------------------------------------------------------
 
-@pytest.mark.slow
-def test_append_scales_near_linearly(tmp_path: Path) -> None:
-    def bench(n: int) -> float:
-        root = tmp_path / f"scale_{n}"
-        (root / "memory").mkdir(parents=True)
-        store = AtomStore(root)
-        start = time.perf_counter()
-        for i in range(n):
-            store.append(_fact(f"scale fact {i}", provenance=f"scale-{n}-{i}"))
-        return time.perf_counter() - start
+def test_append_scan_bytes_stay_bounded_not_quadratic(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Regression guard for the invariant documented at AtomStore.__init__:
+    "Appending atom N must not re-read the N-1 prior atoms."
 
-    bench(50)  # warm-up (imports, fs caches)
-    t_small = bench(100)
-    t_large = bench(1000)
-    ratio = t_large / max(t_small, 1e-6)
-    # Linear growth is ~10x; the audited quadratic behaviour was ~29x
-    # (0.24s -> 7.07s). Generous CI margin, still far below quadratic.
-    assert ratio < 20, f"append no longer linear: 100={t_small:.3f}s 1000={t_large:.3f}s ratio={ratio:.1f}"
+    Formerly this benchmarked wall-clock time for 100 vs 1000 appends and
+    asserted the ratio stayed under an arbitrary threshold — noisy on a
+    shared CI runner and not actually a measurement of the invariant.
+
+    Instead, count the bytes AtomStore actually feeds through its scan
+    (`_ids_from_bytes`, the single choke point both the incremental tail
+    read and the fallback full-rescan go through) across N appends on one
+    store. The incremental index (`_scan_offsets`) is updated eagerly after
+    every write, so in correct operation the scan never has anything new to
+    read: total scanned bytes stay near zero regardless of N. If the index
+    is broken and every append rescans the file from byte 0, total scanned
+    bytes grow like N^2 and blow past the final file size.
+    """
+    root = tmp_path / "scale"
+    (root / "memory").mkdir(parents=True)
+    store = AtomStore(root)
+
+    scanned_bytes = 0
+    original_ids_from_bytes = AtomStore._ids_from_bytes
+
+    def counting_ids_from_bytes(payload: bytes) -> list[str]:
+        nonlocal scanned_bytes
+        scanned_bytes += len(payload)
+        return original_ids_from_bytes(payload)
+
+    monkeypatch.setattr(AtomStore, "_ids_from_bytes", staticmethod(counting_ids_from_bytes))
+
+    n = 200
+    for i in range(n):
+        store.append(_fact(f"scale fact {i}", provenance=f"scale-{i}"))
+
+    file_size = store._path_for_type("fact").stat().st_size
+    assert file_size > 0
+    # A single full pass over the final file is generous slack; quadratic
+    # rescanning sums every prior partial file size and blows way past this.
+    assert scanned_bytes <= file_size, (
+        f"scanned {scanned_bytes} bytes total across {n} appends against a "
+        f"{file_size}-byte file: incremental index is re-reading prior atoms"
+    )

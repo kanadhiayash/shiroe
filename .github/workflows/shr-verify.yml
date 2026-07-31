@@ -34,7 +34,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Run zeref-validate
+      - name: Run shiroe-validate
         run: |
           python3 scripts/shiroe-validate.py
 
@@ -48,12 +48,12 @@ jobs:
           fi
           echo "Tag '$TAG' OK"
 
-      - name: Zeref-scope sweep (no non-zeref bleed)
+      - name: Shiroe-scope sweep (no out-of-project bleed)
         run: |
           # List changed files vs origin/main; empty file if no diff.
-          git diff origin/main..HEAD --name-only > /tmp/zeref-scope.txt || true
+          git diff origin/main..HEAD --name-only > /tmp/shiroe-scope.txt || true
           # If no diff, nothing to check.
-          if [ ! -s /tmp/zeref-scope.txt ]; then
+          if [ ! -s /tmp/shiroe-scope.txt ]; then
             echo "Scope OK (no changed files vs origin/main)"
             exit 0
           fi
@@ -65,9 +65,9 @@ jobs:
           # removing the entry makes the deletion itself fail the sweep.
           allowed='^(AGENTS\.md|CHANGELOG.*|CLAUDE\.md|CODEOWNERS|CONTRIBUTING\.md|GEMINI\.md|GITHUB_OS\.md|INSTALL\.md|LICENSE|MIGRATION\.md|PRIVACY\.md|README\.md|REDACT\.md|SECURITY\.md|SECURITY_CONTACTS\.md|SHARING_POLICY\.md|SKILL\.md|SOUL\.md|QUICKSTART\.md|TASKS\.md|CODEX\.md|LLAMA\.md|dashboard\.html|pyproject\.toml|pytest\.ini|zeref-registry\.json|shiroe-registry\.json|_shared/.*|agents/.*|assets/.*|benchmarks/.*|commands/.*|config/.*|docs/.*|memory/.*|missions/.*|policies/.*|references/.*|registry/.*|scripts/.*|skills/.*|team-packs/.*|team/.*|tests/.*|zeref/.*|shiroe/.*|\.claude-plugin/.*|\.cursor/.*|\.github/.*|\.gitignore|\.gitattributes|\.windsurfrules|\.aider\.conf\.yml.*)$'
           # unscoped = lines that DO NOT match the allowed pattern.
-          unscoped=$(grep -Ev "$allowed" /tmp/zeref-scope.txt || true)
+          unscoped=$(grep -Ev "$allowed" /tmp/shiroe-scope.txt || true)
           if [ -n "$unscoped" ]; then
-            echo "Non-zeref files detected:"
+            echo "Out-of-project files detected:"
             echo "$unscoped"
             exit 1
           fi
@@ -233,17 +233,17 @@ jobs:
 
       - name: Install package into a clean venv
         run: |
-          python3 -m venv /tmp/zrf-e2e-venv
-          /tmp/zrf-e2e-venv/bin/python3 -m pip install --upgrade pip
-          /tmp/zrf-e2e-venv/bin/pip install "${GITHUB_WORKSPACE}"
+          python3 -m venv /tmp/shr-e2e-venv
+          /tmp/shr-e2e-venv/bin/python3 -m pip install --upgrade pip
+          /tmp/shr-e2e-venv/bin/pip install "${GITHUB_WORKSPACE}"
 
-      - name: zeref init + zeref doctor in a scratch project
+      - name: shiroe init + shiroe doctor in a scratch project
         run: |
           set -e
-          mkdir -p /tmp/zrf-e2e-project
-          cd /tmp/zrf-e2e-project
-          /tmp/zrf-e2e-venv/bin/zeref init --name e2e-check --privacy local-only --tier standard
-          /tmp/zrf-e2e-venv/bin/zeref doctor
+          mkdir -p /tmp/shr-e2e-project
+          cd /tmp/shr-e2e-project
+          /tmp/shr-e2e-venv/bin/shiroe init --name e2e-check --privacy local-only --tier standard
+          /tmp/shr-e2e-venv/bin/shiroe doctor
 
   doc-freshness:
     runs-on: ubuntu-latest
