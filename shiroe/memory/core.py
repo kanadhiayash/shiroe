@@ -86,7 +86,7 @@ MEMORY_FILES: tuple[str, ...] = (
 
 STATE_SCHEMA: dict = {
     "schema_version": "memory-state.v1",
-    "canonical_store": "memory/state/zeref.sqlite",  # v1 compat; vNext canonical = memory/state/zeref2.sqlite (ADR-0001)
+    "canonical_store": "memory/state/zeref.sqlite",  # v1 compat; vNext canonical = memory/state/shiroe.sqlite (ADR-0001)
     "event_log": "memory/state/events.jsonl",
     "tables": {
         "memory_items": {

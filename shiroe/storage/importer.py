@@ -11,7 +11,7 @@ Guarantees:
   emit.
 - Idempotent: re-running produces zero writes (records dedup by
   ``(source_type, source_ref, content_hash)``).
-- Backup: ``memory/state/zeref2.sqlite`` copied to
+- Backup: ``memory/state/shiroe.sqlite`` copied to
   ``memory/state/backups/zeref2-<ts>.sqlite`` before any write.
 - Rollback: restores the most recent backup.
 - Manifest: JSON with counts + hashes written to

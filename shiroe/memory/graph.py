@@ -16,7 +16,7 @@ GRAPH_PATH = Path("memory") / "indexes" / "derived-graph.json"
 def build_derived_graph(root: Path | str = Path(".")) -> dict[str, Any]:
     """Build a derived, rebuildable graph from JSONL atoms.
 
-    Atom JSONL is the v1 append-only history. Under vNext ADR-0001 canonical state lives in memory/state/zeref2.sqlite; this graph is an index/view for traversal and
+    Atom JSONL is the v1 append-only history. Under vNext ADR-0001 canonical state lives in memory/state/shiroe.sqlite; this graph is an index/view for traversal and
     provenance checks, never a source of truth.
     """
     root_path = Path(root)
@@ -50,7 +50,7 @@ def build_derived_graph(root: Path | str = Path(".")) -> dict[str, Any]:
 
     return {
         "canonical": False,
-        "source_of_truth": "memory/l1_atoms/*.jsonl",  # v1 layer; canonical state per ADR-0001 lives in memory/state/zeref2.sqlite
+        "source_of_truth": "memory/l1_atoms/*.jsonl",  # v1 layer; canonical state per ADR-0001 lives in memory/state/shiroe.sqlite
         "node_count": len(nodes),
         "edge_count": len(edges),
         "nodes": sorted(nodes.values(), key=lambda item: item["id"]),

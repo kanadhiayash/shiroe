@@ -1,6 +1,6 @@
 """StateDB — thin SQLite wrapper for the vNext canonical state DB.
 
-Path convention: ``<root>/memory/state/zeref2.sqlite`` (separate file from the
+Path convention: ``<root>/memory/state/shiroe.sqlite`` (separate file from the
 legacy ``zeref.sqlite`` so v1 consumers are untouched during the migration
 window).
 """
