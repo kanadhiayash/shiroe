@@ -7,7 +7,7 @@ lack those two keys entirely. `validate_atom` requires the keys to be present
 need a one-time backfill:
 
   recorded_at    <- existing created_at (never fabricated: the only timestamp
-                     we actually have for "when Zeref learned this").
+                     we actually have for "when Shiroe learned this").
   superseded_at  <- null (unknown supersession history for old rows; a row
                      that was in fact later replaced still has a `status`
                      field of "superseded" from the old model — we do not

@@ -1,13 +1,13 @@
 ---
-description: Boot a Zeref session. Runs interview if config/PROJECT.md missing, otherwise restores context from flat memory/ layout per ZEREF_OS §0.
+description: Boot a Shiroe session. Runs interview if config/PROJECT.md missing, otherwise restores context from flat memory/ layout per SHIROE_OS §0.
 ---
 
 If `config/PROJECT.md` does not exist OR `PRIVACY.md` / `REDACT.md` / `SHARING_POLICY.md` are missing at root OR `$ARGUMENTS` includes `--reset`:
 1. Invoke `project-setup` skill to run the interview (creates `config/PROJECT.md`, root `PRIVACY.md`, root `REDACT.md`, root `SHARING_POLICY.md`, `config/PERMISSIONS.md`, `config/PARENT_SYNC.md`, `config/BUDGET.md`).
 2. After interview completes, prompt user to re-run `/start` to boot the session.
-3. If user cancels mid-interview: Zeref boots in READ-ONLY mode until the schema is complete (per ZEREF_OS §7).
+3. If user cancels mid-interview: Shiroe boots in READ-ONLY mode until the schema is complete (per SHIROE_OS §7).
 
-Otherwise (normal boot, reading-order per ZEREF_OS §0):
+Otherwise (normal boot, reading-order per SHIROE_OS §0):
 1. Invoke `sync-coordinator` agent — apply permissions from `config/PERMISSIONS.md` + connector allowlist from `SHARING_POLICY.md`, mount parent if enabled.
 2. Invoke `memory-keeper` agent ORIENT operation:
    - Read `config/PROJECT.md`

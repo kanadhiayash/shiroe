@@ -2,7 +2,7 @@
 """
 privacy-audit: allow-file "Validator error messages document pattern-shaped tokens (schema examples) that trigger the scanner as expected."
 
-shiroe-validate.py — Validate Zeref plugin structure.
+shiroe-validate.py — Validate Shiroe plugin structure.
 
 Checks:
 - Root manifests (SKILL.md, AGENTS.md, CLAUDE.md, GEMINI.md)
@@ -21,11 +21,14 @@ Checks:
 - PATTERNS.jsonl event allowlist + per-event JSON-schema
 - skill-route stack-length lint (max 5)
 - Auto-Activation Gate presence lint (warn if missing gate events in recent log)
+- shiroe-registry.json validated against registry/shiroe-registry.schema.json
+  (hand-rolled structural checker — stdlib only, no jsonschema dependency)
 
 Exit 0 on pass, 1 on fail.
 """
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -38,7 +41,7 @@ EXPECTED = {
     "memory_dirs": ["raw", "snapshots", "sync/outbound", "sync/parent", "archive", "patterns"],
     "memory_flat": ["hot.md", "index.md", "MEMORY.md", "DECISIONS.md", "OPEN_QUESTIONS.md", "RISKS.md", "CONFLICTS.md"],
     "v4x_canon": [
-        "ZEREF_OS.md", "DECISION_LOG.md", "MODEL_DEBATE.md",
+        "SHIROE_OS.md", "DECISION_LOG.md", "MODEL_DEBATE.md",
         "USE_CASES.md", "RESEARCH_RESOURCES.md", "PACKAGE_INDEX.md",
     ],
     "harness_stubs": [".cursor/rules/shiroe.mdc", ".windsurfrules", ".aider.conf.yml.example"],
@@ -101,11 +104,16 @@ def check_yaml_frontmatter(path, required_keys):
 
 
 def load_registry():
-    """Load shiroe-registry.json: skill list + declared structure counts."""
+    """Load shiroe-registry.json: skill list + declared structure counts + raw dict.
+
+    Returns (skills, declared, raw) — raw is None if the file is missing or
+    not valid JSON (schema validation is skipped in that case; the parse
+    failure is already recorded as an error).
+    """
     reg_path = ROOT / "shiroe-registry.json"
     if not reg_path.is_file():
         errors.append("missing shiroe-registry.json (required for dynamic skill count)")
-        return [], {}
+        return [], {}, None
     try:
         reg = json.loads(reg_path.read_text())
         skills = [s["skill"] for s in reg.get("skills", [])]
@@ -116,10 +124,73 @@ def load_registry():
                 declared[k] = v
             elif isinstance(v, list):
                 declared[k] = len(v)
-        return skills, declared
+        return skills, declared, reg
     except (json.JSONDecodeError, KeyError, TypeError) as e:
         errors.append(f"shiroe-registry.json: invalid structure ({e})")
-        return [], {}
+        return [], {}, None
+
+
+# ---------------------------------------------------------------------------
+# Minimal structural JSON-Schema checker (stdlib only — see pyproject.toml
+# "Core: stdlib only — zero mandatory deps"; no `jsonschema` dependency).
+# Covers exactly the keywords registry/shiroe-registry.schema.json uses:
+# type, required, properties, items, enum, pattern. Not a general validator.
+# ---------------------------------------------------------------------------
+
+def _schema_check(instance, schema, path):
+    """Recursively check `instance` against `schema`, appending violations
+    (with the offending JSON path) to the module-level `errors` list."""
+    t = schema.get("type")
+    type_ok = True
+    if t == "object":
+        if not isinstance(instance, dict):
+            errors.append(f"registry schema: {path}: expected object, got {type(instance).__name__}")
+            type_ok = False
+        else:
+            for key in schema.get("required", []):
+                if key not in instance:
+                    errors.append(f"registry schema: {path}: missing required key '{key}'")
+            for key, subschema in schema.get("properties", {}).items():
+                if key in instance:
+                    _schema_check(instance[key], subschema, f"{path}.{key}")
+    elif t == "array":
+        if not isinstance(instance, list):
+            errors.append(f"registry schema: {path}: expected array, got {type(instance).__name__}")
+            type_ok = False
+        else:
+            items_schema = schema.get("items")
+            if items_schema is not None:
+                for i, item in enumerate(instance):
+                    _schema_check(item, items_schema, f"{path}[{i}]")
+    elif t == "string":
+        if not isinstance(instance, str):
+            errors.append(f"registry schema: {path}: expected string, got {type(instance).__name__}")
+            type_ok = False
+        elif "pattern" in schema and not re.match(schema["pattern"], instance):
+            errors.append(f"registry schema: {path}: {instance!r} does not match pattern {schema['pattern']!r}")
+    elif t == "boolean":
+        if not isinstance(instance, bool):
+            errors.append(f"registry schema: {path}: expected boolean, got {type(instance).__name__}")
+            type_ok = False
+
+    if type_ok and "enum" in schema and instance not in schema["enum"]:
+        errors.append(f"registry schema: {path}: {instance!r} not in allowed values {schema['enum']}")
+
+
+def check_registry_schema(reg):
+    """Validate the already-parsed registry dict against the committed schema."""
+    if reg is None:
+        return
+    schema_path = ROOT / "registry" / "shiroe-registry.schema.json"
+    if not schema_path.is_file():
+        errors.append("missing registry/shiroe-registry.schema.json")
+        return
+    try:
+        schema = json.loads(schema_path.read_text())
+    except json.JSONDecodeError as e:
+        errors.append(f"registry/shiroe-registry.schema.json: invalid JSON ({e})")
+        return
+    _schema_check(reg, schema, "$")
 
 
 def discover_md(dirname):
@@ -199,7 +270,10 @@ def lint_patterns_log(skill_inventory, agent_files):
 
 def main():
     # L1: load skill inventory + declared counts from registry
-    skill_inventory, declared_counts = load_registry()
+    skill_inventory, declared_counts, registry_raw = load_registry()
+    schema_errors_before = len(errors)
+    check_registry_schema(registry_raw)
+    schema_error_count = len(errors) - schema_errors_before
     skill_count_expected = len(skill_inventory)
     skill_count_actual = sum((ROOT / "skills" / s).is_dir() for s in skill_inventory)
 
@@ -222,7 +296,7 @@ def main():
     for f in EXPECTED["root_manifests"]:
         check_file(f, "root manifest")
 
-    # Root privacy templates (per ZEREF_OS §4.1)
+    # Root privacy templates (per SHIROE_OS §4.1)
     for f in EXPECTED["root_privacy"]:
         check_file(f, "root privacy template")
 
@@ -230,7 +304,7 @@ def main():
     for f in EXPECTED["config"]:
         check_file(f"config/{f}", "config")
 
-    # memory/ — flat layout per ZEREF_OS §12.
+    # memory/ — flat layout per SHIROE_OS §12.
     # Memory is per-user-project: this repo ships an empty scaffold (memory/README.md
     # + .gitkeep). Missing dirs/files are warnings, not errors, in that case;
     # a populated project should `python3 -m shiroe init` to scaffold them.
@@ -290,7 +364,7 @@ def main():
     if not command_files:
         errors.append("commands/ has no command .md files")
 
-    # team-packs/ (per ZEREF_OS §8) — every pack found on disk needs an identity
+    # team-packs/ (per SHIROE_OS §8) — every pack found on disk needs an identity
     # key: 'name' (canonical packs) or legacy 'pack' (deprecated tier aliases).
     for t in team_pack_files:
         p = ROOT / "team-packs" / t
@@ -312,7 +386,7 @@ def main():
     for c in EXPECTED["v4x_canon"]:
         check_file(f"references/v4x-canon/{c}", "v4x canon doc")
 
-    # Harness stubs (per ZEREF_OS §10)
+    # Harness stubs (per SHIROE_OS §10)
     for s in EXPECTED["harness_stubs"]:
         check_file(s, "harness stub")
 
@@ -332,7 +406,7 @@ def main():
     def _declared(label, actual):
         return f"{actual}/{declared_counts[label]}" if label in declared_counts else str(actual)
 
-    print(f"Zeref validator — {ROOT}")
+    print(f"Shiroe validator — {ROOT}")
     print(f"Skills:           {skill_count_actual}/{skill_count_expected} (from shiroe-registry.json)")
     print(f"Agents:           {_declared('agents', len(agent_files))} (filesystem vs registry)")
     print(f"Commands:         {_declared('commands', len(command_files))} (filesystem vs registry)")
@@ -343,6 +417,7 @@ def main():
     print(f"Harness stubs:    {sum((ROOT / s).is_file() for s in EXPECTED['harness_stubs'])}/3")
     print(f"Memory layout:    flat")
     print(f"PATTERNS lint:    {len(gate_lint)} finding(s)")
+    print(f"Registry schema:  {'valid' if schema_error_count == 0 else f'{schema_error_count} violation(s)'} (registry/shiroe-registry.schema.json)")
 
     if warnings:
         print("\nWarnings:")

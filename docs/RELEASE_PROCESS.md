@@ -1,12 +1,12 @@
 # Release Process
 
-Zeref releases must be evidence-based and reproducible.
+Shiroe releases must be evidence-based and reproducible.
 
 ## Release branch
 
 Use:
 
-    release/zeref__vX.Y.Z
+    release/shiroe__vX.Y.Z
 
 ## Required gates
 
@@ -46,7 +46,7 @@ across `shiroe/VERSION`, `pyproject.toml`, `shiroe-registry.json`,
 `.claude-plugin/plugin.json`, the README badge, and `docs/wiki/Installation.md`
 — enforced by `scripts/check-version-consistency.py` (a required gate,
 above). Skipping the bump is the single most common cause of a stale
-install; `zeref doctor --installation` / `zeref version --verbose` report
+install; `shiroe doctor --installation` / `shiroe version --verbose` report
 the installed manifest (version, git SHA, content digests) so a stale cache
 can be diagnosed from the outside.
 

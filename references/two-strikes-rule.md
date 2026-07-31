@@ -1,6 +1,6 @@
 # Two-Strikes Rule
 
-> Sourced from ZEREF_OS §11 anti-pattern: "Do NOT write a new rule on the first occurrence of an error."
+> Sourced from SHIROE_OS §11 anti-pattern: "Do NOT write a new rule on the first occurrence of an error."
 
 ## Statement
 
@@ -47,5 +47,5 @@ Surface in `/status`: "Trap class X seen N times, never promoted to rule. Promot
 ## Related
 
 - `AGENTS.md` §"Memory model" — MEMORY.md is agent-written, agent-read
-- `references/v4x-canon/ZEREF_OS.md` §11 — anti-patterns
+- `references/v4x-canon/SHIROE_OS.md` §11 — anti-patterns
 - `agents/evidence-curator.md` — grades promoted rules on /done

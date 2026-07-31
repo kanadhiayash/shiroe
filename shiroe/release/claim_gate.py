@@ -31,7 +31,7 @@ Two things live here:
       independently-labeled corpus exists.
    b. Comparative ranking claims resting on contested vendor LoCoMo figures
       (Zep/Mem0 have each publicly revised their own numbers), and any
-      Zeref benchmark number published without both a full-context baseline
+      Shiroe benchmark number published without both a full-context baseline
       and a lexical baseline alongside it.
    c. External-benchmark score claims before any dataset run is on record —
       "explicitly unscored" is the correct posture until one exists.
@@ -187,8 +187,8 @@ _ROUTING_CLAIM_RE = re.compile(
 _VENDOR_NAMES = ("zep", "mem0", "locomo")
 # Both product names. The rename to Shiroe does not retire the old one from
 # the corpus this gate reads: docs still in flight, archived reports, and any
-# third-party copy all say "Zeref". A gate that stopped matching the former
-# name would quietly let a Zeref-attributed overclaim through.
+# third-party copy all say "Shiroe". A gate that stopped matching the former
+# name would quietly let a Shiroe-attributed overclaim through.
 _PRODUCT_NAMES = ("shiroe", "zeref")
 _COMPARISON_WORDS = (
     "beats", "outperform", "better than", " vs ", " vs. ", "ranked #",
@@ -259,10 +259,10 @@ def scan_public_claims(root: Path) -> list[ClaimFinding]:
                     ),
                 ))
 
-            # (b1) contested vendor comparative ranking — only when Zeref is
+            # (b1) contested vendor comparative ranking — only when Shiroe is
             # the subject of the comparison. Citing a vendor's own published
             # figures for context (e.g. justifying why a baseline is
-            # required) is not Zeref making a ranking claim; require a product name
+            # required) is not Shiroe making a ranking claim; require a product name
             # on the line so the gate targets the claim, not the citation.
             if any(p in lowered for p in _PRODUCT_NAMES) and any(v in lowered for v in _VENDOR_NAMES) and any(
                 c in lowered for c in _COMPARISON_WORDS
@@ -278,7 +278,7 @@ def scan_public_claims(root: Path) -> list[ClaimFinding]:
                     ),
                 ))
 
-            # (b2) a Zeref benchmark number without both required baselines
+            # (b2) a Shiroe benchmark number without both required baselines
             if any(p in lowered for p in _PRODUCT_NAMES) and _SCORE_RE.search(line) and (
                 "locomo" in lowered or "benchmark" in lowered or "memory accuracy" in lowered
             ):
@@ -291,7 +291,7 @@ def scan_public_claims(root: Path) -> list[ClaimFinding]:
                         constraint="missing_baseline_pair",
                         excerpt=line.strip(),
                         reason=(
-                            "a Zeref benchmark number appears without both a "
+                            "a Shiroe benchmark number appears without both a "
                             "full-context baseline and a lexical baseline in "
                             "the same document — published evidence shows "
                             "plain full-context beats purpose-built memory "

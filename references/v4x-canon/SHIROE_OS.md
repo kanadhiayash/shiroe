@@ -20,7 +20,7 @@ Do NOT read wiki for general coding questions or things already in the current p
 
 ## 1. Core Identity
 
-Zeref is a harness-agnostic, local-first context and memory engine for developers.
+Shiroe is a harness-agnostic, local-first AI work control plane for developers.
 
 It is:
 - A persistent, compounding wiki per project/repo
@@ -94,7 +94,7 @@ It is NOT:
 - Auto-hygiene: convert relative time anchors to absolute dates on every /stop.
 
 ### 3.5 Pattern Detection
-- Zeref passively logs every tool invocation sequence in memory/patterns/PATTERNS.jsonl.
+- Shiroe passively logs every tool invocation sequence in memory/patterns/PATTERNS.jsonl.
 - On /stop: check for sequences that appeared 3+ times within 48-80 hours.
 - If patterns found: surface to user. "You did X three times in 72 hours. Generate a SKILL.md?"
 - User approves: draft goes to skills/drafts/ for review before activation.
@@ -112,13 +112,13 @@ It is NOT:
 ### 4.2 Setup Interview Questions (asked once at project setup)
 1. Is this project personal, client, employer, or public?
 2. What categories of data are sensitive?
-3. Should Zeref store exact facts, abstractions only, or both?
+3. Should Shiroe store exact facts, abstractions only, or both?
 4. Can any connected MCP tool read this project context, or must this wiki remain local-only?
 
 ### 4.3 Sensitive Data Handling
 - Default mode: abstract-only memory writes.
 - Exact detail storage: only when user explicitly enables it per project.
-- Zeref never transmits wiki content to any external service unless user explicitly approves per action.
+- Shiroe never transmits wiki content to any external service unless user explicitly approves per action.
 - Connectors: read-access to project context is OFF by default unless enabled in SHARING_POLICY.md.
 
 ### 4.4 Local Canonical Rule
@@ -132,14 +132,14 @@ It is NOT:
 
 Configured in config/BUDGET.md. Read on every /start.
 
-| Tier | Model Target | Zeref Behavior |
+| Tier | Model Target | Shiroe Behavior |
 |------|-------------|----------------|
 | Free | Gemini Flash, local Ollama, Mistral | Aggressive compaction, minimal wiki writes, short /status outputs |
 | Standard | GPT-4o mini, Claude Haiku, Gemini Flash 3.5 | Normal operation, full wiki writes, standard conflict scans |
 | God Mode | GPT-4o, Claude Opus/Sonnet, Gemini 3.5 Pro | Full parent-child sync, deep conflict analysis, pattern retrospectives |
 
 - God Mode activates automatically when a high-tier model is detected.
-- No hardcoded limits. User sets the ceiling. Zeref warns before approaching it.
+- No hardcoded limits. User sets the ceiling. Shiroe warns before approaching it.
 
 ---
 
@@ -162,7 +162,7 @@ Configured in config/BUDGET.md. Read on every /start.
 ## 7. Schema Interview (Conversational, Project Setup Only)
 
 Triggered automatically on first /start when no WIKI.md schema exists.
-If user cancels: Zeref boots in READ-ONLY mode until schema is complete.
+If user cancels: Shiroe boots in READ-ONLY mode until schema is complete.
 
 Questions asked in conversational chat flow:
 1. What is this project trying to achieve? (1-2 sentences)
@@ -171,7 +171,7 @@ Questions asked in conversational chat flow:
 4. Who else will read this wiki, just you, or a team?
 5. What does "done" look like for this project?
 
-On question 3, Zeref says: "You can describe the shape of the decision without sharing the data. Zeref will record the structure, not the content."
+On question 3, Shiroe says: "You can describe the shape of the decision without sharing the data. Shiroe will record the structure, not the content."
 
 ---
 
@@ -179,7 +179,7 @@ On question 3, Zeref says: "You can describe the shape of the decision without s
 
 | Team | Agents | When to Use |
 |------|--------|-------------|
-| solo | 1 primary + memory engine | Default for most work |
+| solo | 1 primary + Shiroe AI Tactician | Default for most work |
 | build | Planner, Implementer, Reviewer | Multi-module features, new products |
 | research | Investigator, Synthesizer, Fact-checker | Architecture decisions, tech evaluation |
 | red | Attacker, Security reviewer, Constraint checker, Evidence recorder | Security review, adversarial stress testing |
@@ -190,13 +190,13 @@ Team Rules:
 - Team outputs ALWAYS land in files (e.g., team/red-team-report.md). Never inline-only.
 - Red team: read-only access by default. Can propose edits but not apply them.
 - Maximum team size: 4 agents.
-- User can activate any team manually, or Zeref recommends after detecting risk/repetition signals.
+- User can activate any team manually, or Shiroe recommends after detecting risk/repetition signals.
 
 ---
 
 ## 9. Connector Advisory (No Bundled Tools)
 
-Zeref ships with no bundled MCP tools. Recommends based on detected patterns.
+Shiroe ships with no bundled MCP tools. Recommends based on detected patterns.
 
 Recommended Free MCP Stack — Core:
 - GitHub MCP: repo context, issues, PRs, diffs
@@ -217,7 +217,7 @@ Optional Power:
 Connector Rules:
 - All connectors: OFF by default.
 - User enables per project in SHARING_POLICY.md.
-- Zeref recommends a connector only after detecting repeated manual behavior.
+- Shiroe recommends a connector only after detecting repeated manual behavior.
 
 ---
 
@@ -239,7 +239,7 @@ Connector Rules:
 
 ## 11. Anti-Patterns (Never Do)
 
-- Do NOT become the harness. Zeref wraps harnesses; it is not one.
+- Do NOT become the harness. Shiroe wraps harnesses; it is not one.
 - Do NOT silently overwrite contradicted decisions. Always flag.
 - Do NOT skip the schema interview. If user cancels: read-only mode.
 - Do NOT bundle MCP tools. Recommend only. Never install without approval.

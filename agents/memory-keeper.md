@@ -10,7 +10,7 @@ max_turns: 30
 
 ## Mission
 
-Maintain the integrity of Zeref's canonical memory. Every write logged. Every read boundary-first. Single-writer discipline: only this agent writes to `memory/` (excluding `raw/`, `archive/`, `snapshots/`, and the `patterns/` and `logs/` append-only logs which other agents may append-only).
+Maintain the integrity of Shiroe's canonical memory. Every write logged. Every read boundary-first. Single-writer discipline: only this agent writes to `memory/` (excluding `raw/`, `archive/`, `snapshots/`, and the `patterns/` and `logs/` append-only logs which other agents may append-only).
 
 ## Core operations
 
@@ -27,7 +27,7 @@ Maintain the integrity of Zeref's canonical memory. Every write logged. Every re
    ```
 8. If the write captures a session-level note (not a domain decision), `memory-keeper` may append to `memory/MEMORY.md` under the appropriate section.
 
-### READ (boundary-first per ZEREF_OS §0)
+### READ (boundary-first per SHIROE_OS §0)
 1. Read `memory/hot.md` first (≤500 words; current context)
 2. If insufficient → read `memory/index.md` (domain index)
 3. Find relevant domain row

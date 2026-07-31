@@ -1,6 +1,6 @@
 # Architecture
 
-Zeref sits between an AI harness and a project's memory files. The harness supplies the model and the editor. Zeref supplies the memory, the guards, and the policy that decides what may be written and what may leave the machine.
+Shiroe sits between an AI harness and a project's memory files. The harness supplies the model and the editor. Shiroe supplies the memory, the guards, and the policy that decides what may be written and what may leave the machine.
 
 `AGENTS.md` is the canonical behavior contract. Every harness-specific file is a thin stub that defers to it.
 
@@ -49,7 +49,7 @@ flowchart TB
 | Markdown | Generated human-readable view. Carries a do-not-edit header. | No |
 | TOON | Optional generated model-input view. | No |
 
-Recorded in [`docs/adr/ADR-0001-canonical-store.md`](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/docs/adr/ADR-0001-canonical-store.md).
+Recorded in [`docs/adr/ADR-0001-canonical-store.md`](https://github.com/kanadhiayash/shiroe/blob/main/docs/adr/ADR-0001-canonical-store.md).
 
 ## The guarded write path
 
@@ -103,13 +103,13 @@ Adapter modules are imported lazily. An adapter whose module is absent surfaces 
 
 ### Enforcement levels
 
-Every integration declares how strongly Zeref can actually govern it. The label is part of the contract, so no doc claims control that the execution path does not support.
+Every integration declares how strongly Shiroe can actually govern it. The label is part of the contract, so no doc claims control that the execution path does not support.
 
 | Level | Meaning |
 |---|---|
-| Embedded | Zeref intercepts or authorizes operations through native hooks, plugins, lifecycle callbacks, or controlled subprocesses. |
-| Sidecar / proxy | Zeref enforces only work explicitly routed through its own CLI, MCP server, API, or proxy. |
-| Context-only | Zeref can generate instructions and memory context but cannot guarantee enforcement. |
+| Embedded | Shiroe intercepts or authorizes operations through native hooks, plugins, lifecycle callbacks, or controlled subprocesses. |
+| Sidecar / proxy | Shiroe enforces only work explicitly routed through its own CLI, MCP server, API, or proxy. |
+| Context-only | Shiroe can generate instructions and memory context but cannot guarantee enforcement. |
 
 ## Handoff compilation
 
@@ -143,7 +143,7 @@ Entitlement is enforced in `shiroe/core/reasoning.py`, not in prose. A request m
 
 Provider descriptors are declarative JSON files in `shiroe/adapters/providers/`, one per provider, shipped for `anthropic` and `openai`. Each maps reasoning classes to model IDs and optional effort levels. Adding a provider means adding a JSON file.
 
-**Zeref does not call model APIs.** It decides what class of model a task is entitled to; the harness performs the inference.
+**Shiroe does not call model APIs.** It decides what class of model a task is entitled to; the harness performs the inference.
 
 ## Benchmarks
 
@@ -153,13 +153,13 @@ Two distinct things live under `benchmarks/`.
 
 **External benchmark scaffolding.** Loaders exist for five public suites — LoCoMo, LongMemEval, PersonaMem, RULER, and HELMET — in `benchmarks/external/loaders/`. No dataset runs have been performed and no scores exist. The loaders and baselines are scaffolding only, and their presence implies no result, ranking, or comparison.
 
-Suites that were considered and are not supported are listed with reasons in [`benchmarks/external/UNSUPPORTED.md`](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/benchmarks/external/UNSUPPORTED.md).
+Suites that were considered and are not supported are listed with reasons in [`benchmarks/external/UNSUPPORTED.md`](https://github.com/kanadhiayash/shiroe/blob/main/benchmarks/external/UNSUPPORTED.md).
 
 ## Release gating
 
 Release checks execute the test suite and the internal benchmark suite live rather than reading a stored verdict.
 
-The trust axis accepts an independent re-grade only when that re-grade names the commit it graded. If the recorded commit does not match `HEAD`, the override is refused and the deterministic draft publishes instead — a stale grade cannot silently apply to newer code. See [`docs/TRUST_AUDIT.md`](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/docs/TRUST_AUDIT.md).
+The trust axis accepts an independent re-grade only when that re-grade names the commit it graded. If the recorded commit does not match `HEAD`, the override is refused and the deterministic draft publishes instead — a stale grade cannot silently apply to newer code. See [`docs/TRUST_AUDIT.md`](https://github.com/kanadhiayash/shiroe/blob/main/docs/TRUST_AUDIT.md).
 
 ## Component status taxonomy
 

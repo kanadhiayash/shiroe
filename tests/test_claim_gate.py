@@ -50,7 +50,7 @@ def test_capability_matrix_covers_registered_gates(repo_root: Path) -> None:
 
 def test_blocks_critical_recall_claim(tmp_path: Path) -> None:
     (tmp_path / "README.md").write_text(
-        "Zeref's routing classifier achieves 100% CRITICAL recall.\n",
+        "Shiroe's routing classifier achieves 100% CRITICAL recall.\n",
         encoding="utf-8",
     )
     findings = scan_public_claims(tmp_path)
@@ -59,7 +59,7 @@ def test_blocks_critical_recall_claim(tmp_path: Path) -> None:
 
 def test_blocks_contested_vendor_comparison(tmp_path: Path) -> None:
     (tmp_path / "README.md").write_text(
-        "Zeref beats Zep and Mem0 on LoCoMo accuracy.\n",
+        "Shiroe beats Zep and Mem0 on LoCoMo accuracy.\n",
         encoding="utf-8",
     )
     findings = scan_public_claims(tmp_path)
@@ -68,7 +68,7 @@ def test_blocks_contested_vendor_comparison(tmp_path: Path) -> None:
 
 def test_allows_citing_vendor_baselines_without_zeref_ranking(tmp_path: Path) -> None:
     """Citing a vendor's own published figures for context — e.g. Mem0's
-    baseline showing full-context beats Mem0 — is not Zeref making a
+    baseline showing full-context beats Mem0 — is not Shiroe making a
     ranking claim, and must not trip the gate just for mentioning a vendor
     name near a comparison word."""
     (tmp_path / "README.md").write_text(
@@ -81,7 +81,7 @@ def test_allows_citing_vendor_baselines_without_zeref_ranking(tmp_path: Path) ->
 
 def test_blocks_zeref_score_without_baselines(tmp_path: Path) -> None:
     (tmp_path / "README.md").write_text(
-        "Zeref scores 91% on the LoCoMo benchmark.\n",
+        "Shiroe scores 91% on the LoCoMo benchmark.\n",
         encoding="utf-8",
     )
     findings = scan_public_claims(tmp_path)
@@ -90,7 +90,7 @@ def test_blocks_zeref_score_without_baselines(tmp_path: Path) -> None:
 
 def test_allows_zeref_score_with_both_baselines(tmp_path: Path) -> None:
     (tmp_path / "README.md").write_text(
-        "Zeref scores 91% on the LoCoMo benchmark, next to a full-context "
+        "Shiroe scores 91% on the LoCoMo benchmark, next to a full-context "
         "baseline of 88% and a lexical baseline of 74%.\n",
         encoding="utf-8",
     )
@@ -117,13 +117,13 @@ def test_allows_explicit_unscored_disclaimer(tmp_path: Path) -> None:
 
 
 def test_run_claim_gate_reports_pass_and_fail(tmp_path: Path) -> None:
-    (tmp_path / "README.md").write_text("Zeref is a local-first memory layer.\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text("Shiroe is a local-first memory layer.\n", encoding="utf-8")
     passed, findings = run_claim_gate(tmp_path)
     assert passed is True
     assert findings == []
 
     (tmp_path / "README.md").write_text(
-        "Zeref beats Mem0 on every axis.\n", encoding="utf-8",
+        "Shiroe beats Mem0 on every axis.\n", encoding="utf-8",
     )
     passed, findings = run_claim_gate(tmp_path)
     assert passed is False

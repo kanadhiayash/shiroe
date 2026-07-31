@@ -12,7 +12,7 @@ skills_active_max: 3
 # Team Pack: small
 
 **For:** solo work, prototyping, low-stakes decisions, cost-sensitive
-sessions. The cheapest viable surface that still preserves the Zeref
+sessions. The cheapest viable surface that still preserves the Shiroe
 invariants.
 
 ## Composition

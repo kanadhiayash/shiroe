@@ -1,15 +1,15 @@
-<!-- privacy-audit: allow-file "Plugin manifest + Fairy Tail character description. Documents skill triggers using example pattern names." -->
+<!-- privacy-audit: allow-file "Plugin manifest. Documents skill triggers using example pattern names." -->
 ---
-name: zeref-os
+name: shiroe
 version: 1.1.1
-description: Zeref Memory Engine (compat identifier `zeref-os`) — local-first context and memory engine for AI-assisted work. Harness-agnostic, model-agnostic, privacy-first. Flat memory layout, per-project wiki, append-only pattern log, snapshots, on-demand team packs. Makes AI work cumulative instead of stateless across every harness.
+description: Shiroe (compat identifier `shiroe`) — local-first AI work control plane for AI-assisted work. Harness-agnostic, model-agnostic, privacy-first. Flat memory layout, per-project wiki, append-only pattern log, snapshots, on-demand team packs. Makes AI work cumulative instead of stateless across every harness.
 ---
 
-# Zeref Memory Engine
+# Shiroe
 
-Zeref is a local-first context and memory engine that plugs *into* your existing AI harness (Claude Code, Cursor, Codex, Gemini, Windsurf, Aider). It is **not itself a harness**, **not a CEO persona**, **not a kernel-level OS**. It is the persistent memory layer your AI tools should have had from day one — named after Zeref Dragneel from *Fairy Tail*, the immortal scholar who carried ancient knowledge across forms and ages.
+Shiroe is a local-first AI work control plane that plugs *into* your existing AI harness (Claude Code, Cursor, Codex, Gemini, Windsurf, Aider). It is **not itself a harness** and **not a CEO persona**. It is the persistent memory layer your AI tools should have had from day one.
 
-## What Zeref does
+## What Shiroe does
 
 - **Remembers**: per-project flat `memory/` wiki + append-only `PATTERNS.jsonl` + snapshots
 - **Persists across harnesses**: works in Claude Code, Codex, Gemini CLI / Antigravity, Cursor, Windsurf, Aider, Hermes, Amp, Zed, Perplexity Computer, or any tool that reads markdown
@@ -20,14 +20,14 @@ Zeref is a local-first context and memory engine that plugs *into* your existing
 
 ## Entry points
 
-- `/zeref-os:start` — session boot with context restored (hot.md → index.md)
-- `/zeref-os:done` — write summary, persist decisions, refresh hot.md, conflict scan, snapshot
-- `/zeref-os:stop` — end session, optional parent push, optional handoff compile
-- `/zeref-os:status` — current session state + active team + pending drafts
-- `/zeref-os:team` — activate a team pack
-- `/zeref-os:sync-parent` — manual parent rollup
-- `/zeref-os:reset-permissions` — clear session overrides
-- `/zeref-os:review-skill` — review pattern-detected skill drafts
+- `/shiroe:start` — session boot with context restored (hot.md → index.md)
+- `/shiroe:done` — write summary, persist decisions, refresh hot.md, conflict scan, snapshot
+- `/shiroe:stop` — end session, optional parent push, optional handoff compile
+- `/shiroe:status` — current session state + active team + pending drafts
+- `/shiroe:team` — activate a team pack
+- `/shiroe:sync-parent` — manual parent rollup
+- `/shiroe:reset-permissions` — clear session overrides
+- `/shiroe:review-skill` — review pattern-detected skill drafts
 
 ## Architecture
 
@@ -50,4 +50,4 @@ memory/
 
 ## Promise
 
-Zeref makes AI work feel cumulative instead of stateless — in every harness, with any model, with privacy on by default.
+Shiroe makes AI work feel cumulative instead of stateless — in every harness, with any model, with privacy on by default.

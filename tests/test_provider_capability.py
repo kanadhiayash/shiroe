@@ -334,7 +334,7 @@ def test_refresh_rejects_v1_schema() -> None:
 
 def test_refresh_command_is_off_by_default_and_hits_no_network() -> None:
     """The connector gate must refuse before any network call — this is
-    what keeps `zeref providers refresh` off in CI and silent in the test
+    what keeps `shiroe providers refresh` off in CI and silent in the test
     suite. No env override is set here, and SHARING_POLICY.md ships
     provider_refresh: enabled: false."""
     with pytest.raises(ConnectorDisabledError):

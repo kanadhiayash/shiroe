@@ -1,8 +1,8 @@
-# Zeref — Aider config example (opt-in)
+# Shiroe — Aider config example (opt-in)
 #
 # Copy to .aider.conf.yml and adjust per your environment.
 # Aider reads AGENTS.md natively (convention-based). This file only pins
-# Aider-specific behavior so it lines up with Zeref's reading order.
+# Aider-specific behavior so it lines up with Shiroe's reading order.
 #
 # Canonical agent spec: AGENTS.md
 # Per-harness quirks: config/aider-overrides.md (create if needed)
@@ -23,12 +23,12 @@ auto-commits: false
 # (alternatively, create a small AIDER.md stub pointing to AGENTS.md)
 # conventions: AGENTS.md
 
-# Model selection — Zeref is model-agnostic; pin to whatever you have
+# Model selection — Shiroe is model-agnostic; pin to whatever you have
 # model: gpt-4o
 # weak-model: gpt-4o-mini
 
 # Avoid mode that touches files outside the wiki rules
-# (Zeref's privacy-guardian enforces this on its side; this is a redundant guard)
+# (Shiroe's privacy-guardian enforces this on its side; this is a redundant guard)
 # read-only: false   # default; set true for /team red sessions
 
 # Do NOT enable any feature that transmits the codebase to an external service

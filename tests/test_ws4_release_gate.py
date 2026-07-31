@@ -1,7 +1,7 @@
 """WS4 gate tests — release-gate integrity + init/doctor parity (issue #122).
 
 Covers:
-- fresh `zeref init` scaffolds every file `zeref doctor` requires;
+- fresh `shiroe init` scaffolds every file `shiroe doctor` requires;
 - release check requires real commit provenance (fails without .git);
 - release check never trusts a stored benchmarks/results.json PASS;
 - file-based network permissions are consistent with the env lane and

@@ -8,7 +8,7 @@ source_updated_at: 2026-05-24
 # community mirror repo, not the vendor — see issue #175
 source_authority: third_party
 last_verified_catalog_sha: 5d3c7696339b4d8add91808e20e3fe3e29a12957
-extracted_by: zeref v1.2 profile-extractor (main-thread Opus 4.7)
+extracted_by: shiroe v1.2 profile-extractor (main-thread Opus 4.7)
 extracted_at: 2026-07-11
 
 # Cost-router inputs
@@ -18,7 +18,7 @@ tool_declaration_tokens: 2200
 bare_prompt_tokens: 1600
 prompt_cache_ttl_min: 5
 
-# Output-shape defaults (target already enforces — Zeref should NOT re-instruct)
+# Output-shape defaults (target already enforces — Shiroe should NOT re-instruct)
 output_style: markdown-verbose-answer-first
 markdown_default: yes
 emoji_default: no
@@ -83,9 +83,9 @@ cache_hit_multiplier: 0.5
 # Diff hints
 notes: |
   Instant (non-thinking) variant. Small system prompt (~4k tokens vs
-  Opus 4.8's 45k) — Zeref's compression yield here is smaller in
+  Opus 4.8's 45k) — Shiroe's compression yield here is smaller in
   absolute terms but higher in %-of-budget. Target's penalty-driven
-  refusal signature means Zeref should NEVER re-ask what context
+  refusal signature means Shiroe should NEVER re-ask what context
   already answers; caveman-handoff should include an explicit
   context-availability preamble.
 
@@ -98,7 +98,7 @@ notes: |
   code-focused agentic loops — extract as Codex-namespaced profiles.
 ---
 
-# gpt-5-5-instant — Zeref target profile
+# gpt-5-5-instant — Shiroe target profile
 
 Derived-summary schema — no source text vendored.
 

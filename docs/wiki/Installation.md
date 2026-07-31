@@ -1,29 +1,27 @@
 # Installation
 
-> **Zeref is not an operating system.** It is a local-first memory and context layer that plugs into an AI harness you already use. The repository and plugin identifier is `zeref-os`; the product is **Zeref Memory Engine**.
-
-Zeref v3.0.0-alpha.1 installs as a Claude Code plugin. Other harnesses read `AGENTS.md` directly through a thin per-harness stub.
+Shiroe v3.0.0-alpha.1 installs as a Claude Code plugin. Other harnesses read `AGENTS.md` directly through a thin per-harness stub.
 
 ## Claude Code
 
 ### Install
 
 ```bash
-claude plugin marketplace add kanadhiayash/zeref-os
-claude plugin install zeref-os@zeref-os
+claude plugin marketplace add kanadhiayash/shiroe
+claude plugin install shiroe@shiroe
 ```
 
-The plugin lands at `~/.claude/plugins/cache/zeref-os/zeref-os/`.
+The plugin lands at `~/.claude/plugins/cache/shiroe/shiroe/`.
 
 ### Verify
 
 ```bash
-claude plugin list | grep zeref-os
-# zeref-os@zeref-os  v3.0.0-alpha.1  enabled
+claude plugin list | grep shiroe
+# shiroe@shiroe  v3.0.0-alpha.1  enabled
 
 cd ~/my-project
 claude
-> /zeref-os:start
+> /shiroe:start
 ```
 
 A successful boot reports the project name, the last session timestamp, counts of active decisions, open questions, and unresolved conflicts, the active privacy mode, and the always-on context size.
@@ -31,7 +29,7 @@ A successful boot reports the project name, the last session timestamp, counts o
 ### Run the validator
 
 ```bash
-cd ~/.claude/plugins/cache/zeref-os/zeref-os
+cd ~/.claude/plugins/cache/shiroe/shiroe
 python3 scripts/shiroe-validate.py
 ```
 
@@ -52,16 +50,16 @@ Each harness reads its own stub, and every stub defers to `AGENTS.md`.
 | Odysseus | `AGENTS.md` natively |
 | Grok | `GROK.md` |
 
-Adapters report an enforcement level — embedded, sidecar/proxy, or context-only — so you can see how much Zeref can actually govern each one. See [[Architecture]].
+Adapters report an enforcement level — embedded, sidecar/proxy, or context-only — so you can see how much Shiroe can actually govern each one. See [[Architecture]].
 
-Full per-harness detail: [`references/harness-translation-map.md`](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/references/harness-translation-map.md).
+Full per-harness detail: [`references/harness-translation-map.md`](https://github.com/kanadhiayash/shiroe/blob/main/references/harness-translation-map.md).
 
 ## Standalone (any harness)
 
 Clone into the project and point your tool at the contract:
 
 ```bash
-git clone https://github.com/kanadhiayash/zeref-memory-engine.git .zeref
+git clone https://github.com/kanadhiayash/shiroe.git .shiroe
 ```
 
 ```text
@@ -70,7 +68,7 @@ git clone https://github.com/kanadhiayash/zeref-memory-engine.git .zeref
 
 ## Per-project setup
 
-On the first `/zeref-os:start` in a project with no `config/PROJECT.md`, the `project-setup` skill runs an interview and captures:
+On the first `/shiroe:start` in a project with no `config/PROJECT.md`, the `project-setup` skill runs an interview and captures:
 
 - project name and optional parent project
 - privacy mode (defaults to `abstract`)
@@ -78,14 +76,14 @@ On the first `/zeref-os:start` in a project with no `config/PROJECT.md`, the `pr
 
 It then writes `config/PROJECT.md`, the root privacy files (`PRIVACY.md`, `REDACT.md`, `SHARING_POLICY.md`), `config/PERMISSIONS.md`, `config/BUDGET.md`, and — if a parent was named — `config/PARENT_SYNC.md`.
 
-If you cancel mid-interview, Zeref boots read-only until the configuration is complete. It does not guess at values you did not supply.
+If you cancel mid-interview, Shiroe boots read-only until the configuration is complete. It does not guess at values you did not supply.
 
 ## Python runtime
 
 The `shiroe/` runtime provides the CLI and structured queries:
 
 ```bash
-cd ~/.claude/plugins/cache/zeref-os/zeref-os
+cd ~/.claude/plugins/cache/shiroe/shiroe
 pip install -e .
 python3 -m shiroe --help
 ```
@@ -93,12 +91,12 @@ python3 -m shiroe --help
 Core commands:
 
 ```
-zeref status              summarize current memory state
-zeref write-decision      append a decision through the guarded write path
-zeref grade <claim>       grade evidence for a claim
-zeref audit               structural validation and privacy audit
-zeref init                scaffold memory and config
-zeref db-status           report storage backend availability
+shiroe status              summarize current memory state
+shiroe write-decision      append a decision through the guarded write path
+shiroe grade <claim>       grade evidence for a claim
+shiroe audit               structural validation and privacy audit
+shiroe init                scaffold memory and config
+shiroe db-status           report storage backend availability
 ```
 
 ## Verify the install end to end
@@ -116,10 +114,10 @@ The version is read from `shiroe/VERSION`, which is the single source of truth; 
 ## Uninstall
 
 ```bash
-claude plugin uninstall zeref-os@zeref-os
+claude plugin uninstall shiroe@shiroe
 ```
 
-Your project's `memory/` and `config/` files are left intact — Zeref archives rather than hard-deletes. To purge them yourself:
+Your project's `memory/` and `config/` files are left intact — Shiroe archives rather than hard-deletes. To purge them yourself:
 
 ```bash
 rm -rf memory/ config/PROJECT.md PRIVACY.md REDACT.md SHARING_POLICY.md
@@ -141,4 +139,4 @@ rm -rf memory/ config/PROJECT.md PRIVACY.md REDACT.md SHARING_POLICY.md
 - [[Memory-Model]] — what lands on disk
 - [[Privacy-Model]] — configure privacy before first write
 - [[FAQ]] — common questions
-- [`AGENTS.md`](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/AGENTS.md) — canonical contract
+- [`AGENTS.md`](https://github.com/kanadhiayash/shiroe/blob/main/AGENTS.md) — canonical contract

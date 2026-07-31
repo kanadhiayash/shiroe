@@ -1,7 +1,7 @@
 """External benchmark program (vNext PR 19, master plan §16).
 
 Every benchmark artifact carries the §16.10 provenance envelope:
-Zeref version + commit, harness + version, model/provider, dataset
+Shiroe version + commit, harness + version, model/provider, dataset
 version, configuration, seed, run count, mean + variance, failures /
 abstentions, raw artifact hashes, and a fixture / external /
 comparative label. Nothing else is accepted as a "report".

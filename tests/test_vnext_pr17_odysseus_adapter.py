@@ -24,7 +24,7 @@ def test_odysseus_sidecar_when_api_endpoint_set(monkeypatch) -> None:
                          lambda cmd: None)
     r = OdysseusAdapter().detect()
     assert r.detected
-    # Odysseus owns its own runtime; Zeref integrates via API.
+    # Odysseus owns its own runtime; Shiroe integrates via API.
     assert r.enforcement_level.value == "B"
 
 

@@ -86,7 +86,7 @@ def test_evidence_list_and_report(repo_root: Path, tmp_path: Path) -> None:
 
 def test_public_docs_with_grade_f_and_claims(tmp_path: Path) -> None:
     doc = tmp_path / "PUBLIC.md"
-    doc.write_text("Zeref is best-in-class.\n\nEvidence grade: F\n", encoding="utf-8")
+    doc.write_text("Shiroe is best-in-class.\n\nEvidence grade: F\n", encoding="utf-8")
     issues = check_public_docs(doc)
     assert len(issues) == 2
 

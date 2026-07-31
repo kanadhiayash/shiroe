@@ -1,5 +1,5 @@
 """
-`zeref init` scaffolds the expected layout.
+`shiroe init` scaffolds the expected layout.
 """
 
 from __future__ import annotations

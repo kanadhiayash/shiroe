@@ -1,5 +1,5 @@
 {
-  "$schema": "https://zeref-os.dev/registry.schema.json",
+  "$schema": "https://raw.githubusercontent.com/kanadhiayash/shiroe/main/registry/shiroe-registry.schema.json",
   "_comment_privacy_audit": "privacy-audit: allow-file — registry names skill/agent/command identifiers as canonical spec; no user data.",
   "version": "3.0.0-alpha.1",
   "generated": "2026-07-11",

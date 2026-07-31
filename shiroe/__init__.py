@@ -1,4 +1,4 @@
-"""Zeref — reference Python runtime."""
+"""Shiroe — reference Python runtime."""
 
 from pathlib import Path
 

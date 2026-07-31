@@ -17,7 +17,7 @@ HIGH_IMPLEMENTATIONS: dict[int, dict[str, str]] = {
     10: {"form": "quality-guardrail", "boundary": "public-safe copy gate", "gate": "fact/public-claim scans"},
     16: {"form": "optional-adapter", "boundary": "vector backend candidate", "gate": "stdlib lexical retrieval remains core"},
     21: {"form": "benchmark-fixture", "boundary": "simulation as local tests", "gate": "no runtime dependency"},
-    23: {"form": "contract-reference", "boundary": "agent schema reference", "gate": "Zeref does not become an agent framework"},
+    23: {"form": "contract-reference", "boundary": "agent schema reference", "gate": "Shiroe does not become an agent framework"},
     24: {"form": "optional-adapter", "boundary": "Agents SDK adapter target", "gate": "permissioned and opt-in only"},
     25: {"form": "plugin-boundary", "boundary": "skill/plugin contract reference", "gate": "orchestration stays outside core"},
     27: {"form": "routing-policy", "boundary": "risk informed model routing", "gate": "route decisions require evidence"},

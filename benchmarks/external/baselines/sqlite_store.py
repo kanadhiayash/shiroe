@@ -1,7 +1,7 @@
 """Simple SQLite FTS baseline.
 
 Ingests chunks into an FTS5 (or LIKE-fallback) table and recalls the top-k
-matches for a query. A memory engine that cannot beat a 40-line SQLite store
+matches for a query. A memory system that cannot beat a 40-line SQLite store
 has no business claiming benchmark superiority.
 """
 

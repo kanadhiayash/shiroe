@@ -58,7 +58,7 @@ def run_release_check(root: Path) -> list[ReleaseFinding]:
 def _check_claim_gate(root: Path) -> ReleaseFinding:
     """SHR-66 / issue #172: block public claims that exceed their evidence
     class (routing-accuracy claims off a fixture-coverage corpus, contested
-    vendor comparisons, un-baselined Zeref numbers, unscored external
+    vendor comparisons, un-baselined Shiroe numbers, unscored external
     benchmarks). See shiroe.release.claim_gate for the encoded constraints."""
     from shiroe.release.claim_gate import scan_public_claims
     findings = scan_public_claims(root)
@@ -308,7 +308,7 @@ def format_release(findings: list[ReleaseFinding], *, format: str = "text") -> s
     if format == "json":
         return json.dumps([finding.to_dict() for finding in findings], indent=2, sort_keys=True) + "\n"
     if format == "md":
-        lines = ["# Zeref Release Check", ""]
+        lines = ["# Shiroe Release Check", ""]
         for finding in findings:
             lines.append(f"- **{finding.status}** `{finding.name}` - {finding.reason}")
         return "\n".join(lines) + "\n"

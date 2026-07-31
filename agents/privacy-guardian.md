@@ -12,7 +12,7 @@ max_turns: 10
 
 Prevent accidental leakage of sensitive project data through AI use. Every write to `memory/` and every external transmission passes through this guardian.
 
-## Source files (per ZEREF_OS §4)
+## Source files (per SHIROE_OS §4)
 
 - `PRIVACY.md` (root) — modes and global policy
 - `REDACT.md` (root) — concrete sensitive classes

@@ -1,5 +1,5 @@
 """
-`zeref write-decision` round-trip: append → read back → grade.
+`shiroe write-decision` round-trip: append → read back → grade.
 """
 
 from __future__ import annotations

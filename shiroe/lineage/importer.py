@@ -1,7 +1,7 @@
 """
 privacy-audit: allow-file "Lineage importer references example repo paths + intake fields as schema; no user data."
 
-Sandbox importer for Zeref lineage repositories.
+Sandbox importer for Shiroe lineage repositories.
 
 Foreign repositories are cloned only into .shiroe-sandbox and represented in
 tracked code by metadata, hashes, counts, and exclusion records.

@@ -1,17 +1,19 @@
 <!-- privacy-audit: allow-file "Public hero doc. Documents install commands with example env-var names. No user memory." -->
 
-# Zeref Memory Engine
+# Shiroe
+
+> One governed project state across every human, agent, model, harness, and device.
 
 <p align="center">
   <img src="https://img.shields.io/badge/version-3.0.0--alpha.1-blueviolet" alt="version 3.0.0-alpha.1">
-  <img src="assets/zeref-os-hero.png" alt="Zeref Memory Engine" width="720">
+  <img src="assets/zeref-os-hero.png" alt="Shiroe" width="720">
 </p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license"></a>
   <a href="AGENTS.md"><img src="https://img.shields.io/badge/AGENTS.md-canonical-blue" alt="AGENTS.md canonical spec"></a>
   <a href="SECURITY.md"><img src="https://img.shields.io/badge/security-private%20reporting-critical" alt="private vulnerability reporting"></a>
-  <a href="https://github.com/kanadhiayash/zeref-memory-engine/actions/workflows/shr-verify.yml"><img src="https://github.com/kanadhiayash/zeref-memory-engine/actions/workflows/shr-verify.yml/badge.svg" alt="verify"></a>
+  <a href="https://github.com/kanadhiayash/shiroe/actions/workflows/shr-verify.yml"><img src="https://github.com/kanadhiayash/shiroe/actions/workflows/shr-verify.yml/badge.svg" alt="verify"></a>
 </p>
 
 <p align="center">
@@ -27,13 +29,13 @@
 
 ## What it is
 
-Zeref is a local-first memory engine that gives AI coding agents a persistent, reviewable project memory stored as plain files in your repository. It is for engineers who work across more than one AI tool and are tired of re-explaining the same decisions, constraints, and dead ends at the start of every session.
+Shiroe is a local-first AI work control plane for governed execution, model routing, project memory, evidence, handoffs, and team synchronization. It gives AI coding agents a persistent, reviewable project memory stored as plain files in your repository, for engineers who work across more than one AI tool and are tired of re-explaining the same decisions, constraints, and dead ends at the start of every session.
 
 Memory lives in your project, in Markdown and SQLite you can read and diff. Sessions read it before they act, write to it through a guarded path, and hand it to the next session in a scrubbed, portable form.
 
 Current release: **v3.0.0-alpha.1**. Alpha software — interfaces may change. See [Limitations](#limitations).
 
-**Zeref is:**
+**Shiroe is:**
 
 - **Local-first** — canonical state is files on your disk, inside your repo.
 - **Boundary-first on reads** — a session reads a small hot file, then an index, then one named page section. Context stays bounded as the project grows.
@@ -42,9 +44,8 @@ Current release: **v3.0.0-alpha.1**. Alpha software — interfaces may change. S
 - **Guarded on writes** — writes pass fact, evidence, privacy, and contradiction checks before a write gate admits them.
 - **Provider-neutral by construction** — core code names reasoning classes, never vendor model IDs.
 
-**Zeref is not:**
+**Shiroe is not:**
 
-- an operating system,
 - a hosted service,
 - an inference layer or model provider,
 - a vector database,
@@ -55,25 +56,25 @@ Current release: **v3.0.0-alpha.1**. Alpha software — interfaces may change. S
 
 ## How do I give an AI agent persistent project memory?
 
-Point every AI tool you use at the same `AGENTS.md` in your project root, and let Zeref own the files underneath it. `AGENTS.md` is the behavior contract: it tells a session what to read first, what it may write, and what it must stop and ask about. Because the contract and the memory both live in the repo, any harness that can read a Markdown instruction file participates without per-tool syncing.
+Point every AI tool you use at the same `AGENTS.md` in your project root, and let Shiroe own the files underneath it. `AGENTS.md` is the behavior contract: it tells a session what to read first, what it may write, and what it must stop and ask about. Because the contract and the memory both live in the repo, any harness that can read a Markdown instruction file participates without per-tool syncing.
 
 The practical effect is that a session starts with your project's decisions, open questions, risks, and conflicts already loaded, and ends by writing what it learned back to the same place.
 
 ## What is local-first LLM memory?
 
-Local-first LLM memory keeps the canonical copy of an agent's memory on your machine, in your version control, rather than in a vendor's account. Zeref stores current state in SQLite, append-only history in JSONL, and human-readable views in Markdown, all inside the project.
+Local-first LLM memory keeps the canonical copy of an agent's memory on your machine, in your version control, rather than in a vendor's account. Shiroe stores current state in SQLite, append-only history in JSONL, and human-readable views in Markdown, all inside the project.
 
 Nothing leaves the machine unless you turn sharing on. External transmission is off by default, and `local-only` privacy mode blocks it outright.
 
 ## How do I stop an AI assistant from forgetting project decisions?
 
-Write decisions to a durable store the assistant reads at the start of every session, and make contradicting one of them an event that requires your judgment. Zeref records decisions with provenance and an evidence grade, and detects when a later claim conflicts with an earlier one.
+Write decisions to a durable store the assistant reads at the start of every session, and make contradicting one of them an event that requires your judgment. Shiroe records decisions with provenance and an evidence grade, and detects when a later claim conflicts with an earlier one.
 
 A detected conflict does not overwrite and does not silently pick a winner. It halts the write, records both sides with their provenance, and waits for you to arbitrate.
 
 ## How do I share context between Claude Code, Cursor, and Codex?
 
-Compile a handoff artifact and open it in the next tool. Zeref's handoff compiler targets five destinations — `codex`, `claude`, `cursor`, `github`, and `human` — and scrubs the payload against your privacy policy on the way out.
+Compile a handoff artifact and open it in the next tool. Shiroe's handoff compiler targets five destinations — `codex`, `claude`, `cursor`, `github`, and `human` — and scrubs the payload against your privacy policy on the way out.
 
 Handoffs fail closed: only atoms explicitly classed public-safe are exported by default. Anything unclassified is treated as private and withheld, and anything marked local-only never leaves the machine regardless of flags.
 
@@ -87,7 +88,7 @@ The next session performs a boundary-first read and resumes from stored state.
 
 ## Architecture
 
-Zeref sits between the AI harness and your project's memory files. The harness supplies the model and the editor; Zeref supplies the memory, the guards, and the policy.
+Shiroe sits between the AI harness and your project's memory files. The harness supplies the model and the editor; Shiroe supplies the memory, the guards, and the policy.
 
 ```mermaid
 flowchart TB
@@ -139,9 +140,9 @@ Each adapter declares an enforcement level rather than implying uniform control:
 
 | Level | Meaning |
 |---|---|
-| Embedded | Zeref authorizes operations through native hooks or controlled subprocesses. |
-| Sidecar / proxy | Zeref enforces only work routed through its own CLI, MCP server, or proxy. |
-| Context-only | Zeref can supply context and instructions but cannot guarantee enforcement. |
+| Embedded | Shiroe authorizes operations through native hooks or controlled subprocesses. |
+| Sidecar / proxy | Shiroe enforces only work routed through its own CLI, MCP server, or proxy. |
+| Context-only | Shiroe can supply context and instructions but cannot guarantee enforcement. |
 
 An adapter whose module is absent reports `detected=false` with a stated reason rather than failing on import.
 
@@ -158,7 +159,7 @@ Core code and schemas never name a vendor model. A task carries a criticality; c
 
 `local` and `private` are placement constraints rather than cost tiers and are permitted at any criticality. The entitlement rule is enforced in code, not prose: a request may always downgrade to a cheaper class and never upgrade, and `frontier` requires CRITICAL. Violations raise `ReasoningPolicyError`.
 
-Provider descriptors are declarative JSON files in `shiroe/adapters/providers/`, one per provider, shipped for `anthropic` and `openai`. Adding a provider means adding a JSON file, not writing code. **Zeref does not call model APIs.** It resolves which class of model a task is entitled to; your harness does the inference.
+Provider descriptors are declarative JSON files in `shiroe/adapters/providers/`, one per provider, shipped for `anthropic` and `openai`. Adding a provider means adding a JSON file, not writing code. **Shiroe does not call model APIs.** It resolves which class of model a task is entitled to; your harness does the inference.
 
 ---
 
@@ -188,7 +189,7 @@ A claim that fails any guard does not reach the store. A claim that trips the co
 
 ### Contradiction handling refuses four shortcuts
 
-Zeref will not resolve a conflict by recency, by evidence grade, by silently dropping one side, or by deferring indefinitely. Each of those is a way of making a judgment call while appearing not to. The conflict stays open, with both sides and their provenance recorded, until you decide.
+Shiroe will not resolve a conflict by recency, by evidence grade, by silently dropping one side, or by deferring indefinitely. Each of those is a way of making a judgment call while appearing not to. The conflict stays open, with both sides and their provenance recorded, until you decide.
 
 ### The release gate executes
 
@@ -198,10 +199,10 @@ Release checks run the test suite and the internal benchmark suite live rather t
 
 ## Quickstart
 
-Clone Zeref into a project:
+Clone Shiroe into a project:
 
 ```bash
-git clone https://github.com/kanadhiayash/zeref-memory-engine.git .zeref
+git clone https://github.com/kanadhiayash/shiroe.git .shiroe
 ```
 
 Point your AI harness at:
@@ -290,11 +291,11 @@ Two separate things live under `benchmarks/`, and conflating them would misrepre
 
 **Internal quality axes.** A deterministic suite scores the repo against its own rubric on axes such as portability, adaptivity, scalability, retrieval, and trust. These are internal quality axes used as release gates. They are not benchmark rankings and are not comparable to any other system's numbers.
 
-**External benchmark harness.** Loaders exist for six public suites — LoCoMo, LongMemEval, PersonaMem, ConvoMem, RULER, and HELMET — in `benchmarks/external/loaders/`. Every run reports three arms side by side: `zeref`, `full_context` (no memory system at all), and `bm25` (a plain lexical ranker). A Zeref number on its own is unfalsifiable, so the harness does not produce one.
+**External benchmark harness.** Loaders exist for six public suites — LoCoMo, LongMemEval, PersonaMem, ConvoMem, RULER, and HELMET — in `benchmarks/external/loaders/`. Every run reports three arms side by side: `shiroe`, `full_context` (no memory system at all), and `bm25` (a plain lexical ranker). A Shiroe number on its own is unfalsifiable, so the harness does not produce one.
 
 **No scored runs exist.** Nothing has been generated by a model or graded by a judge, so there is no accuracy number, no ranking, and nothing to publish.
 
-What has been run is *proxy mode*: ingest and retrieve only, zero network calls. It measures one thing — whether the gold answer appeared in the retrieved context — which is an infrastructure signal, not any benchmark's official metric, and must not be quoted as a score. On that signal, across full datasets, a plain BM25 ranker currently retrieves the answer more often than Zeref does on the two multi-session conversational suites, at equal `k`. That gap is tracked in [issue #196](https://github.com/kanadhiayash/zeref-memory-engine/issues/196) and is not resolved.
+What has been run is *proxy mode*: ingest and retrieve only, zero network calls. It measures one thing — whether the gold answer appeared in the retrieved context — which is an infrastructure signal, not any benchmark's official metric, and must not be quoted as a score. On that signal, across full datasets, a plain BM25 ranker currently retrieves the answer more often than Shiroe does on the two multi-session conversational suites, at equal `k`. That gap is tracked in [issue #196](https://github.com/kanadhiayash/shiroe/issues/196) and is not resolved.
 
 Benchmarks that were considered and are not supported, each with a stated reason, are listed in [`benchmarks/external/UNSUPPORTED.md`](benchmarks/external/UNSUPPORTED.md). Nothing is silently omitted.
 
@@ -305,12 +306,13 @@ Benchmarks that were considered and are not supported, each with a stated reason
 Stated plainly, because the alternative is letting you discover them later.
 
 - **No published benchmark results.** The external harness runs, but only in proxy mode — retrieval only, no generation, no judging. No scores, no rankings.
-- **Retrieval trails a lexical baseline.** On the retrieval proxy, plain BM25 currently finds the answer more often than Zeref on LoCoMo and LongMemEval at equal `k`. Tracked in [#196](https://github.com/kanadhiayash/zeref-memory-engine/issues/196).
-- **Zeref performs no inference.** It routes and governs; your harness calls the model.
+- **Retrieval trails a lexical baseline.** On the retrieval proxy, plain BM25 currently finds the answer more often than Shiroe on LoCoMo and LongMemEval at equal `k`. Tracked in [#196](https://github.com/kanadhiayash/shiroe/issues/196).
+- **Shiroe performs no inference.** It routes and governs; your harness calls the model.
 - **Enforcement varies by harness.** Context-only integrations can be given instructions but cannot be compelled. Each adapter states its own level.
 - **Privacy redaction is defense-in-depth.** It reduces the blast radius of a mistake. It is not a reason to paste production credentials into a prompt.
 - **Alpha software.** Interfaces may change. MIT licensed, no warranty.
-- **Single-machine memory.** There is no shared multi-device memory story yet.
+- **Single-machine memory.** There is no shared multi-device memory story yet, despite the "every device" framing in the tagline above — that names where the project is headed, not what runs today.
+- **No work graphs.** There is no work-graph module in the code. Execution, routing, and handoffs are governed independently; nothing yet models them as a graph.
 - **Pattern detection proposes, never installs.** Drafts land for review and are not auto-activated.
 
 ---

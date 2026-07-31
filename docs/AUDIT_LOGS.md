@@ -1,6 +1,6 @@
 # Audit Logs
 
-Zeref writes append-only JSONL audit logs under `memory/audit/`.
+Shiroe writes append-only JSONL audit logs under `memory/audit/`.
 
 Files:
 
@@ -17,9 +17,9 @@ optional memory id, guards run, reason, timestamp, and payload.
 Generate a report:
 
 ```bash
-zeref audit report
-zeref audit report --since 2026-07-09
-zeref audit report --format md
+shiroe audit report
+shiroe audit report --since 2026-07-09
+shiroe audit report --format md
 ```
 
 Corrupt JSONL lines are reported instead of crashing the report.

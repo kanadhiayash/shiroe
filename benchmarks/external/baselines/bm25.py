@@ -1,6 +1,6 @@
 """Okapi BM25 lexical baseline (pure stdlib, no dependencies).
 
-A memory engine that cannot beat a ~40-line BM25 ranker on recall has no
+A memory system that cannot beat a ~40-line BM25 ranker on recall has no
 business claiming benchmark superiority. Kept separate from
 `sqlite_store.SqliteFtsBackend` (which degrades to a LIKE-fallback ranker
 when FTS5 isn't compiled in) so the "lexical baseline" arm is always the

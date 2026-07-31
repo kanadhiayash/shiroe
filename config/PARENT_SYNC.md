@@ -21,7 +21,7 @@ Optional. Lets a child project push approved summaries and decisions upward to a
 ## How to enable
 
 1. Set `enabled: true`
-2. Set `parent_path` to the parent project's root (must contain its own flat `memory/` per ZEREF_OS §12)
+2. Set `parent_path` to the parent project's root (must contain its own flat `memory/` per SHIROE_OS §12)
 3. On first `/sync-parent`, `parent-sync` skill creates `<parent_path>/memory/sync/parent/<child-id>/`
 
 ## What gets pushed

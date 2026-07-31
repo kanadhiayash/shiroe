@@ -1,6 +1,6 @@
 """Cross-store convergence: one logical fact lives in exactly one store.
 
-Zeref accumulated three parallel fact stores — JSONL atoms
+Shiroe accumulated three parallel fact stores — JSONL atoms
 (``memory/l1_atoms/*.jsonl``), ``memory_cards`` in ``memory_state.py``, and
 ``memory_records`` in the vNext migrations — each written by a different
 entry point. The stated architecture (docs/adr/ADR-0001) is one canonical
@@ -34,7 +34,7 @@ def repo(fake_repo: Path) -> Path:
 
 def _guarded_write(root: Path) -> dict:
     """Write one fact through the guarded pipeline — the path the CLI drives
-    for `zeref memory propose` + `zeref memory write`.
+    for `shiroe memory propose` + `shiroe memory write`.
     """
     proposal_path = root / "proposal.json"
     propose_memory(CLAIM, output=proposal_path)

@@ -1,8 +1,8 @@
 <!-- privacy-audit: allow-file "Contribution doc references example maintainer email + branch names as spec." -->
 
-# Contributing to Zeref Memory Engine
+# Contributing to Shiroe
 
-Zeref is a local-first memory engine for AI-assisted work. Contributions should improve the runtime, docs, guards, benchmarks, install path, or release safety.
+Shiroe is a local-first AI work control plane for AI-assisted work. Contributions should improve the runtime, docs, guards, benchmarks, install path, or release safety.
 
 ## Before starting
 
@@ -14,7 +14,7 @@ For security issues, do not open a public issue. Read `SECURITY.md`.
 
 Use:
 
-    <type>/zeref__<short-description>
+    <type>/shiroe__<short-description>
 
 Allowed types:
 
@@ -29,9 +29,9 @@ Allowed types:
 
 Examples:
 
-    docs/zeref__public-surface-overhaul
-    fix/zeref__privacy-redaction-edge-case
-    test/zeref__benchmark-failure-report
+    docs/shiroe__public-surface-overhaul
+    fix/shiroe__privacy-redaction-edge-case
+    test/shiroe__benchmark-failure-report
 
 ## Pull request expectations
 

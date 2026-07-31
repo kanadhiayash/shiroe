@@ -159,7 +159,7 @@ def _apply_verified_overrides(results: list[dict]) -> list[dict]:
 def _render_report(results: list[dict], rubric_rel: str, passed: bool, failures: list[dict]) -> str:
     today = date.today().isoformat()  # noqa: DTZ011 — public report only
     lines = [
-        "# Internal Quality Axes Report - Zeref Memory Engine",
+        "# Internal Quality Axes Report - Shiroe",
         "",
         "> **Internal quality axes — fixture-based self-checks. NOT external benchmark results.**",
         "> These axes verify local invariants against committed fixtures. They do not measure",

@@ -15,7 +15,7 @@ JUDGE INDEPENDENCE — read before quoting any number produced this way. When
 generation and judging both run on Gemini, the judge is scoring its own
 model family's output, and LLM judges are known to prefer it. That does NOT
 invalidate the comparison this harness makes, because all three arms
-(zeref, full_context, bm25) share one generator and one judge, so the bias
+(shiroe, full_context, bm25) share one generator and one judge, so the bias
 applies equally to all three and the RELATIVE ranking still holds. It DOES
 invalidate an absolute leaderboard claim ("we scored X on LoCoMo"). Use a
 different model for the generator than for the judge, and keep the caveat

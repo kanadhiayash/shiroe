@@ -1,6 +1,6 @@
 # Release Gates
 
-`zeref release check` runs local readiness checks for:
+`shiroe release check` runs local readiness checks for:
 
 - version file presence
 - memory layout

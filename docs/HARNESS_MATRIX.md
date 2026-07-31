@@ -1,4 +1,4 @@
-# Harness Matrix — Zeref Memory Engine
+# Harness Matrix — Shiroe
 
 Portability evidence per harness. Evidence-state (not ✅ marks) per [SHR-AUDIT-022] +
 D7 (ratified 2026-07-10): only harnesses with a host-observed boot log are `verified`.
@@ -10,7 +10,7 @@ Evidence states:
   during a recorded session; log path cited.
 - **partially-verified** — one or two of the four stages executed; others documented-only.
 - **documented-only** — stubs shipped and CLI wiring exists, but no host log observed.
-- **unsupported** — the host cannot boot Zeref reliably; explicit exclusion.
+- **unsupported** — the host cannot boot Shiroe reliably; explicit exclusion.
 - **blocked** — host unavailable in the audit environment; state unknown.
 
 | Harness | Stub | Boot | Memory read | Tool surface | Handoff | Evidence state | Log reference |
@@ -26,7 +26,7 @@ Evidence states:
 
 ## Boot-sequence verification (per [AGENTS.md](../AGENTS.md) §0)
 
-Recorded in the Zeref project memory of the harness under `memory/patterns/PATTERNS.jsonl`
+Recorded in the Shiroe project memory of the harness under `memory/patterns/PATTERNS.jsonl`
 as a `harness-boot-verified` event. Fields:
 
 ```
@@ -57,7 +57,7 @@ terminal pane, with the PATTERNS.jsonl `harness-boot-verified` event as evidence
 ## How to add a new harness
 
 1. Create the stub file (`<HARNESS>.md` or host-specific rule file).
-2. Boot the host in a Zeref-initialized project.
+2. Boot the host in a Shiroe-initialized project.
 3. Run the four smoke commands above.
 4. Verify a `harness-boot-verified` event lands in `memory/patterns/PATTERNS.jsonl`.
 5. Add the row to this matrix with the log reference.

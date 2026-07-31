@@ -14,7 +14,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DATA_ROOT="${ZEREF_BENCHMARK_DATA:-$HOME/zeref-benchmark-data}"
+DATA_ROOT="${ZEREF_BENCHMARK_DATA:-$HOME/shiroe-benchmark-data}"
 OLLAMA_MODEL="${ZEREF_OLLAMA_MODEL:-llama3.1:8b}"
 VERIFY_ONLY=0
 [ "${1:-}" = "--verify" ] && VERIFY_ONLY=1
@@ -123,7 +123,7 @@ PY
 say "Repository verification"
 cd "$REPO_ROOT"
 python3 -m pytest -q
-python3 scripts/shiroe-validate.py >/dev/null && echo "  zeref-validate: pass"
+python3 scripts/shiroe-validate.py >/dev/null && echo "  shiroe-validate: pass"
 python3 -m shiroe audit-privacy --strict --fail-classes credentials >/dev/null && echo "  privacy (credentials class): pass"
 
 say "Ready"

@@ -69,7 +69,7 @@ REQUIRED_FIELDS = (
 
 # Bi-temporal axes (independent — see shiroe/memory/bitemporal.py):
 #   valid time:       valid_from / valid_until  — when the fact was true in the world.
-#   transaction time:  recorded_at / superseded_at — when Zeref learned/un-learned it.
+#   transaction time:  recorded_at / superseded_at — when Shiroe learned/un-learned it.
 # All four are nullable: an open valid_from/valid_until means "unknown bound" (never
 # fabricate one), a null superseded_at means "still the current belief".
 

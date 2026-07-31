@@ -79,7 +79,7 @@ def proposal_to_atom(proposal: dict[str, Any]) -> dict[str, Any]:
         status="active",
         valid_from=proposal.get("valid_from"),
         valid_until=proposal.get("valid_until"),
-        # Transaction time: when Zeref came to believe this. Set explicitly so
+        # Transaction time: when Shiroe came to believe this. Set explicitly so
         # the atom participates in bi-temporal ranking from the moment it
         # lands (see shiroe.memory.bitemporal).
         recorded_at=utc_now_iso(),

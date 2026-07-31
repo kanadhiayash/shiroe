@@ -1,4 +1,4 @@
-"""Append-only audit logging for Zeref."""
+"""Append-only audit logging for Shiroe."""
 
 from shiroe.audit.logger import AuditEvent, AuditLogger
 

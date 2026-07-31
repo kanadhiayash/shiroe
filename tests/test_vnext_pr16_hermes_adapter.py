@@ -13,7 +13,7 @@ def test_hermes_sidecar_when_detected(monkeypatch) -> None:
                          lambda cmd: None)
     r = HermesAdapter().detect()
     assert r.detected
-    # Hermes has its own runtime; Zeref is a sidecar (Level B).
+    # Hermes has its own runtime; Shiroe is a sidecar (Level B).
     assert r.enforcement_level.value == "B"
 
 

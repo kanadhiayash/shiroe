@@ -33,7 +33,7 @@ def compile_handoff(
     root: Path | str = Path("."),
     *,
     target: str,
-    objective: str = "Continue from current Zeref memory state.",
+    objective: str = "Continue from current Shiroe memory state.",
     include_private: bool = False,
 ) -> dict[str, Any]:
     """Compile a scrubbed handoff artifact for `target`.

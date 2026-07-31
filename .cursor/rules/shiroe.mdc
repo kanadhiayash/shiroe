@@ -1,11 +1,11 @@
 ---
-description: Zeref — local-first context and memory engine. Canonical spec in AGENTS.md.
+description: Shiroe — local-first AI work control plane. Canonical spec in AGENTS.md.
 globs:
   - "**/*"
 alwaysApply: true
 ---
 
-# Zeref (Cursor stub)
+# Shiroe (Cursor stub)
 
 Canonical agent spec: **AGENTS.md**
 

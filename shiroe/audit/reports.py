@@ -27,7 +27,7 @@ def audit_report(root: Path, *, since: str = "", format: str = "text") -> str:
             sort_keys=True,
         )
 
-    lines = ["# Zeref Audit Report" if format == "md" else "Zeref Audit Report", ""]
+    lines = ["# Shiroe Audit Report" if format == "md" else "Shiroe Audit Report", ""]
     if since:
         lines.extend([f"Since: {since}", ""])
     lines.extend(

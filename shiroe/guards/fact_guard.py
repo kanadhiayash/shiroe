@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 BLOCKED_PATTERNS = {
-    "unsupported_superlative": ["best memory engine", "best-in-class", "beats every", "beats all"],
+    "unsupported_superlative": ["is the best", "best-in-class", "beats every", "beats all"],
     "benchmark_claim": ["10/10 on all benchmarks", "scores 10/10", "leaderboard"],
     "production_ready": ["production-ready", "production proven", "production-proven"],
     "success_without_evidence": ["all gates pass", "all checks pass", "fully verified", "unsupported claim"],
@@ -105,11 +105,11 @@ def report(findings: list[FactFinding], *, format: str = "text") -> str:
 def suggest_rewrite(claim: str) -> str:
     lowered = claim.lower()
     if "best" in lowered or "beats" in lowered:
-        return "Use: Zeref is designed as a local-first memory hardening layer for AI agents."
+        return "Use: Shiroe is designed as a local-first memory hardening layer for AI agents."
     if "benchmark" in lowered or "10/10" in lowered or "leaderboard" in lowered:
         return "State benchmark status only with a dated, reproducible source."
     if "production" in lowered:
-        return "Use: Zeref is being hardened for local-first AI memory workflows."
+        return "Use: Shiroe is being hardened for local-first AI memory workflows."
     return "Rewrite as a sourced, bounded claim."
 
 

@@ -1,10 +1,10 @@
-"""Typed errors for Zeref hardening gates."""
+"""Typed errors for Shiroe hardening gates."""
 
 from __future__ import annotations
 
 
 class ZerefError(ValueError):
-    """Base error for user-actionable Zeref failures."""
+    """Base error for user-actionable Shiroe failures."""
 
 
 class ValidationError(ZerefError):

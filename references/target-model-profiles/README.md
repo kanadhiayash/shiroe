@@ -1,12 +1,12 @@
-# references/target-model-profiles/ — Zeref target-aware routing hints
+# references/target-model-profiles/ — Shiroe target-aware routing hints
 
-One YAML profile per target model that Zeref emits into. Derived summaries
+One YAML profile per target model that Shiroe emits into. Derived summaries
 of leaked system prompts from `github.com/asgeirtj/system_prompts_leaks`.
 **No source text vendored.**
 
 ## Purpose
 
-Zeref's `caveman-handoff`, `prompt-context-engine`, and `cost_router` consume
+Shiroe's `caveman-handoff`, `prompt-context-engine`, and `cost_router` consume
 these profiles to (a) drop content the target already has in its system
 prompt and (b) pre-shape prompts to match the target's format and refusal
 signatures.
@@ -32,7 +32,7 @@ Every profile MUST carry:
 - Constraints: `refusal_signature`, `persona_lock`, `identity_reference_ok`,
   `hard_limits[]`.
 - Compression: `already_knows[]` — what target's system prompt covers so
-  Zeref's wrapper drops it.
+  Shiroe's wrapper drops it.
 - Prompt-context-engine hints: `prefers_structured_task_brief`,
   `prefers_success_criteria`, `prefers_explicit_context_pointer`.
 - Built-ins: `built_in_tools[]`.
@@ -59,7 +59,7 @@ Every profile MUST carry:
 ## Freshness policy
 
 - Profiles carry `source_updated_at` from the catalog.
-- `zeref release check` and `zeref doctor` refuse PASS (hard-fail) when a
+- `shiroe release check` and `shiroe doctor` refuse PASS (hard-fail) when a
   profile with `source_authority: official` is >60 days stale relative to
   the release date — an official publisher exists to re-verify against, so
   staleness there is treated as unverified drift.
@@ -67,7 +67,7 @@ Every profile MUST carry:
   non-blocking WARNING instead of a hard fail: there is no authoritative
   publisher to re-check it against either way, so refusing to release would
   just be recording a verification nobody could have performed. The
-  WARNING still surfaces in the release report and in `zeref doctor` output
+  WARNING still surfaces in the release report and in `shiroe doctor` output
   — it is never silently dropped or reported as PASS. (issue #175)
 - Monthly refresh cadence (see
   [skills/imported/system-prompts-leaks/README.md](../../skills/imported/system-prompts-leaks/README.md)).

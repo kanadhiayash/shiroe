@@ -20,7 +20,7 @@ Push approved child-project state up to a parent project. Provenance preserved. 
 1. Read `config/PARENT_SYNC.md`. If `enabled: false` → exit with "Parent sync not configured".
 2. Validate `parent_path`:
    - Path exists
-   - Contains a flat `memory/` (is a Zeref OS v4.3+ project)
+   - Contains a flat `memory/` (is a Shiroe v4.3+ project)
    - Writable by current user
 3. If `child_id` is null → assign one:
    - Default: basename of current project root

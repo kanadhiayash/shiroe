@@ -24,7 +24,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 SCHEMA_VERSION = 1
-PRODUCT_NAME = "Zeref Memory Engine"
+PRODUCT_NAME = "Shiroe AI Tactician"
 
 # Directories never included in the packaged-file digest even without git:
 # generated caches, VCS internals, and — critically — memory/, which is the

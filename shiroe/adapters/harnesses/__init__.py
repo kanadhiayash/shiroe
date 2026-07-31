@@ -1,6 +1,6 @@
 """Harness adapters (vNext PRs 12–18, master plan §12).
 
-A harness is the AI-agent runtime the user is actually driving Zeref
+A harness is the AI-agent runtime the user is actually driving Shiroe
 through — Claude Code, Codex, Gemini CLI, Kimi Code, Hermes, Odysseus.
 Each adapter reports:
 

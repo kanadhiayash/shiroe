@@ -1,3 +1,3 @@
-"""Local-first hardening guards for Zeref."""
+"""Local-first hardening guards for Shiroe."""
 
 __all__ = []

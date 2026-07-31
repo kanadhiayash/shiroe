@@ -1,9 +1,9 @@
-"""Zeref retrieval arm — drives the real `shiroe.memory` search stack.
+"""Shiroe retrieval arm — drives the real `shiroe.memory` search stack.
 
 Not a re-implementation: each ingested chunk becomes a real validated atom
 (`shiroe.memory.schemas.create_atom`) written through `AtomStore`, and recall
 goes through `shiroe.memory.search.search_atoms` — the same function
-`zeref recall` and `zeref explain-search` use. Whatever Zeref actually does
+`shiroe recall` and `shiroe explain-search` use. Whatever Shiroe actually does
 in production is what gets measured here, not a benchmark-only stand-in.
 """
 
@@ -21,7 +21,7 @@ _EPOCH = datetime(1970, 1, 1, tzinfo=timezone.utc)
 
 
 class ShiroeBackend:
-    """Implements the harness ingest/recall interface with real Zeref atoms."""
+    """Implements the harness ingest/recall interface with real Shiroe atoms."""
 
     name = "shiroe"
 
@@ -33,7 +33,7 @@ class ShiroeBackend:
     def _new_root(self) -> None:
         if self._tmp is not None:
             self._tmp.cleanup()
-        self._tmp = tempfile.TemporaryDirectory(prefix="zeref-bench-zeref-")
+        self._tmp = tempfile.TemporaryDirectory(prefix="shiroe-bench-shiroe-")
         self.root = Path(self._tmp.name)
         self.store = AtomStore(self.root)
         self.store.ensure_layout()

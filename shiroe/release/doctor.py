@@ -1,4 +1,4 @@
-"""Doctor checks for local Zeref health."""
+"""Doctor checks for local Shiroe health."""
 
 from __future__ import annotations
 

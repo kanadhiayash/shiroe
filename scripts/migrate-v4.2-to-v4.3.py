@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""migrate-v4.2-to-v4.3.py — Zeref nomenclature migration.
+"""migrate-v4.2-to-v4.3.py — Shiroe nomenclature migration.
 
-v4.2 → v4.3 file layout alignment per ZEREF_OS §12.
+v4.2 → v4.3 file layout alignment per SHIROE_OS §12.
 
 Moves performed (all reversible via the pre-migration snapshot):
   memory/wiki/INDEX.md          → memory/index.md
@@ -55,7 +55,7 @@ ARCHIVE_MOVES = [
 NEW_FILES = {
     "memory/hot.md": """<!-- memory/hot.md — last 3 sessions, current context. Cap ≤500 words.
 
-Per ZEREF_OS §0: read FIRST on every session start. If insufficient, fall through to memory/index.md.
+Per SHIROE_OS §0: read FIRST on every session start. If insufficient, fall through to memory/index.md.
 
 Format suggestion:
 - ## Session <iso-date> — <one-line purpose>
@@ -69,7 +69,7 @@ Format suggestion:
 """,
     "memory/MEMORY.md": """<!-- memory/MEMORY.md — agent-written session notes (NOT human-edited).
 
-Per ZEREF_OS §3.4:
+Per SHIROE_OS §3.4:
 - AGENTS.md = human-written, agent-read (rules, policy)
 - MEMORY.md = agent-written, agent-read (session notes, trap avoidance)
 - First 200 lines auto-load on session start.
@@ -87,9 +87,9 @@ SESSION_EVENTS_HEADER = (
     '{"ts": "__TS__", "agent": "migrate-v4.2-to-v4.3", '
     '"event": "log-cutover", "target": "memory/patterns/PATTERNS.jsonl", '
     '"payload": {"predecessor": "memory/archive/session-events-v4.2.jsonl", '
-    '"reason": "v4.3 flat memory layout per ZEREF_OS §12"}}\n'
+    '"reason": "v4.3 flat memory layout per SHIROE_OS §12"}}\n'
 )
-WIKI_TOMBSTONE = """<!-- memory/wiki/ moved to flat memory/ layout in v4.3 (ZEREF_OS §12).
+WIKI_TOMBSTONE = """<!-- memory/wiki/ moved to flat memory/ layout in v4.3 (SHIROE_OS §12).
 - INDEX.md          → memory/index.md
 - DECISIONS.md      → memory/DECISIONS.md
 - OPEN_QUESTIONS.md → memory/OPEN_QUESTIONS.md
@@ -253,7 +253,7 @@ def main() -> int:
     if dry:
         print("DRY-RUN complete. Re-run with --apply to perform the migration.")
     else:
-        print("Migration complete. Verify with `git status` and `scripts/zeref-validate-v4.py`.")
+        print("Migration complete. Verify with `git status` and `scripts/shiroe-validate-v4.py`.")
     return 0
 
 

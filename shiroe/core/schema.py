@@ -1,4 +1,4 @@
-"""Canonical memory-card schema for guarded Zeref writes."""
+"""Canonical memory-card schema for guarded Shiroe writes."""
 
 from __future__ import annotations
 

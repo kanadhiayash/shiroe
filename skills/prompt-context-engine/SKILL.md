@@ -30,7 +30,7 @@ max_turns: 8
 
 ## Mission
 
-Auto-gate #3 of the v2.6 four-gate chain. Classify, restructure, and inject every incoming user prompt into an optimized, executable task brief before Zeref begins work. Prevent wasted tokens, rework cycles, and misaligned execution caused by unstructured or under-specified prompts. Preserve every named tool, repo, constraint, and edge case from the original prompt (zero context loss — `_shared/rules.md#R6`).
+Auto-gate #3 of the v2.6 four-gate chain. Classify, restructure, and inject every incoming user prompt into an optimized, executable task brief before Shiroe begins work. Prevent wasted tokens, rework cycles, and misaligned execution caused by unstructured or under-specified prompts. Preserve every named tool, repo, constraint, and edge case from the original prompt (zero context loss — `_shared/rules.md#R6`).
 
 ## Model and Environment Guidance
 
@@ -107,7 +107,7 @@ UNSTRUCTURED signals:
 - Multiple intents mixed without priority
 - Abstract goal without clear deliverable
 - Named tools or repos mentioned without connection to action
-- Example: "I want zeref to be smarter about costs and also the skills thing and also fix the prompts"
+- Example: "I want shiroe to be smarter about costs and also the skills thing and also fix the prompts"
 
 ### Step 3: Act by Classification
 

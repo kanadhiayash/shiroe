@@ -3,10 +3,10 @@ privacy-audit: allow-file "Runner names provenance/cost schema fields as spec; n
 
 Three-arm external benchmark runner (Wave 4).
 
-A Zeref retrieval number alone is meaningless, so every run evaluates three
+A Shiroe retrieval number alone is meaningless, so every run evaluates three
 arms side by side:
 
-    (a) zeref        — the real shiroe.memory search stack
+    (a) shiroe        — the real shiroe.memory search stack
     (b) full_context — no memory system at all (the honest floor; published
                         research shows full-context frequently beats
                         purpose-built memory products at small-to-medium
@@ -56,7 +56,7 @@ ARM_BACKENDS = {
     "full_context": FullContextBackend,
     "bm25": Bm25Backend,
 }
-ALL_ARMS = tuple(ARM_BACKENDS)  # dict preserves insertion order: zeref, full_context, bm25
+ALL_ARMS = tuple(ARM_BACKENDS)  # dict preserves insertion order: shiroe, full_context, bm25
 
 
 def resolve_arms(arms: str | list[str] | tuple[str, ...] | None) -> tuple[str, ...]:
@@ -230,7 +230,7 @@ def run_three_arms(
 
     # A task whose whole haystack fits in one chunk hands every arm the same
     # context, so all three necessarily score the same. That is a property of
-    # the sample, not a finding about Zeref, and counting it as a three-way tie
+    # the sample, not a finding about Shiroe, and counting it as a three-way tie
     # silently drags every arm's mean toward the others. ConvoMem is ~37%
     # such tasks. Report them so a comparison can be read with them excluded.
     degenerate: list[str] = []

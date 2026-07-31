@@ -48,7 +48,7 @@ def test_build_derived_graph_is_rebuildable_from_atoms(tmp_path: Path) -> None:
         source="tests/lineage",
         evidence="A",
         confidence="high",
-        entities=["Zeref"],
+        entities=["Shiroe"],
         provenance="test",
     )
     AtomStore(tmp_path).append(atom)

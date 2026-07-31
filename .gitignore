@@ -36,10 +36,10 @@ ruvector.db
 agentdb.rvf
 agentdb.rvf.lock
 
-# Zeref trace logs (local runtime)
-zeref-trace.jsonl
+# Shiroe trace logs (local runtime)
+shiroe-trace.jsonl
 
-# Zeref structured memory state (local runtime)
+# Shiroe structured memory state (local runtime)
 memory/state/*.sqlite
 memory/state/*.sqlite-*
 
@@ -72,7 +72,7 @@ npm-debug.log
 .claude/launch.json
 .claude/
 
-# Zeref local runtime memory artifacts
+# Shiroe local runtime memory artifacts
 memory/hot.md
 memory/index.md
 memory/MEMORY.md
@@ -98,7 +98,7 @@ docs/audits/release-evidence/
 docs/_evidence/
 
 # Local lineage sandbox imports. Foreign repository clones and inventories are
-# generated evidence only and must not enter Zeref core.
+# generated evidence only and must not enter Shiroe core.
 .shiroe-sandbox/
 
 # Local verification evidence (never published; see hardening program governance)

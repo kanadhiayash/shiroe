@@ -90,7 +90,7 @@ def test_memory_write_rejects_missing_evidence_grade(repo_root: Path, tmp_path: 
     proposal = {
         "type": "fact",
         "title": "missing evidence",
-        "claim": "Zeref has guarded writes.",
+        "claim": "Shiroe has guarded writes.",
         "privacy_class": "internal",
         "source_refs": ["README.md"],
     }
@@ -108,7 +108,7 @@ def test_memory_write_rejects_missing_privacy_class(repo_root: Path, tmp_path: P
     proposal = {
         "type": "fact",
         "title": "missing privacy",
-        "claim": "Zeref has guarded writes.",
+        "claim": "Shiroe has guarded writes.",
         "evidence_grade": "B",
         "source_refs": ["README.md"],
     }
@@ -124,7 +124,7 @@ def test_memory_write_rejects_missing_source_refs(repo_root: Path, tmp_path: Pat
     proposal = {
         "type": "fact",
         "title": "missing source",
-        "claim": "Zeref has guarded writes.",
+        "claim": "Shiroe has guarded writes.",
         "privacy_class": "internal",
         "evidence_grade": "B",
     }
@@ -203,7 +203,7 @@ def test_write_gate_rejects_every_factguard_blocked_phrase(tmp_path: Path) -> No
 
     The gate used to restate a four-phrase subset of BLOCKED_PATTERNS inline.
     Phrases added to FactGuard afterwards ("production-ready", "all gates
-    pass", "fully verified", ...) were refused by `zeref fact check` but still
+    pass", "fully verified", ...) were refused by `shiroe fact check` but still
     accepted into memory. This pins the two to one shared table.
     """
     from shiroe.core.errors import GuardRejection
@@ -224,7 +224,7 @@ def test_write_gate_rejects_every_factguard_blocked_phrase(tmp_path: Path) -> No
         proposal = {
             "type": "fact",
             "title": f"claim {phrase}",
-            "claim": f"Zeref {phrase} today.",
+            "claim": f"Shiroe {phrase} today.",
             "privacy_class": "internal",
             "evidence_grade": "B",
             "source_refs": ["README.md"],
@@ -245,7 +245,7 @@ def test_memory_write_cli_rejects_previously_missed_phrase(repo_root: Path, tmp_
     proposal = {
         "type": "fact",
         "title": "readiness",
-        "claim": "Zeref is production-ready for all workloads.",
+        "claim": "Shiroe is production-ready for all workloads.",
         "privacy_class": "internal",
         "evidence_grade": "B",
         "source_refs": ["README.md"],

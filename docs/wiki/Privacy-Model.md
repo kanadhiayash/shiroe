@@ -1,6 +1,6 @@
 # Privacy Model
 
-Privacy in Zeref is deterministic and code-enforced. The `shiroe/privacy.py` runtime applies redaction rules before any write, and `shiroe/guards/privacy_guard.py` sits on the write path. Nothing depends on a model remembering to be careful.
+Privacy in Shiroe is deterministic and code-enforced. The `shiroe/privacy.py` runtime applies redaction rules before any write, and `shiroe/guards/privacy_guard.py` sits on the write path. Nothing depends on a model remembering to be careful.
 
 That distinction is the whole design. A model asked to redact is a model that can be talked out of redacting. A regex cannot be persuaded.
 
@@ -82,10 +82,10 @@ Under `local-only`, the path is blocked entirely and staging does not proceed.
 
 | File | Purpose |
 |---|---|
-| [`PRIVACY.md`](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/PRIVACY.md) | Active mode and abstraction rules. |
-| [`REDACT.md`](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/REDACT.md) | Sensitive classes and patterns. |
-| [`SHARING_POLICY.md`](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/SHARING_POLICY.md) | Connector and destination allowlist. |
-| [`SECURITY.md`](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/SECURITY.md) | Vulnerability reporting. |
+| [`PRIVACY.md`](https://github.com/kanadhiayash/shiroe/blob/main/PRIVACY.md) | Active mode and abstraction rules. |
+| [`REDACT.md`](https://github.com/kanadhiayash/shiroe/blob/main/REDACT.md) | Sensitive classes and patterns. |
+| [`SHARING_POLICY.md`](https://github.com/kanadhiayash/shiroe/blob/main/SHARING_POLICY.md) | Connector and destination allowlist. |
+| [`SECURITY.md`](https://github.com/kanadhiayash/shiroe/blob/main/SECURITY.md) | Vulnerability reporting. |
 
 ## Verify it yourself
 
@@ -94,7 +94,7 @@ python3 -m shiroe audit      # structural validation and privacy audit
 python3 -m pytest -q        # includes redaction and export tests
 ```
 
-Report vulnerabilities privately per [`SECURITY.md`](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/SECURITY.md). Do not open public issues for them.
+Report vulnerabilities privately per [`SECURITY.md`](https://github.com/kanadhiayash/shiroe/blob/main/SECURITY.md). Do not open public issues for them.
 
 ## Related
 

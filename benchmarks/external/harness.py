@@ -49,7 +49,7 @@ _TOKEN_RE = re.compile(r"[a-z0-9]+")
 
 
 class MemoryBackend(Protocol):
-    """Ingest/recall interface shared by zeref and the honest baselines."""
+    """Ingest/recall interface shared by shiroe and the honest baselines."""
 
     name: str
 

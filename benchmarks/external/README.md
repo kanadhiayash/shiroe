@@ -7,7 +7,7 @@ are fixture-based self-checks and are NOT external benchmark results.
 
 ## What this is
 
-A reproducible, provenance-bound harness for running the Zeref memory engine
+A reproducible, provenance-bound harness for running the Shiroe AI Tactician
 and two honest baselines against real external datasets:
 
 - Supported: **LoCoMo, LongMemEval, ConvoMem, PersonaMem, RULER, HELMET**
@@ -17,9 +17,9 @@ and two honest baselines against real external datasets:
 - Explicitly unsupported, with reasons: see [`UNSUPPORTED.md`](UNSUPPORTED.md).
 - Baselines (`baselines/`): `plain_files` and `sqlite_fts` are legacy
   infrastructure checks. The three arms every scored run reports are
-  `zeref` (the real `shiroe.memory` search stack), `full_context` (no memory
+  `shiroe` (the real `shiroe.memory` search stack), `full_context` (no memory
   system — the honest floor), and `bm25` (a plain Okapi BM25 ranker).
-  Phase B publishes zeref numbers **next to** `full_context` and `bm25`
+  Phase B publishes shiroe numbers **next to** `full_context` and `bm25`
   or not at all.
 - Providers (`providers/`): adapter interface with mandatory cost recording.
   The Anthropic adapter reads `ANTHROPIC_API_KEY` from the environment and in
@@ -31,7 +31,7 @@ and two honest baselines against real external datasets:
   authorized session enables it. `DeterministicFakeJudge` is the only judge
   ever exercised by this repo's tests.
 - Cost gate (`cost.py`): `estimate_run_cost` computes judge-call count and
-  dollar cost from the local dataset before anything runs; `zeref benchmark
+  dollar cost from the local dataset before anything runs; `shiroe benchmark
   external --live` refuses to proceed past the estimate without `--confirm`,
   clamps any `--max-cost` to a $500 hard ceiling, and the runner aborts
   mid-run — before the call that would cross the ceiling, not after — if the
@@ -75,17 +75,17 @@ not the benchmark's official metric, and must never be quoted as a score.
 Every results JSON is bound to: git SHA, dataset name/version/sha256, model
 id, prompts hash, token/cost record, timestamp, and mode (`dry_run`/`live`).
 
-## Three-arm CLI (`zeref benchmark external`)
+## Three-arm CLI (`shiroe benchmark external`)
 
 The single-backend `harness.py` invocation above still works for
 infrastructure spot-checks. For an actual comparison, use the CLI, which
-always runs the `zeref`, `full_context`, and `bm25` arms together (a Zeref
+always runs the `shiroe`, `full_context`, and `bm25` arms together (a Shiroe
 number alone is meaningless — see `shiroe/release/claim_gate.py`'s
 `missing_baseline_pair` constraint):
 
 ```bash
 # Default: proxy mode. Ingest + recall only, zero network calls.
-zeref benchmark external --benchmark locomo --data /path/to/locomo
+shiroe benchmark external --benchmark locomo --data /path/to/locomo
 
 # Cost estimate only — always printed before any run, live or not:
 #   cost estimate: N tasks x 3 arms = ... judge calls, est. $X.XXXX
@@ -93,7 +93,7 @@ zeref benchmark external --benchmark locomo --data /path/to/locomo
 
 # Scored run (generates + judges an answer per task per arm). Requires
 # --confirm and a cost estimate under --max-cost (hard ceiling: $500).
-zeref benchmark external --benchmark locomo --data /path/to/locomo \
+shiroe benchmark external --benchmark locomo --data /path/to/locomo \
   --live --confirm --max-cost 5 --judge gemini
 ```
 
@@ -106,12 +106,12 @@ because the running cost hit `--max-cost` mid-run).
 
 ## What Phase B will publish (budget-gated)
 
-- Full-dataset runs of zeref AND both baselines with the same provider,
+- Full-dataset runs of shiroe AND both baselines with the same provider,
   prompts, and recall budget, scored by each benchmark's own metric
   (exact match / token F1 / choice accuracy as defined per loader).
 - Provenance for every number: dataset hash pinned, git SHA, model id,
   prompts hash, and the real (not estimated) token/cost record.
-- Failures and losses included — if a baseline beats zeref on an axis, that
+- Failures and losses included — if a baseline beats shiroe on an axis, that
   is published too.
 
 Until those runs exist, the only honest claim is: "the harness exists and the

@@ -1,6 +1,6 @@
 # Memory Model
 
-> Hand a six-month-old project to a new collaborator. Where do they read first? What do they read second? When do they stop? Zeref answers those three questions with files on disk.
+> Hand a six-month-old project to a new collaborator. Where do they read first? What do they read second? When do they stop? Shiroe answers those three questions with files on disk.
 
 ## The store invariant
 
@@ -15,7 +15,7 @@
 
 The Markdown you read in `memory/` is a view, not the record. Editing it by hand edits the projection rather than the source; regeneration overwrites your change. Write through the CLI or a session so the write passes the guards.
 
-Recorded in [`docs/adr/ADR-0001-canonical-store.md`](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/docs/adr/ADR-0001-canonical-store.md).
+Recorded in [`docs/adr/ADR-0001-canonical-store.md`](https://github.com/kanadhiayash/shiroe/blob/main/docs/adr/ADR-0001-canonical-store.md).
 
 ## Layout
 

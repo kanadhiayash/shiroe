@@ -1,7 +1,7 @@
 """
 privacy-audit: allow-file "Memory scaffold module names example project fields (project_root, created, last_session) as schema documentation; no real data."
 
-Memory Core layout helpers for Zeref.
+Memory Core layout helpers for Shiroe.
 
 This module is the narrow boundary for project-root discovery and memory
 scaffolding. Higher-level write, search, and lifecycle behavior should build on
@@ -138,7 +138,7 @@ STATE_SCHEMA: dict = {
 
 @dataclass(frozen=True)
 class MemoryLayout:
-    """Resolved paths for the current Zeref memory layout."""
+    """Resolved paths for the current Shiroe memory layout."""
 
     root: Path
 
@@ -186,7 +186,7 @@ class MemoryLayout:
 
 @dataclass(frozen=True)
 class MemoryRoot:
-    """A Zeref project root plus its resolved memory layout."""
+    """A Shiroe project root plus its resolved memory layout."""
 
     root: Path
     layout: MemoryLayout
@@ -300,7 +300,7 @@ class MemoryWriter:
 
 
 def discover_project_root(start: Path | None = None, max_depth: int = 10) -> Path:
-    """Walk up from start looking for a Zeref project marker.
+    """Walk up from start looking for a Shiroe project marker.
 
     Prefer config/PROJECT.md (always scaffolded by `shiroe init`).
     Fall back to AGENTS.md for the packaging repo (which does not run init).
@@ -346,7 +346,7 @@ def scaffold_project(
     tier: str | None,
     parent: str | None,
 ) -> MemoryRoot:
-    """Create the Zeref memory/config scaffold without overwriting user files."""
+    """Create the Shiroe memory/config scaffold without overwriting user files."""
     memory_root = MemoryRoot.from_path(root)
     values = normalize_init_values(
         name=name,

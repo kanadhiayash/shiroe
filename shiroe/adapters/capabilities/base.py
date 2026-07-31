@@ -8,10 +8,10 @@ from typing import Any, Protocol, runtime_checkable
 
 
 class EnforcementLevel(str, Enum):
-    """How much runtime control Zeref actually has over this adapter."""
+    """How much runtime control Shiroe actually has over this adapter."""
 
     embedded = "A"        # subprocess or native hook we own
-    sidecar = "B"         # routed through Zeref CLI / MCP / proxy
+    sidecar = "B"         # routed through Shiroe CLI / MCP / proxy
     context_only = "C"    # we assemble the prompt; can't guarantee execution
 
 

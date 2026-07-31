@@ -1,4 +1,4 @@
-# Internal Quality Axes Report - Zeref Memory Engine
+# Internal Quality Axes Report - Shiroe
 
 > **Internal quality axes — fixture-based self-checks. NOT external benchmark results.**
 > These axes verify local invariants against committed fixtures. They do not measure

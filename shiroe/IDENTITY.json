@@ -1,7 +1,7 @@
 {
-  "_comment_privacy_audit": "privacy-audit: allow-file — canonical identity metadata (product/module/repo naming). No user data.",
-  "product": "Zeref Memory Engine",
-  "product_short": "Zeref",
+  "_comment_privacy_audit": "privacy-audit: allow-file \u2014 canonical identity metadata (product/module/repo naming). No user data.",
+  "product": "Shiroe AI Tactician",
+  "product_short": "Shiroe",
   "distribution": "shiroe",
   "module": "shiroe",
   "cli": "shiroe",
