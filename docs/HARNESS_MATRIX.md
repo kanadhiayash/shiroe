@@ -24,6 +24,37 @@ Evidence states:
 | Llama family (Ollama, vLLM, Open WebUI) | `LLAMA.md` | doc | doc | via `python3 -m shiroe` | doc | **documented-only** | system-prompt wrapper approach; requires host testing |
 | Hermes, Amp, Zed, Perplexity | none (reads `AGENTS.md`) | doc | doc | via `python3 -m shiroe` | doc | **documented-only** | no dedicated stub |
 
+## Three different things, often confused (issue #149)
+
+"Supported" has meant three unrelated things in this repo. They are listed
+separately here because a reader could not otherwise tell which one applies.
+
+**1. Handoff targets** — a Python module that formats a session handoff for
+that destination. Source of truth: `shiroe/handoff/`.
+
+`claude` · `codex` · `cursor` · `github` · `human`
+
+**2. Harness adapters** — a Python module that emits harness-shaped context.
+Source of truth: `shiroe/adapters/harnesses/`.
+
+`claude_code` · `codex` · `gemini_cli` · `hermes` · `kimi_code` · `odysseus`
+
+**3. Stub-only integrations** — a rules or config file pointing the harness at
+`AGENTS.md`. No Python module; the harness reads the spec as context and is
+asked, not compelled, to follow it.
+
+`.windsurfrules` (Windsurf) · `.aider.conf.yml.example` (Aider)
+
+The three lists genuinely differ. Cursor is a handoff target with no adapter.
+Gemini CLI, Hermes, Kimi, and Odysseus are adapters with no handoff target.
+Windsurf and Aider are neither — they are context-only, which is the weakest
+tier and should never be described as equivalent to the others.
+
+The table below records *evidence state* — whether a host was observed
+booting — which is a separate axis again. A harness can have an adapter and
+still be `documented-only` because nobody has run it and kept the log.
+
+
 ## Boot-sequence verification (per [AGENTS.md](../AGENTS.md) §0)
 
 Recorded in the Shiroe project memory of the harness under `memory/patterns/PATTERNS.jsonl`
