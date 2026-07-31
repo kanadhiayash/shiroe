@@ -68,7 +68,7 @@ claim
 disk
 ```
 
-Concurrency is handled by an advisory lock in `zeref/lock.py`. A second concurrent writer aborts with a clear error rather than interleaving, and writes are atomic, so an interrupted write does not leave a half-written file.
+Concurrency is handled by an advisory lock in `shiroe/lock.py`. A second concurrent writer aborts with a clear error rather than interleaving, and writes are atomic, so an interrupted write does not leave a half-written file.
 
 ## Contradiction handling
 
@@ -108,7 +108,7 @@ Agreement among reviewers never upgrades weak source evidence to a strong grade.
 
 The log is never edited in place. Entries are appended; replay reconstructs state. Pattern detection reads it as a stream.
 
-Event types are allowlisted and each carries a required payload shape, validated by `scripts/zeref-validate.py`. The validator is the source of truth for which events and values are legal — it enforces the allowlist, per-event schema, and value enums, and reports findings rather than silently accepting unknown types.
+Event types are allowlisted and each carries a required payload shape, validated by `scripts/shiroe-validate.py`. The validator is the source of truth for which events and values are legal — it enforces the allowlist, per-event schema, and value enums, and reports findings rather than silently accepting unknown types.
 
 ## Snapshots and archival
 
@@ -128,7 +128,7 @@ For projects that roll up into a parent, the sequence is staged and gated rather
 ## Validation
 
 ```bash
-python3 scripts/zeref-validate.py
+python3 scripts/shiroe-validate.py
 ```
 
 Checks that registered surfaces resolve on disk, that root privacy files are present, that the memory layout is well-formed, and that the event log passes schema lint. Exits non-zero on any finding.

@@ -1,6 +1,6 @@
 # Harness Matrix — Zeref Memory Engine
 
-Portability evidence per harness. Evidence-state (not ✅ marks) per [ZRF-AUDIT-022] +
+Portability evidence per harness. Evidence-state (not ✅ marks) per [SHR-AUDIT-022] +
 D7 (ratified 2026-07-10): only harnesses with a host-observed boot log are `verified`.
 Everything else is `documented-only` until a host log ships.
 
@@ -16,13 +16,13 @@ Evidence states:
 | Harness | Stub | Boot | Memory read | Tool surface | Handoff | Evidence state | Log reference |
 |---|---|:---:|:---:|:---:|:---:|:---|:---|
 | Claude Code | `CLAUDE.md` | yes | yes | yes | yes | **verified** | verified against a host log; record maintained outside this repository |
-| Codex | `CODEX.md` | doc | doc | via `python3 -m zeref` | doc | **documented-only** | stubs present; no host log |
-| Cursor | `.cursor/rules/zeref.mdc` | doc | doc | via `python3 -m zeref` | doc | **documented-only** | stubs present; no host log |
-| Windsurf | `.windsurfrules` | doc | doc | via `python3 -m zeref` | doc | **documented-only** | stubs present; no host log |
-| Aider | `.aider.conf.yml.example` | doc | doc | via `python3 -m zeref` | doc | **documented-only** | stub `.example` only — user must copy to `.aider.conf.yml` |
-| Gemini CLI / Antigravity | `GEMINI.md` | doc | doc | via `python3 -m zeref` | doc | **documented-only** | stubs present; no host log |
-| Llama family (Ollama, vLLM, Open WebUI) | `LLAMA.md` | doc | doc | via `python3 -m zeref` | doc | **documented-only** | system-prompt wrapper approach; requires host testing |
-| Hermes, Amp, Zed, Perplexity | none (reads `AGENTS.md`) | doc | doc | via `python3 -m zeref` | doc | **documented-only** | no dedicated stub |
+| Codex | `CODEX.md` | doc | doc | via `python3 -m shiroe` | doc | **documented-only** | stubs present; no host log |
+| Cursor | `.cursor/rules/shiroe.mdc` | doc | doc | via `python3 -m shiroe` | doc | **documented-only** | stubs present; no host log |
+| Windsurf | `.windsurfrules` | doc | doc | via `python3 -m shiroe` | doc | **documented-only** | stubs present; no host log |
+| Aider | `.aider.conf.yml.example` | doc | doc | via `python3 -m shiroe` | doc | **documented-only** | stub `.example` only — user must copy to `.aider.conf.yml` |
+| Gemini CLI / Antigravity | `GEMINI.md` | doc | doc | via `python3 -m shiroe` | doc | **documented-only** | stubs present; no host log |
+| Llama family (Ollama, vLLM, Open WebUI) | `LLAMA.md` | doc | doc | via `python3 -m shiroe` | doc | **documented-only** | system-prompt wrapper approach; requires host testing |
+| Hermes, Amp, Zed, Perplexity | none (reads `AGENTS.md`) | doc | doc | via `python3 -m shiroe` | doc | **documented-only** | no dedicated stub |
 
 ## Boot-sequence verification (per [AGENTS.md](../AGENTS.md) §0)
 
@@ -42,12 +42,12 @@ An entry with all 8 steps + a signed log promotes the harness to `verified`.
 ```bash
 # in any harness, from your project root:
 python3 scripts/harness-probe.py                 # file-presence check (does not prove boot)
-python3 -m zeref status                          # discovery + memory read
-python3 -m zeref write-decision \
+python3 -m shiroe status                          # discovery + memory read
+python3 -m shiroe write-decision \
   --title "Harness smoke test" --why "Verifying boot" \
   --evidence "harness-matrix" --grade medium     # single-writer + scrub + audit log
-python3 -m zeref audit-privacy --strict          # policy-vs-enforcement
-python3 -m zeref handoff compile                 # cross-model packager
+python3 -m shiroe audit-privacy --strict          # policy-vs-enforcement
+python3 -m shiroe handoff compile                 # cross-model packager
 ```
 
 The `harness-probe.py` file-presence check alone does NOT constitute a `verified` state
@@ -66,4 +66,4 @@ terminal pane, with the PATTERNS.jsonl `harness-boot-verified` event as evidence
 ## Legacy note
 
 The prior `v1.0.0` matrix used ✅/⚠ marks that were self-attested — this file replaces
-that convention with the evidence-state schema described here (per ZRF-AUDIT-022 finding).
+that convention with the evidence-state schema described here (per SHR-AUDIT-022 finding).

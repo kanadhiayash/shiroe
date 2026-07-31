@@ -123,8 +123,8 @@ PY
 say "Repository verification"
 cd "$REPO_ROOT"
 python3 -m pytest -q
-python3 scripts/zeref-validate.py >/dev/null && echo "  zeref-validate: pass"
-python3 -m zeref audit-privacy --strict --fail-classes credentials >/dev/null && echo "  privacy (credentials class): pass"
+python3 scripts/shiroe-validate.py >/dev/null && echo "  zeref-validate: pass"
+python3 -m shiroe audit-privacy --strict --fail-classes credentials >/dev/null && echo "  privacy (credentials class): pass"
 
 say "Ready"
 cat <<EOF
@@ -134,11 +134,11 @@ cat <<EOF
                Put GEMINI_API_KEY in a gitignored .env.local at the repo root.
 
   Proxy run — retrieval quality, zero network, minutes:
-    python3 -m zeref.cli benchmark external --benchmark locomo \\
+    python3 -m shiroe.cli benchmark external --benchmark locomo \\
       --data \$ZEREF_BENCHMARK_DATA/locomo --arms all
 
   Scored run — checkpointed, resumable, resume by re-running the same command:
-    python3 -m zeref.cli benchmark external --benchmark locomo \\
+    python3 -m shiroe.cli benchmark external --benchmark locomo \\
       --data \$ZEREF_BENCHMARK_DATA/locomo --arms all \\
       --provider ollama --provider-model $OLLAMA_MODEL --num-ctx 32768 \\
       --judge gemini --live --confirm --max-cost 1 \\

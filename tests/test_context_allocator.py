@@ -1,4 +1,4 @@
-"""ZRF-64: context budget allocator.
+"""SHR-64: context budget allocator.
 
 packet.py renders six sections but owns no budget. These tests lock in the
 fix: a hard budget derived from PR 2's provider capability registry, whole
@@ -14,8 +14,8 @@ from pathlib import Path
 
 import pytest
 
-from zeref.adapters.providers.base import JsonProviderAdapter, ModelCapability
-from zeref.context.allocator import AllocatorError, allocate_packet
+from shiroe.adapters.providers.base import JsonProviderAdapter, ModelCapability
+from shiroe.context.allocator import AllocatorError, allocate_packet
 
 REPO = Path(__file__).resolve().parents[1]
 
@@ -244,7 +244,7 @@ def test_output_reserve_override_bypasses_registry_value() -> None:
 def test_allocate_from_reasoning_class_uses_registry(tmp_path: Path) -> None:
     provider_json = tmp_path / "fixture.json"
     provider_json.write_text(json.dumps({
-        "schema": "zeref.provider/v2",
+        "schema": "shiroe.provider/v2",
         "provider": "fixture",
         "classes": {
             "fast": {

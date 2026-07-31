@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from zeref.adapters.harnesses.odysseus import OdysseusAdapter
+from shiroe.adapters.harnesses.odysseus import OdysseusAdapter
 
 
 def test_odysseus_context_only_without_signals(monkeypatch) -> None:
     monkeypatch.delenv("ODYSSEUS_VERSION", raising=False)
     monkeypatch.delenv("ODYSSEUS_API_ENDPOINT", raising=False)
-    monkeypatch.setattr("zeref.adapters.harnesses.odysseus.which",
+    monkeypatch.setattr("shiroe.adapters.harnesses.odysseus.which",
                          lambda cmd: None)
     r = OdysseusAdapter().detect()
     assert not r.detected
@@ -20,7 +20,7 @@ def test_odysseus_context_only_without_signals(monkeypatch) -> None:
 def test_odysseus_sidecar_when_api_endpoint_set(monkeypatch) -> None:
     monkeypatch.setenv("ODYSSEUS_API_ENDPOINT", "https://o.example/api")
     monkeypatch.delenv("ODYSSEUS_VERSION", raising=False)
-    monkeypatch.setattr("zeref.adapters.harnesses.odysseus.which",
+    monkeypatch.setattr("shiroe.adapters.harnesses.odysseus.which",
                          lambda cmd: None)
     r = OdysseusAdapter().detect()
     assert r.detected

@@ -9,23 +9,23 @@ from pathlib import Path
 
 import pytest
 
-from zeref.adapters.capabilities.base import AdapterResult
-from zeref.capabilities import (
+from shiroe.adapters.capabilities.base import AdapterResult
+from shiroe.capabilities import (
     approve,
     inspect_source,
     register_discovery,
 )
-from zeref.capabilities.discovery import DiscoveredCapability
-from zeref.capabilities.store import CapabilityStore
-from zeref.policy import AutonomyMode
-from zeref.runtime import (
+from shiroe.capabilities.discovery import DiscoveredCapability
+from shiroe.capabilities.store import CapabilityStore
+from shiroe.policy import AutonomyMode
+from shiroe.runtime import (
     BudgetTracker,
     Supervisor,
     can_run_transition,
     can_step_transition,
     resume,
 )
-from zeref.runtime.state_machine import (
+from shiroe.runtime.state_machine import (
     IRREVERSIBLE_TERMINAL_STEP_STATES,
     RUN_STATES,
     STEP_STATES,
@@ -34,8 +34,8 @@ from zeref.runtime.state_machine import (
     INVALID_RUN_TRANSITION,
     INVALID_STEP_TRANSITION,
 )
-from zeref.storage import EventLog
-from zeref.teams import compile_team
+from shiroe.storage import EventLog
+from shiroe.teams import compile_team
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -288,7 +288,7 @@ def test_pre_revoked_capability_causes_failure(tmp_path: Path) -> None:
     finally:
         conn.close()
     victim = row[0]
-    from zeref.capabilities import revoke
+    from shiroe.capabilities import revoke
     revoke(tmp_path, victim)
 
     sup = Supervisor(tmp_path, run_id, mode=AutonomyMode.policy_bound,

@@ -19,7 +19,7 @@ def _env(repo_root: Path) -> dict:
 
 def _init(repo_root: Path, root: Path) -> None:
     subprocess.run(
-        [sys.executable, "-m", "zeref", "init",
+        [sys.executable, "-m", "shiroe", "init",
          "--directory", str(root),
          "--name", "decision-test",
          "--privacy", "abstract",
@@ -33,7 +33,7 @@ def _init(repo_root: Path, root: Path) -> None:
 def test_write_decision_appends_to_DECISIONS(repo_root: Path, tmp_path: Path) -> None:
     _init(repo_root, tmp_path)
     r = subprocess.run(
-        [sys.executable, "-m", "zeref", "write-decision",
+        [sys.executable, "-m", "shiroe", "write-decision",
          "--title", "Adopt v1.0.0 trust-repair plan",
          "--why", "Eliminate version drift; harden privacy scrubber",
          "--evidence", "audit report 2026-06-19",
@@ -61,7 +61,7 @@ def test_write_decision_appends_to_DECISIONS(repo_root: Path, tmp_path: Path) ->
 def test_write_decision_scrubs_pii(repo_root: Path, tmp_path: Path) -> None:
     _init(repo_root, tmp_path)
     r = subprocess.run(
-        [sys.executable, "-m", "zeref", "write-decision",
+        [sys.executable, "-m", "shiroe", "write-decision",
          "--title", "Rotate ghp_AbCdEfGhIjKlMnOpQrStUvWxYz0123",
          "--why", "Leaked in public log",
          "--evidence", "n/a",

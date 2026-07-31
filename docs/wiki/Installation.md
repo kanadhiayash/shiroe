@@ -32,7 +32,7 @@ A successful boot reports the project name, the last session timestamp, counts o
 
 ```bash
 cd ~/.claude/plugins/cache/zeref-os/zeref-os
-python3 scripts/zeref-validate.py
+python3 scripts/shiroe-validate.py
 ```
 
 The validator checks that every registered skill, agent, command, and team pack resolves on disk, that the root privacy files are present, that harness stubs are intact, that the memory layout is well-formed, and that the append-only event log passes its schema lint. It prints a per-surface tally and exits non-zero on any finding.
@@ -45,7 +45,7 @@ Each harness reads its own stub, and every stub defers to `AGENTS.md`.
 |---|---|
 | Claude Code | `AGENTS.md` (via plugin) |
 | Codex | `AGENTS.md` natively |
-| Cursor | `.cursor/rules/zeref.mdc` |
+| Cursor | `.cursor/rules/shiroe.mdc` |
 | Gemini CLI | `GEMINI.md` |
 | Hermes | `AGENTS.md` natively |
 | Kimi Code | `AGENTS.md` natively |
@@ -65,7 +65,7 @@ git clone https://github.com/kanadhiayash/zeref-memory-engine.git .zeref
 ```
 
 ```text
-.zeref/AGENTS.md
+.shiroe/AGENTS.md
 ```
 
 ## Per-project setup
@@ -82,12 +82,12 @@ If you cancel mid-interview, Zeref boots read-only until the configuration is co
 
 ## Python runtime
 
-The `zeref/` runtime provides the CLI and structured queries:
+The `shiroe/` runtime provides the CLI and structured queries:
 
 ```bash
 cd ~/.claude/plugins/cache/zeref-os/zeref-os
 pip install -e .
-python3 -m zeref --help
+python3 -m shiroe --help
 ```
 
 Core commands:
@@ -104,14 +104,14 @@ zeref db-status           report storage backend availability
 ## Verify the install end to end
 
 ```bash
-python3 -m zeref --version
-python3 scripts/zeref-validate.py
+python3 -m shiroe --version
+python3 scripts/shiroe-validate.py
 python3 scripts/check-version-consistency.py
 python3 -m pytest -q
 python3 benchmarks/run-all.py
 ```
 
-The version is read from `zeref/VERSION`, which is the single source of truth; `check-version-consistency.py` fails if any surface disagrees with it.
+The version is read from `shiroe/VERSION`, which is the single source of truth; `check-version-consistency.py` fails if any surface disagrees with it.
 
 ## Uninstall
 
@@ -129,11 +129,11 @@ rm -rf memory/ config/PROJECT.md PRIVACY.md REDACT.md SHARING_POLICY.md
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| `unknown event type` in event-log lint | A custom event type was written | Add it to the event schema in `scripts/zeref-validate.py`, or rename the event |
+| `unknown event type` in event-log lint | A custom event type was written | Add it to the event schema in `scripts/shiroe-validate.py`, or rename the event |
 | Handoff artifact not produced on tool switch | Handoff compilation was skipped | Confirm the session ended through `/stop` and that the target is one of the five supported |
 | Handoff blocked on a path containing a look-alike character | Homoglyph guard fired during normalization | Replace with ASCII, or confirm explicitly if intentional |
 | Validator reports a missing surface | Partial install or renamed directory | Re-run the install; adapters and skills must resolve from the registry |
-| Version check fails | A surface disagrees with `zeref/VERSION` | Update the surface; never add a second source of version truth |
+| Version check fails | A surface disagrees with `shiroe/VERSION` | Update the surface; never add a second source of version truth |
 
 ## Related
 

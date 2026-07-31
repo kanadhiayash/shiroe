@@ -6,7 +6,7 @@ Three-arm external benchmark runner (Wave 4).
 A Zeref retrieval number alone is meaningless, so every run evaluates three
 arms side by side:
 
-    (a) zeref        — the real zeref.memory search stack
+    (a) zeref        — the real shiroe.memory search stack
     (b) full_context — no memory system at all (the honest floor; published
                         research shows full-context frequently beats
                         purpose-built memory products at small-to-medium
@@ -34,7 +34,7 @@ from typing import Any
 
 from benchmarks.external.baselines.bm25 import Bm25Backend
 from benchmarks.external.baselines.full_context import FullContextBackend
-from benchmarks.external.baselines.zeref_backend import ZerefBackend
+from benchmarks.external.baselines.shiroe_backend import ShiroeBackend
 from benchmarks.external.checkpoint import CheckpointStore
 from benchmarks.external.cost import CostEstimate, effective_max_cost, estimate_run_cost
 from benchmarks.external.harness import (
@@ -52,7 +52,7 @@ from benchmarks.external.loaders import get_loader
 from benchmarks.external.providers.base import Provider
 
 ARM_BACKENDS = {
-    "zeref": ZerefBackend,
+    "shiroe": ShiroeBackend,
     "full_context": FullContextBackend,
     "bm25": Bm25Backend,
 }

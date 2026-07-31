@@ -6,13 +6,13 @@ from pathlib import Path
 
 import pytest
 
-from zeref.adapters.harnesses.codex import CodexAdapter
+from shiroe.adapters.harnesses.codex import CodexAdapter
 
 
 def test_codex_reports_context_only_when_no_binary(tmp_path: Path,
                                                     monkeypatch) -> None:
     monkeypatch.delenv("CODEX_CLI_VERSION", raising=False)
-    monkeypatch.setattr("zeref.adapters.harnesses.codex.which", lambda cmd: None)
+    monkeypatch.setattr("shiroe.adapters.harnesses.codex.which", lambda cmd: None)
     report = CodexAdapter().detect()
     assert not report.detected
     assert report.enforcement_level.value == "C"
@@ -21,7 +21,7 @@ def test_codex_reports_context_only_when_no_binary(tmp_path: Path,
 
 def test_codex_reports_embedded_when_env_var_set(monkeypatch) -> None:
     monkeypatch.setenv("CODEX_CLI_VERSION", "0.4.2")
-    monkeypatch.setattr("zeref.adapters.harnesses.codex.which", lambda cmd: None)
+    monkeypatch.setattr("shiroe.adapters.harnesses.codex.which", lambda cmd: None)
     report = CodexAdapter().detect()
     assert report.detected
     assert report.enforcement_level.value == "A"

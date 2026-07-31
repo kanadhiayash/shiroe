@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from zeref.adapters.harnesses.claude_code import ClaudeCodeAdapter
+from shiroe.adapters.harnesses.claude_code import ClaudeCodeAdapter
 
 
 def test_claude_code_reports_features() -> None:
@@ -17,7 +17,7 @@ def test_claude_code_reports_features() -> None:
 def test_claude_code_context_only_without_signals(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.delenv("CLAUDE_CODE_VERSION", raising=False)
     monkeypatch.delenv("CLAUDECODE_VERSION", raising=False)
-    monkeypatch.setattr("zeref.adapters.harnesses.claude_code.which",
+    monkeypatch.setattr("shiroe.adapters.harnesses.claude_code.which",
                          lambda cmd: None)
     monkeypatch.setenv("HOME", str(tmp_path))
     report = ClaudeCodeAdapter().detect()
@@ -27,7 +27,7 @@ def test_claude_code_context_only_without_signals(monkeypatch, tmp_path: Path) -
 
 def test_claude_code_embedded_with_env(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setenv("CLAUDE_CODE_VERSION", "1.2.3")
-    monkeypatch.setattr("zeref.adapters.harnesses.claude_code.which",
+    monkeypatch.setattr("shiroe.adapters.harnesses.claude_code.which",
                          lambda cmd: None)
     monkeypatch.setenv("HOME", str(tmp_path))
     report = ClaudeCodeAdapter().detect()

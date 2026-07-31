@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from zeref.lineage.intake import REQUIRED_COLUMNS, audit_csv, load_rows
+from shiroe.lineage.intake import REQUIRED_COLUMNS, audit_csv, load_rows
 
 
 def _write_csv(path: Path, rows: list[dict[str, str]]) -> None:
@@ -77,7 +77,7 @@ def test_lineage_audit_cli_accepts_project_csv() -> None:
         pytest.skip("Set ZEREF_LINEAGE_INTAKE_CSV to run the local full intake CSV smoke test.")
     csv_path = Path(csv_env)
     result = subprocess.run(
-        [sys.executable, "-m", "zeref.cli", "lineage", "audit", "--csv", str(csv_path)],
+        [sys.executable, "-m", "shiroe.cli", "lineage", "audit", "--csv", str(csv_path)],
         text=True,
         capture_output=True,
         check=False,

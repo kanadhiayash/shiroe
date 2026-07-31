@@ -403,9 +403,9 @@ _BACKEND_FACTORIES = {
     "sqlite_fts": lambda: __import__(
         "benchmarks.external.baselines.sqlite_store", fromlist=["SqliteFtsBackend"]
     ).SqliteFtsBackend(),
-    "zeref": lambda: __import__(
-        "benchmarks.external.baselines.zeref_backend", fromlist=["ZerefBackend"]
-    ).ZerefBackend(),
+    "shiroe": lambda: __import__(
+        "benchmarks.external.baselines.shiroe_backend", fromlist=["ShiroeBackend"]
+    ).ShiroeBackend(),
     "full_context": lambda: __import__(
         "benchmarks.external.baselines.full_context", fromlist=["FullContextBackend"]
     ).FullContextBackend(),

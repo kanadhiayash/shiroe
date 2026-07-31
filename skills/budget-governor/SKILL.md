@@ -122,7 +122,7 @@ User may attempt to override a hard-block (e.g. CRITICAL on Haiku). Single-key o
    `event: budget-gate, payload: {weight: CRITICAL, tier: HAIKU, match: OVERRIDE, override_reason: "<text>"}`
 4. **pattern-observer** surveils for repeat overrides in 48-80h window — ≥3 same-class overrides triggers `pattern-to-skill` candidate "user routinely overrides X on Y tier — consider reclassifying."
 
-Override events count toward `budget-warn_at_tokens` but bypass the hard-block. Validator (`scripts/zeref-validate.py`) recognizes `match=OVERRIDE` per the `budget-gate` event schema allowlist.
+Override events count toward `budget-warn_at_tokens` but bypass the hard-block. Validator (`scripts/shiroe-validate.py`) recognizes `match=OVERRIDE` per the `budget-gate` event schema allowlist.
 
 Single-key shortcuts (user just says "override") are rejected with a re-prompt requiring full directive + brief acknowledgement.
 

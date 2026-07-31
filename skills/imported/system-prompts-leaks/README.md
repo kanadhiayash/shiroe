@@ -28,7 +28,7 @@ The reverse is equally load-bearing: knowing each target's refusal signature and
 
 - **No source text vendored.** Zeref imports **derived observations** only, into `references/target-model-profiles/<target_id>.md` — one 200-400 token YAML per target.
 - Original prompts remain the model vendors' IP. Zeref stores summaries + tokens counts + format quirks + refusal signatures, not text.
-- Every profile cites `source_url` + `source_updated_at` + `last_verified_sha` from the catalog repo. Freshness is a release-gate subcheck (`zeref/release/checks.py`).
+- Every profile cites `source_url` + `source_updated_at` + `last_verified_sha` from the catalog repo. Freshness is a release-gate subcheck (`shiroe/release/checks.py`).
 - `benchmarks/foreign_code_containment.py` trivially green — nothing copied.
 
 ## Allowed use

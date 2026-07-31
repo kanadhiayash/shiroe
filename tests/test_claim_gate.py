@@ -1,4 +1,4 @@
-"""ZRF-66 / issue #172: external benchmark truth gate.
+"""SHR-66 / issue #172: external benchmark truth gate.
 
 Covers the capability evidence matrix and the three encoded claim-gate
 constraints: routing-accuracy fixture-coverage, contested vendor
@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from zeref.release.claim_gate import (
+from shiroe.release.claim_gate import (
     build_capability_matrix,
     run_claim_gate,
     scan_public_claims,
@@ -43,7 +43,7 @@ def test_capability_matrix_blocks_all_external_benchmarks(repo_root: Path) -> No
 def test_capability_matrix_covers_registered_gates(repo_root: Path) -> None:
     entries = build_capability_matrix(repo_root)
     gate_caps = [e for e in entries if e.capability.startswith("gate:")]
-    assert len(gate_caps) == 5  # zeref-registry.json currently declares 5 gates
+    assert len(gate_caps) == 5  # shiroe-registry.json currently declares 5 gates
     # every gate in this repo has a matching pytest module, so all are claimable
     assert all(e.public_claim_allowed for e in gate_caps), gate_caps
 

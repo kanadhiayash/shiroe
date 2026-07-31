@@ -19,9 +19,9 @@ from pathlib import Path
 
 import pytest
 
-from zeref.guards.write_gate import propose_memory, write_from_proposal
-from zeref.memory.atom_store import AtomStore
-from zeref.memory_state import MemoryStore
+from shiroe.guards.write_gate import propose_memory, write_from_proposal
+from shiroe.memory.atom_store import AtomStore
+from shiroe.memory_state import MemoryStore
 
 CLAIM = "convergence probe: the deploy window is Tuesday 14:00 UTC"
 
@@ -112,7 +112,7 @@ def test_markdown_views_are_generated_not_authored(repo: Path) -> None:
     """Markdown is a projection. Regenerating from history must be able to
     reproduce it, so exactly one generator may own ``memory/views/``.
     """
-    from zeref.memory import render
+    from shiroe.memory import render
 
     _guarded_write(repo)
     render.render_memory_view(repo, "all")

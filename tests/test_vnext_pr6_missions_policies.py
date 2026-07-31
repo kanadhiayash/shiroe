@@ -7,11 +7,11 @@ from pathlib import Path
 
 import pytest
 
-from zeref import execution_policies as ep
-from zeref import missions as ms
-from zeref.execution_policies.schema import POLICY_IDS, PolicySchemaError, validate as validate_policy
-from zeref.missions.schema import MISSION_SCHEMA, MissionSchemaError, validate as validate_mission
-from zeref.yaml_subset import YAMLSubsetError, parse
+from shiroe import execution_policies as ep
+from shiroe import missions as ms
+from shiroe.execution_policies.schema import POLICY_IDS, PolicySchemaError, validate as validate_policy
+from shiroe.missions.schema import MISSION_SCHEMA, MissionSchemaError, validate as validate_mission
+from shiroe.yaml_subset import YAMLSubsetError, parse
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -170,7 +170,7 @@ def test_frontier_reasoning_is_gated_by_policy() -> None:
 def test_policy_schema_rejects_bad_autonomy() -> None:
     with pytest.raises(PolicySchemaError):
         validate_policy({
-            "schema": "zeref.policy/v1", "id": "lean", "version": 1,
+            "schema": "shiroe.policy/v1", "id": "lean", "version": 1,
             "max_parallel_workers": 1, "max_capabilities": 1,
             "independent_verifiers": 0, "autonomy_default": "chaos",
             "reasoning_class_limits": {"fast": 1, "balanced": 1, "deep": 0, "frontier": 0},
@@ -181,7 +181,7 @@ def test_policy_schema_rejects_bad_autonomy() -> None:
 def test_policy_schema_rejects_unknown_id() -> None:
     with pytest.raises(PolicySchemaError):
         validate_policy({
-            "schema": "zeref.policy/v1", "id": "not-a-policy", "version": 1,
+            "schema": "shiroe.policy/v1", "id": "not-a-policy", "version": 1,
             "max_parallel_workers": 1, "max_capabilities": 1,
             "independent_verifiers": 0, "autonomy_default": "auto-safe",
             "reasoning_class_limits": {"fast": 1, "balanced": 1, "deep": 0, "frontier": 0},

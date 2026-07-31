@@ -8,8 +8,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator
 
-from zeref.memory.atom_store import AtomStore
-from zeref.memory.schemas import create_atom
+from shiroe.memory.atom_store import AtomStore
+from shiroe.memory.schemas import create_atom
 
 
 REPO = Path(__file__).resolve().parent.parent

@@ -4,9 +4,9 @@ Covers three families of guarantees:
 
 1. Static repo scans — no leftover "faang-mangoes" council references in
    live surfaces, and no provider model ids leaked into the provider-neutral
-   core package (``zeref/`` minus ``zeref/adapters/``).
+   core package (``shiroe/`` minus ``shiroe/adapters/``).
 2. Reasoning-class policy — criticality -> reasoning class resolution and
-   the frontier/CRITICAL-only, no-upgrade rules in ``zeref.core.reasoning``.
+   the frontier/CRITICAL-only, no-upgrade rules in ``shiroe.core.reasoning``.
 3. Provider adapters, the deprecation alias shim, the registry contract,
    and loop-contract alias canonicalization.
 """
@@ -20,9 +20,9 @@ from pathlib import Path
 
 import pytest
 
-import zeref.core.deprecations as deprecations
-from zeref.core.deprecations import DEPRECATED_ALIASES, resolve_alias
-from zeref.core.reasoning import (
+import shiroe.core.deprecations as deprecations
+from shiroe.core.deprecations import DEPRECATED_ALIASES, resolve_alias
+from shiroe.core.reasoning import (
     BALANCED,
     DEEP,
     FAST,
@@ -33,8 +33,8 @@ from zeref.core.reasoning import (
     resolve_class,
     validate_request,
 )
-from zeref.adapters.providers import get_provider, resolve_model
-from zeref.loops.contract import create_loop_contract
+from shiroe.adapters.providers import get_provider, resolve_model
+from shiroe.loops.contract import create_loop_contract
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -42,8 +42,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 # council. Historical references are allowed to live in CHANGELOG.md and
 # docs/audits/ — neither of those is scanned here.
 LIVE_SURFACES: tuple[str, ...] = (
-    "zeref",
-    "zeref-registry.json",
+    "shiroe",
+    "shiroe-registry.json",
     "AGENTS.md",
     "SOUL.md",
     "agents",
@@ -121,8 +121,8 @@ def test_no_council_references_in_live_surfaces() -> None:
 
 
 def test_no_provider_model_ids_in_core_package() -> None:
-    core_root = REPO_ROOT / "zeref"
-    adapters_root = REPO_ROOT / "zeref" / "adapters"
+    core_root = REPO_ROOT / "shiroe"
+    adapters_root = REPO_ROOT / "shiroe" / "adapters"
     offenders: list[str] = []
 
     for file_path in core_root.rglob("*.py"):
@@ -147,7 +147,7 @@ def test_no_provider_model_ids_in_core_package() -> None:
 
     assert not offenders, (
         "provider model ids leaked into core package (must live only in "
-        "zeref/adapters/**):\n" + "\n".join(sorted(offenders))
+        "shiroe/adapters/**):\n" + "\n".join(sorted(offenders))
     )
 
 
@@ -259,10 +259,10 @@ def test_deprecation_aliases() -> None:
 
 
 def test_registry_reasoning_class_and_status() -> None:
-    registry_path = REPO_ROOT / "zeref-registry.json"
+    registry_path = REPO_ROOT / "shiroe-registry.json"
     registry = json.loads(registry_path.read_text(encoding="utf-8"))
 
-    canonical_version = (REPO_ROOT / "zeref" / "VERSION").read_text(encoding="utf-8").strip()
+    canonical_version = (REPO_ROOT / "shiroe" / "VERSION").read_text(encoding="utf-8").strip()
     assert registry["version"] == canonical_version
 
     allowed_classes = {"fast", "balanced", "deep", "frontier"}

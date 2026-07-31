@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from zeref.adapters.harnesses.gemini_cli import GeminiCLIAdapter
+from shiroe.adapters.harnesses.gemini_cli import GeminiCLIAdapter
 
 
 def test_gemini_context_only_without_signals(monkeypatch) -> None:
     monkeypatch.delenv("GEMINI_CLI_VERSION", raising=False)
     monkeypatch.delenv("GEMINI_VERSION", raising=False)
-    monkeypatch.setattr("zeref.adapters.harnesses.gemini_cli.which",
+    monkeypatch.setattr("shiroe.adapters.harnesses.gemini_cli.which",
                          lambda cmd: None)
     r = GeminiCLIAdapter().detect()
     assert not r.detected
@@ -19,7 +19,7 @@ def test_gemini_context_only_without_signals(monkeypatch) -> None:
 
 def test_gemini_embedded_when_env_var(monkeypatch) -> None:
     monkeypatch.setenv("GEMINI_CLI_VERSION", "0.9")
-    monkeypatch.setattr("zeref.adapters.harnesses.gemini_cli.which",
+    monkeypatch.setattr("shiroe.adapters.harnesses.gemini_cli.which",
                          lambda cmd: None)
     r = GeminiCLIAdapter().detect()
     assert r.detected

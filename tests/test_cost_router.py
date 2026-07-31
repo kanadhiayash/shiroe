@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from zeref.memory.cost_router import audit_budgets, route_operation
+from shiroe.memory.cost_router import audit_budgets, route_operation
 
 
 def test_route_blocks_markdown_rewrite_without_approval() -> None:
@@ -42,7 +42,7 @@ def test_cost_audit_reports_oversized_hot_file(tmp_path: Path) -> None:
 def test_cost_cli_route_json(repo_root: Path) -> None:
     result = subprocess.run(
         [
-            sys.executable, "-m", "zeref", "cost", "route",
+            sys.executable, "-m", "shiroe", "cost", "route",
             "--operation", "memory-add",
             "--text", "Use atom append.",
         ],

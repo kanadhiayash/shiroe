@@ -21,10 +21,10 @@ REPO = Path(__file__).resolve().parent.parent
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-from zeref.guards.write_gate import proposal_to_atom  # noqa: E402
-from zeref.memory.atom_store import AtomStore  # noqa: E402
-from zeref.memory.schemas import AtomValidationError  # noqa: E402
-from zeref.memory_state import MemoryStore  # noqa: E402
+from shiroe.guards.write_gate import proposal_to_atom  # noqa: E402
+from shiroe.memory.atom_store import AtomStore  # noqa: E402
+from shiroe.memory.schemas import AtomValidationError  # noqa: E402
+from shiroe.memory_state import MemoryStore  # noqa: E402
 
 
 def card_to_proposal(card) -> dict:

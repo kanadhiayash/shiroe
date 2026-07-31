@@ -43,7 +43,7 @@ def _root() -> Path:
 HARNESSES: list[dict] = [
     {"name": "claude-code", "stub": "CLAUDE.md",                 "bin": "claude"},
     {"name": "codex",       "stub": "CODEX.md",                  "bin": "codex"},
-    {"name": "cursor",      "stub": ".cursor/rules/zeref.mdc",   "bin": "cursor"},
+    {"name": "cursor",      "stub": ".cursor/rules/shiroe.mdc",   "bin": "cursor"},
     {"name": "windsurf",    "stub": ".windsurfrules",            "bin": "windsurf"},
     {"name": "aider",       "stub": ".aider.conf.yml.example",   "bin": "aider"},
     {"name": "gemini",      "stub": "GEMINI.md",                 "bin": "gemini"},

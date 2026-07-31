@@ -12,7 +12,7 @@ Zeref is harness-agnostic. The canonical spec lives in `AGENTS.md` (Linux Founda
 |---|---|---|---|
 | **Claude Code** | `CLAUDE.md` | One-line: `See @AGENTS.md`. Skills surface as `zeref:<name>`. Commands as `/zeref:<command>`. | `CLAUDE.md` |
 | **Codex** | `AGENTS.md` | Native AGENTS.md support | — |
-| **Cursor** | `.cursor/rules/zeref.mdc` | Cursor rules format pointing to AGENTS.md | `.cursor/rules/zeref.mdc` |
+| **Cursor** | `.cursor/rules/shiroe.mdc` | Cursor rules format pointing to AGENTS.md | `.cursor/rules/shiroe.mdc` |
 | **Gemini CLI / Antigravity** | `GEMINI.md` → AGENTS.md | Native AGENTS.md support; thin GEMINI.md stub | `GEMINI.md` |
 | **Windsurf** | `.windsurfrules` | Windsurf rules format pointing to AGENTS.md | `.windsurfrules` |
 | **Aider** | `.aider.conf.yml` + AGENTS.md | Convention-based, opt-in copy from `.aider.conf.yml.example` | `.aider.conf.yml.example` |

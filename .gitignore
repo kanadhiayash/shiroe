@@ -88,7 +88,7 @@ memory/views/
 memory/snapshots/
 memory/sync/
 
-# Release-check evidence blobs are generated locally by zeref/release/checks.py.
+# Release-check evidence blobs are generated locally by shiroe/release/checks.py.
 # Raw evidence dumps are operator records kept outside this repository
 # and must not re-enter the public tree.
 docs/audits/release-evidence/
@@ -99,7 +99,7 @@ docs/_evidence/
 
 # Local lineage sandbox imports. Foreign repository clones and inventories are
 # generated evidence only and must not enter Zeref core.
-.zeref-sandbox/
+.shiroe-sandbox/
 
 # Local verification evidence (never published; see hardening program governance)
 docs/_evidence/

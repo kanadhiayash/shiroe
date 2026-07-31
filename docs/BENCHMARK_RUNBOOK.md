@@ -50,7 +50,7 @@ Dry run is the default: ingest and recall only, zero network calls, no cost. It
 prints the cost estimate a live run *would* incur.
 
 ```bash
-python3 -m zeref.cli benchmark external --benchmark locomo --data ~/zeref-benchmark-data/locomo --arms all --limit 20
+python3 -m shiroe.cli benchmark external --benchmark locomo --data ~/zeref-benchmark-data/locomo --arms all --limit 20
 ```
 
 Read the `cost estimate:` line before going further. If that number surprises
@@ -65,13 +65,13 @@ Requires `--live --confirm`, and the estimate must fit under `--max-cost`.
 Start small and confirm the pipeline end to end:
 
 ```bash
-python3 -m zeref.cli benchmark external --benchmark locomo --data ~/zeref-benchmark-data/locomo --arms all --limit 20 --live --confirm --max-cost 2 --out results/locomo-smoke.json
+python3 -m shiroe.cli benchmark external --benchmark locomo --data ~/zeref-benchmark-data/locomo --arms all --limit 20 --live --confirm --max-cost 2 --out results/locomo-smoke.json
 ```
 
 Then the full dataset:
 
 ```bash
-python3 -m zeref.cli benchmark external --benchmark locomo --data ~/zeref-benchmark-data/locomo --arms all --live --confirm --max-cost 60 --out results/locomo-full.json
+python3 -m shiroe.cli benchmark external --benchmark locomo --data ~/zeref-benchmark-data/locomo --arms all --live --confirm --max-cost 60 --out results/locomo-full.json
 ```
 
 ### `--max-cost` is PER INVOCATION, not global
@@ -96,13 +96,13 @@ no shared state. One benchmark per terminal:
 
 ```bash
 # terminal 1
-python3 -m zeref.cli benchmark external --benchmark locomo --data ~/zeref-benchmark-data/locomo --arms all --live --confirm --max-cost 60 --out results/locomo.json
+python3 -m shiroe.cli benchmark external --benchmark locomo --data ~/zeref-benchmark-data/locomo --arms all --live --confirm --max-cost 60 --out results/locomo.json
 
 # terminal 2
-python3 -m zeref.cli benchmark external --benchmark longmemeval --data ~/zeref-benchmark-data/longmemeval --arms all --live --confirm --max-cost 60 --out results/longmemeval.json
+python3 -m shiroe.cli benchmark external --benchmark longmemeval --data ~/zeref-benchmark-data/longmemeval --arms all --live --confirm --max-cost 60 --out results/longmemeval.json
 
 # terminal 3
-python3 -m zeref.cli benchmark external --benchmark convomem --data ~/zeref-benchmark-data/convomem --arms all --live --confirm --max-cost 60 --limit 500 --out results/convomem.json
+python3 -m shiroe.cli benchmark external --benchmark convomem --data ~/zeref-benchmark-data/convomem --arms all --live --confirm --max-cost 60 --limit 500 --out results/convomem.json
 ```
 
 Do **not** run the same benchmark in two terminals expecting it to go faster.
@@ -156,7 +156,7 @@ against current published pricing before quoting any dollar figure publicly.
 
 No external benchmark number has been published for this project. Until one is,
 the correct public posture is "explicitly unscored", enforced by
-`zeref/release/claim_gate.py`.
+`shiroe/release/claim_gate.py`.
 
 When results exist, report the arm comparison, the dataset revision, the judge
 model, and the sample size together. A score without those four is not a result.

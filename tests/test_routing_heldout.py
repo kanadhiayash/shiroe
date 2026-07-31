@@ -1,4 +1,4 @@
-"""ZRF-61: independent, blind held-out measurement of the criticality classifier.
+"""SHR-61: independent, blind held-out measurement of the criticality classifier.
 
 ``tests/test_routing_classifier.py`` is honest about its own limit: its
 corpus and the classifier's rules were authored together in one session, so
@@ -9,7 +9,7 @@ had not yet read its rules?
 
 Process (see git history for the two-phase split):
   Phase 1 — ``tests/fixtures/routing_corpus_heldout.jsonl`` was authored and
-  committed *before* ``zeref/routing/criticality.py`` or
+  committed *before* ``shiroe/routing/criticality.py`` or
   ``tests/test_routing_classifier.py`` was read in this session. 68 free-text
   tasks, each hand-labeled LOW/MEDIUM/HIGH/CRITICAL from the rubric in the
   corpus-generation task alone, with ``ambiguous`` and ``debatable`` flags
@@ -42,8 +42,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from zeref.core.reasoning import CRITICALITIES
-from zeref.routing.criticality import TaskSignals, classify
+from shiroe.core.reasoning import CRITICALITIES
+from shiroe.routing.criticality import TaskSignals, classify
 
 REPO = Path(__file__).resolve().parents[1]
 CORPUS_PATH = REPO / "tests" / "fixtures" / "routing_corpus_heldout.jsonl"

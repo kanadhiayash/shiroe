@@ -10,11 +10,11 @@ from pathlib import Path
 
 import pytest
 
-from zeref.core.errors import GuardRejection
-from zeref.guards.contradiction_guard import detect_incoming_conflicts, scan_store
-from zeref.guards.write_gate import write_from_proposal
-from zeref.memory import scaffold_project
-from zeref.memory_state import MemoryStore
+from shiroe.core.errors import GuardRejection
+from shiroe.guards.contradiction_guard import detect_incoming_conflicts, scan_store
+from shiroe.guards.write_gate import write_from_proposal
+from shiroe.memory import scaffold_project
+from shiroe.memory_state import MemoryStore
 
 
 def _env(repo_root: Path) -> dict:
@@ -25,7 +25,7 @@ def _env(repo_root: Path) -> dict:
 
 def _run(repo_root: Path, cwd: Path, args: list[str]) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, "-m", "zeref", *args],
+        [sys.executable, "-m", "shiroe", *args],
         cwd=str(cwd),
         capture_output=True,
         text=True,

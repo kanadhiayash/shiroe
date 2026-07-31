@@ -53,7 +53,7 @@ Recorded in [`docs/adr/ADR-0001-canonical-store.md`](https://github.com/kanadhia
 
 ## The guarded write path
 
-Five guards live in `zeref/guards/`. A claim that fails any one of them does not reach the store.
+Five guards live in `shiroe/guards/`. A claim that fails any one of them does not reach the store.
 
 | Guard | Rejects |
 |---|---|
@@ -139,9 +139,9 @@ Core code and canonical schemas never name a vendor model. A task carries a crit
 
 `local` and `private` are placement constraints — run on-device, or run in a privacy-restricted context — rather than cost tiers, and are permitted at any criticality.
 
-Entitlement is enforced in `zeref/core/reasoning.py`, not in prose. A request may always downgrade to a cheaper class and never upgrade; `frontier` requires CRITICAL. A violation raises `ReasoningPolicyError` rather than emitting a warning.
+Entitlement is enforced in `shiroe/core/reasoning.py`, not in prose. A request may always downgrade to a cheaper class and never upgrade; `frontier` requires CRITICAL. A violation raises `ReasoningPolicyError` rather than emitting a warning.
 
-Provider descriptors are declarative JSON files in `zeref/adapters/providers/`, one per provider, shipped for `anthropic` and `openai`. Each maps reasoning classes to model IDs and optional effort levels. Adding a provider means adding a JSON file.
+Provider descriptors are declarative JSON files in `shiroe/adapters/providers/`, one per provider, shipped for `anthropic` and `openai`. Each maps reasoning classes to model IDs and optional effort levels. Adding a provider means adding a JSON file.
 
 **Zeref does not call model APIs.** It decides what class of model a task is entitled to; the harness performs the inference.
 
@@ -180,7 +180,7 @@ Every component carries a label so nothing claims capability it does not have.
 | `skills/` | On-trigger procedures: routing, contradiction resolution, evidence grading, handoff compilation, privacy abstraction, skill drafting. |
 | `commands/` | User-facing command contracts. |
 | `team-packs/` | On-demand multi-agent configurations. See [[Team-Packs]]. |
-| `zeref/` | Python runtime — guards, adapters, store, privacy, locking, CLI. |
+| `shiroe/` | Python runtime — guards, adapters, store, privacy, locking, CLI. |
 | `benchmarks/` | Internal quality suite and external loader scaffolding. |
 
 ## Related

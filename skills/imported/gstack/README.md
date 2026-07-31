@@ -18,7 +18,7 @@ gstack is a global-scope skill collection registered on the user's Claude Code h
 
 ## Boundary
 
-This directory contains **no** vendored gstack source. Zeref invokes gstack skills through the host harness's global skill registry only. gstack skills may **not** write to `memory/`, `zeref/`, `benchmarks/`, or any Zeref-canonical surface.
+This directory contains **no** vendored gstack source. Zeref invokes gstack skills through the host harness's global skill registry only. gstack skills may **not** write to `memory/`, `shiroe/`, `benchmarks/`, or any Zeref-canonical surface.
 
 ## Why reference-only
 

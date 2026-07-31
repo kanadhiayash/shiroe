@@ -22,7 +22,7 @@ def _score_agents_md() -> tuple[float, str]:
         return 0.0, "AGENTS.md missing"
     stubs = ["CLAUDE.md", "CODEX.md", "GEMINI.md", "LLAMA.md",
              ".windsurfrules", ".aider.conf.yml.example",
-             ".cursor/rules/zeref.mdc"]
+             ".cursor/rules/shiroe.mdc"]
     cite_count = sum(
         1 for s in stubs
         if (REPO / s).exists()
@@ -35,7 +35,7 @@ def _score_agents_md() -> tuple[float, str]:
 def _score_stubs() -> tuple[float, str]:
     required = ["CLAUDE.md", "CODEX.md", "GEMINI.md", "LLAMA.md",
                 ".windsurfrules", ".aider.conf.yml.example",
-                ".cursor/rules/zeref.mdc"]
+                ".cursor/rules/shiroe.mdc"]
     present = [s for s in required if (REPO / s).exists()]
     n = len(present)
     score = 10.0 if n >= 7 else 8.0 if n >= 5 else 6.0 if n >= 3 else 2.0
@@ -74,13 +74,13 @@ def _score_matrix() -> tuple[float, str]:
 
 def _score_cli() -> tuple[float, str]:
     r = subprocess.run(
-        [sys.executable, "-m", "zeref", "--version"],
+        [sys.executable, "-m", "shiroe", "--version"],
         capture_output=True, text=True, cwd=str(REPO),
     )
     if r.returncode != 0:
         return 0.0, f"CLI --version crashed: {r.stderr.strip()}"
     r2 = subprocess.run(
-        [sys.executable, "-m", "zeref", "status"],
+        [sys.executable, "-m", "shiroe", "status"],
         capture_output=True, text=True, cwd=str(REPO),
     )
     if r2.returncode != 0:

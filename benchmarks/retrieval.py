@@ -9,8 +9,8 @@ import json
 import tempfile
 from pathlib import Path
 
-from zeref.memory import scaffold_project
-from zeref.memory_state import MemoryStore
+from shiroe.memory import scaffold_project
+from shiroe.memory_state import MemoryStore
 from benchmarks.adapters import adapter_summary, run_fixture_adapters
 
 REPO = Path(__file__).resolve().parent.parent

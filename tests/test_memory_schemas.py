@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from zeref.memory.schemas import AtomValidationError, create_atom, make_atom_id, validate_atom
+from shiroe.memory.schemas import AtomValidationError, create_atom, make_atom_id, validate_atom
 
 
 def test_create_atom_returns_valid_complete_atom() -> None:

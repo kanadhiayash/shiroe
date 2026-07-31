@@ -17,7 +17,7 @@ overrides:
 
 > Per ZEREF_OS §12 file structure. Claude-Code-specific quirks live here so AGENTS.md stays harness-agnostic.
 
-**Model resolution:** Concrete model ids resolve via `zeref/adapters/providers/anthropic.json` (reasoning classes: fast/balanced/deep/frontier).
+**Model resolution:** Concrete model ids resolve via `shiroe/adapters/providers/anthropic.json` (reasoning classes: fast/balanced/deep/frontier).
 
 ## Model selection
 

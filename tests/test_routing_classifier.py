@@ -1,15 +1,15 @@
-"""ZRF-61: prove the criticality classifier feeds the gateway a correct label.
+"""SHR-61: prove the criticality classifier feeds the gateway a correct label.
 
-The entitlement table (zeref.core.reasoning) is only as trustworthy as the
+The entitlement table (shiroe.core.reasoning) is only as trustworthy as the
 criticality it is handed. This suite runs a labeled corpus
 (tests/fixtures/routing_corpus.jsonl) through the deterministic classifier
-(zeref.routing.criticality) end to end, publishes a confusion matrix and the
+(shiroe.routing.criticality) end to end, publishes a confusion matrix and the
 five metrics the audit named explicitly, and asserts CRITICAL recall on its
 own — a high blended accuracy that hides one missed CRITICAL is a failure
 here, not a pass.
 
 Honesty note for reviewers: the corpus and the classifier's rules were
-authored together (see zeref/routing/criticality.py and the generation
+authored together (see shiroe/routing/criticality.py and the generation
 script this fixture came from), so 100% agreement on this corpus is expected
 by construction, not a generalization claim. Its value is threefold: it is a
 frozen regression suite (a future rule change that silently reclassifies any
@@ -26,8 +26,8 @@ from pathlib import Path
 
 import pytest
 
-from zeref.core.reasoning import CRITICALITIES
-from zeref.routing.criticality import (
+from shiroe.core.reasoning import CRITICALITIES
+from shiroe.routing.criticality import (
     BLAST_RADII,
     CHANGE_SHAPES,
     CLAIM_DIRECTIONS,
@@ -37,7 +37,7 @@ from zeref.routing.criticality import (
     TaskSignals,
     classify,
 )
-from zeref.routing.gateway import (
+from shiroe.routing.gateway import (
     ANY,
     ApprovalRequiredError,
     RoutingError,
@@ -229,7 +229,7 @@ def test_placement_does_not_erase_reasoning_depth() -> None:
             classify_and_route(signals, purpose="C01 confined", placement=placement_word)
         # Confirm independently that the classifier itself was never asked
         # about placement and still says CRITICAL — the RoutingError above
-        # comes from the placement gate in zeref.routing.gateway.route(),
+        # comes from the placement gate in shiroe.routing.gateway.route(),
         # not from a downgraded classification.
         assert classify(signals).criticality == "CRITICAL"
 
@@ -255,9 +255,9 @@ def test_classify_and_route_wires_classification_into_the_gateway() -> None:
 
 def test_explicit_criticality_path_is_unaffected() -> None:
     """PR1 callers that already hand route() a validated criticality keep working."""
-    from zeref.routing.gateway import ModelCallRequest, route
+    from shiroe.routing.gateway import ModelCallRequest, route
 
-    decision = route(ModelCallRequest(criticality="HIGH", purpose="pre-ZRF-61 caller"))
+    decision = route(ModelCallRequest(criticality="HIGH", purpose="pre-SHR-61 caller"))
     assert decision.reasoning_class == "deep"
     assert decision.classification is None
 

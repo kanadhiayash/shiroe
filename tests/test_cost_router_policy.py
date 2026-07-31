@@ -1,4 +1,4 @@
-"""ZRF-63: route_operation() ordering and audit_budgets() mapping coverage.
+"""SHR-63: route_operation() ordering and audit_budgets() mapping coverage.
 
 Three defects in the pre-fix `route_operation`:
   1. It normalized `operation` to hyphen-spelling for dispatch but tested the
@@ -21,7 +21,7 @@ from pathlib import Path
 
 import pytest
 
-from zeref.memory.cost_router import DEFAULT_POLICY, audit_budgets, route_operation
+from shiroe.memory.cost_router import DEFAULT_POLICY, audit_budgets, route_operation
 
 FORBIDDEN_OPS = DEFAULT_POLICY["forbidden_by_default"]
 

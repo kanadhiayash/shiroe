@@ -7,8 +7,8 @@ import sys
 from pathlib import Path
 
 from benchmarks.helpers import axis_result, print_json_result, temp_memory_root
-from zeref.loops.contract import create_loop_contract
-from zeref.loops.runtime import loop_report, loop_status, run_loop
+from shiroe.loops.contract import create_loop_contract
+from shiroe.loops.runtime import loop_report, loop_status, run_loop
 
 
 def run() -> dict:

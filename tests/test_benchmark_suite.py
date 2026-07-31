@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from zeref.benchmark.failure_analysis import collect_failures, write_failure_report
+from shiroe.benchmark.failure_analysis import collect_failures, write_failure_report
 
 
 NEW_AXES = [
@@ -129,7 +129,7 @@ def test_ci_detection_matches_workflow_content_not_filename() -> None:
 
     Both trust sub-scores used to look for a specific file (test.yml,
     version-consistency.yml). CI was later consolidated into a single
-    zrf-verify.yml, so both reported False and capped their sub-scores while
+    shr-verify.yml, so both reported False and capped their sub-scores while
     CI was in fact running those commands on every pull request — a false
     statement in a tracked, published report.
     """

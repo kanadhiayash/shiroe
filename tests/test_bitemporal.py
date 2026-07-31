@@ -9,8 +9,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-from zeref.memory.atom_store import AtomStore
-from zeref.memory.bitemporal import (
+from shiroe.memory.atom_store import AtomStore
+from shiroe.memory.bitemporal import (
     as_of_recorded,
     as_of_valid,
     current,
@@ -19,9 +19,9 @@ from zeref.memory.bitemporal import (
     supersede_fact,
     valid_intervals_overlap,
 )
-from zeref.memory.contradictions import detect_conflict
-from zeref.memory.schemas import create_atom
-from zeref.memory.search import search_atoms
+from shiroe.memory.contradictions import detect_conflict
+from shiroe.memory.schemas import create_atom
+from shiroe.memory.search import search_atoms
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MIGRATION_SCRIPT = REPO_ROOT / "scripts" / "migrate-bitemporal-facts.py"
@@ -221,7 +221,7 @@ def test_migration_backfills_recorded_at_and_is_idempotent(tmp_path: Path) -> No
     assert before == after
 
     # And the migrated row now satisfies the current atom schema.
-    from zeref.memory.schemas import validate_atom
+    from shiroe.memory.schemas import validate_atom
     validate_atom(migrated)
 
 

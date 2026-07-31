@@ -11,7 +11,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license"></a>
   <a href="AGENTS.md"><img src="https://img.shields.io/badge/AGENTS.md-canonical-blue" alt="AGENTS.md canonical spec"></a>
   <a href="SECURITY.md"><img src="https://img.shields.io/badge/security-private%20reporting-critical" alt="private vulnerability reporting"></a>
-  <a href="https://github.com/kanadhiayash/zeref-memory-engine/actions/workflows/zrf-verify.yml"><img src="https://github.com/kanadhiayash/zeref-memory-engine/actions/workflows/zrf-verify.yml/badge.svg" alt="verify"></a>
+  <a href="https://github.com/kanadhiayash/zeref-memory-engine/actions/workflows/shr-verify.yml"><img src="https://github.com/kanadhiayash/zeref-memory-engine/actions/workflows/shr-verify.yml/badge.svg" alt="verify"></a>
 </p>
 
 <p align="center">
@@ -158,7 +158,7 @@ Core code and schemas never name a vendor model. A task carries a criticality; c
 
 `local` and `private` are placement constraints rather than cost tiers and are permitted at any criticality. The entitlement rule is enforced in code, not prose: a request may always downgrade to a cheaper class and never upgrade, and `frontier` requires CRITICAL. Violations raise `ReasoningPolicyError`.
 
-Provider descriptors are declarative JSON files in `zeref/adapters/providers/`, one per provider, shipped for `anthropic` and `openai`. Adding a provider means adding a JSON file, not writing code. **Zeref does not call model APIs.** It resolves which class of model a task is entitled to; your harness does the inference.
+Provider descriptors are declarative JSON files in `shiroe/adapters/providers/`, one per provider, shipped for `anthropic` and `openai`. Adding a provider means adding a JSON file, not writing code. **Zeref does not call model APIs.** It resolves which class of model a task is entitled to; your harness does the inference.
 
 ---
 
@@ -168,15 +168,15 @@ Each row states a property, the code that enforces it, and how you can check it 
 
 | Guarantee | Enforced by | Verify |
 |---|---|---|
-| No write bypasses the guards | `zeref/guards/write_gate.py` | `python3 -m pytest -q` |
-| Overclaiming is blocked | `zeref/guards/fact_guard.py` | Superlatives, benchmark boasts, and maturity assertions fail the scan — including in this README. |
-| Claims carry graded evidence | `zeref/guards/evidence_guard.py` | Source quality is graded separately from deliberation quality. |
-| Secrets are redacted deterministically | `zeref/privacy.py`, `zeref/guards/privacy_guard.py` | Regex plus NFKC normalization, homoglyph folding, and base64 decoding. |
-| Contradictions reach a human | `zeref/guards/contradiction_guard.py` | Conflicts land in `memory/CONFLICTS.md`; no automatic resolution. |
-| One writer per resource | `zeref/lock.py` (`MemoryLock`, `atomic_write`) | A second concurrent writer aborts with a clear error. |
+| No write bypasses the guards | `shiroe/guards/write_gate.py` | `python3 -m pytest -q` |
+| Overclaiming is blocked | `shiroe/guards/fact_guard.py` | Superlatives, benchmark boasts, and maturity assertions fail the scan — including in this README. |
+| Claims carry graded evidence | `shiroe/guards/evidence_guard.py` | Source quality is graded separately from deliberation quality. |
+| Secrets are redacted deterministically | `shiroe/privacy.py`, `shiroe/guards/privacy_guard.py` | Regex plus NFKC normalization, homoglyph folding, and base64 decoding. |
+| Contradictions reach a human | `shiroe/guards/contradiction_guard.py` | Conflicts land in `memory/CONFLICTS.md`; no automatic resolution. |
+| One writer per resource | `shiroe/lock.py` (`MemoryLock`, `atomic_write`) | A second concurrent writer aborts with a clear error. |
 | History is append-only | JSONL event log | Events are appended, never rewritten. |
-| Exports fail closed | `zeref/handoff/compiler.py` | Unclassified atoms are withheld; local-only atoms never export. |
-| Cost tiers are entitlements | `zeref/core/reasoning.py` | `frontier` outside CRITICAL raises rather than warns. |
+| Exports fail closed | `shiroe/handoff/compiler.py` | Unclassified atoms are withheld; local-only atoms never export. |
+| Cost tiers are entitlements | `shiroe/core/reasoning.py` | `frontier` outside CRITICAL raises rather than warns. |
 
 ### The write path
 
@@ -207,15 +207,15 @@ git clone https://github.com/kanadhiayash/zeref-memory-engine.git .zeref
 Point your AI harness at:
 
 ```text
-.zeref/AGENTS.md
+.shiroe/AGENTS.md
 ```
 
 Verify locally:
 
 ```bash
-python3 -m zeref --version
-python3 -m zeref status
-python3 scripts/zeref-validate.py
+python3 -m shiroe --version
+python3 -m shiroe status
+python3 scripts/shiroe-validate.py
 python3 -m pytest -q
 python3 benchmarks/run-all.py
 ```
@@ -257,7 +257,7 @@ memory/
 |---|---|
 | `AGENTS.md` | Canonical behavior contract for AI harnesses. |
 | `memory/` | Project memory, decisions, risks, conflicts, sources, generated views. |
-| `zeref/` | Python runtime, guards, adapters, and CLI. |
+| `shiroe/` | Python runtime, guards, adapters, and CLI. |
 | `skills/` | On-trigger procedures — routing, contradiction resolution, evidence grading, handoff compilation, privacy abstraction, and skill drafting. |
 | `agents/` | Background roles — memory writer, privacy guardian, evidence curator, pattern observer, sync coordinator, handoff orchestrator. |
 | `commands/` | User-facing command contracts. |

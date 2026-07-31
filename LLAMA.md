@@ -14,8 +14,8 @@ Open WebUI, and any harness that fronts a Llama-family model).
 - Recommended invocation: point the model's system prompt at `AGENTS.md`
   via a wrapper script or the harness's prompt-template feature.
 - For tool-calling harnesses (Open WebUI, vLLM with function calling),
-  expose `zeref` as a subprocess tool: `python3 -m zeref status`,
-  `python3 -m zeref write-decision …`, `python3 -m zeref audit-privacy`.
+  expose `zeref` as a subprocess tool: `python3 -m shiroe status`,
+  `python3 -m shiroe write-decision …`, `python3 -m shiroe audit-privacy`.
 
 ## First action every session
 

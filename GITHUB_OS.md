@@ -35,8 +35,8 @@ Conventional Commits with scope `(zeref)`. Examples:
 
 ### Required gates before push
 
-1. `python3 scripts/zeref-validate.py` — passes (Skills count matches registry; PATTERNS lint 0)
-2. Zeref-scope sweep: every staged file matches allowlist (`AGENTS.md|CHANGELOG|...|scripts/|skills/|team-packs/|tests/|zeref/`); no non-zeref bleed
+1. `python3 scripts/shiroe-validate.py` — passes (Skills count matches registry; PATTERNS lint 0)
+2. Zeref-scope sweep: every staged file matches allowlist (`AGENTS.md|CHANGELOG|...|scripts/|skills/|team-packs/|tests/|shiroe/`); no non-zeref bleed
 3. No `--force` to main; no `--no-verify`; no skipping hooks
 4. R6 (Zero Context Loss) — `_shared/rules.md#R6` honored across all skill writes
 5. Privacy gate — `PRIVACY.md` mode + `REDACT.md` classes enforced before any external transmission
@@ -61,13 +61,13 @@ Existing repo files (SKILL.md, AGENTS.md, CHANGELOG.md, etc.) keep their establi
 ### Classification
 
 - `public`: README.md, CHANGELOG*.md, GitHub Releases, AGENTS.md, SKILL.md, PRIVACY.md/REDACT.md/SHARING_POLICY.md
-- `internal`: memory/*, agents/, scripts/, tests/, zeref/, _shared/
+- `internal`: memory/*, agents/, scripts/, tests/, shiroe/, _shared/
 - `restricted`: never committed (no credentials / PII / client data)
 
 ## Repo-specific paths
 
 - Plugin manifest: `.claude-plugin/plugin.json`
-- Harness stubs: `CLAUDE.md` / `GEMINI.md` / `.cursor/rules/zeref.mdc` / `.windsurfrules` / `.aider.conf.yml.example`
+- Harness stubs: `CLAUDE.md` / `GEMINI.md` / `.cursor/rules/shiroe.mdc` / `.windsurfrules` / `.aider.conf.yml.example`
 
 ## Command center
 

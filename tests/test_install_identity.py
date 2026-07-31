@@ -1,11 +1,11 @@
-"""ZRF-67 — plugin identity + install freshness.
+"""SHR-67 — plugin identity + install freshness.
 
 Covers two things:
   1. The display-name rebrand landed on live surfaces, without touching the
-     `zeref-os` compatibility identifier (package name / plugin name /
+     `shiroe` compatibility identifier (package name / plugin name /
      registry namespace), and without rewriting historical records.
-  2. The installed-state manifest (`zeref doctor --installation`,
-     `zeref version --verbose`) is well-formed, its digests are real, it can
+  2. The installed-state manifest (`shiroe doctor --installation`,
+     `shiroe version --verbose`) is well-formed, its digests are real, it can
      detect that a previously recorded manifest is stale against current
      content, and computing it never touches — let alone loses — memory/.
 """
@@ -19,16 +19,16 @@ import subprocess
 import sys
 from pathlib import Path
 
-from zeref.release.manifest import _packaged_files, build_manifest, is_stale
+from shiroe.release.manifest import _packaged_files, build_manifest, is_stale
 
 # Specific current *display* surfaces — the doc/manifest text a user actually
 # reads. Deliberately NOT a blanket repo grep: historical records (CHANGELOG,
-# scripts/zeref-publish-releases.sh), migration notes (skills/memory-import-export,
+# scripts/shiroe-publish-releases.sh), migration notes (skills/memory-import-export,
 # skills/parent-sync), and test fixtures are allowed to keep the old name.
 DISPLAY_SURFACES = [
     "README.md", "SKILL.md", "AGENTS.md", "CLAUDE.md", "CODEX.md", "GEMINI.md",
     "LLAMA.md", "GITHUB_OS.md", "config/PROJECT.md", "commands/status.md",
-    "commands/start.md", "zeref/__init__.py", "zeref/cli.py",
+    "commands/start.md", "shiroe/__init__.py", "shiroe/cli.py",
 ]
 
 
@@ -40,7 +40,7 @@ def _env(repo_root: Path) -> dict:
 
 def _run(repo_root: Path, cwd: Path, args: list[str]) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, "-m", "zeref", *args],
+        [sys.executable, "-m", "shiroe", *args],
         cwd=str(cwd), capture_output=True, text=True, env=_env(repo_root),
     )
 
@@ -68,19 +68,21 @@ def test_no_display_surface_renders_old_name(repo_root: Path) -> None:
 
 
 def test_compat_identifier_intact(repo_root: Path) -> None:
-    """The zeref-os package/plugin identifier is a separate migration decision
-    (out of scope for ZRF-67) and must survive the display-name rebrand."""
+    """The shiroe package/plugin identifier is the namespace-rename target
+    (SHR-namespace-rename) and must be consistent across every distribution
+    manifest, while the registry schema host (zeref-os.dev) — a branding
+    surface, not a technical identifier — stays untouched."""
     pyproject_text = (repo_root / "pyproject.toml").read_text(encoding="utf-8")
-    assert 'name = "zeref-os"' in pyproject_text
+    assert 'name = "shiroe"' in pyproject_text
 
     plugin = json.loads((repo_root / ".claude-plugin/plugin.json").read_text(encoding="utf-8"))
-    assert plugin["name"] == "zeref-os"
+    assert plugin["name"] == "shiroe"
 
     marketplace = json.loads((repo_root / ".claude-plugin/marketplace.json").read_text(encoding="utf-8"))
-    assert marketplace["name"] == "zeref-os"
-    assert marketplace["plugins"][0]["name"] == "zeref-os"
+    assert marketplace["name"] == "shiroe"
+    assert marketplace["plugins"][0]["name"] == "shiroe"
 
-    registry = json.loads((repo_root / "zeref-registry.json").read_text(encoding="utf-8"))
+    registry = json.loads((repo_root / "shiroe-registry.json").read_text(encoding="utf-8"))
     assert "zeref-os" in registry["$schema"]
 
 
@@ -93,12 +95,12 @@ def test_manifest_well_formed_and_digests_match_actual_files(repo_root: Path) ->
 
     assert manifest.schema_version == 1
     assert manifest.product_name == "Zeref Memory Engine"
-    assert manifest.compat_id == "zeref-os"
+    assert manifest.compat_id == "shiroe"
     assert manifest.package_file_count > 0
     assert manifest.package_digest.startswith("sha256:")
 
     expected_registry = "sha256:" + hashlib.sha256(
-        (repo_root / "zeref-registry.json").read_bytes()
+        (repo_root / "shiroe-registry.json").read_bytes()
     ).hexdigest()
     assert manifest.registry_digest == expected_registry
 
@@ -122,11 +124,11 @@ def test_doctor_installation_and_version_verbose_cli(repo_root: Path) -> None:
     # The existing global --version flag must keep working unchanged.
     flag = _run(repo_root, repo_root, ["--version"])
     assert flag.returncode == 0
-    assert flag.stdout.strip().startswith("zeref ")
+    assert flag.stdout.strip().startswith("shiroe ")
 
     bare = _run(repo_root, repo_root, ["version"])
     assert bare.returncode == 0
-    assert bare.stdout.strip().startswith("zeref ")
+    assert bare.stdout.strip().startswith("shiroe ")
 
 
 def test_is_stale_detects_upgrade(repo_root: Path) -> None:
@@ -152,7 +154,7 @@ def _seed_installable(root: Path, *, version: str, plugin_description: str) -> N
     (root / "pyproject.toml").write_text(
         f'[project]\nname = "zeref-os"\nversion = "{version}"\n', encoding="utf-8",
     )
-    (root / "zeref-registry.json").write_text(
+    (root / "shiroe-registry.json").write_text(
         json.dumps({"version": version}), encoding="utf-8",
     )
     (root / ".claude-plugin").mkdir(exist_ok=True)
@@ -163,7 +165,7 @@ def _seed_installable(root: Path, *, version: str, plugin_description: str) -> N
 
 
 def test_upgrade_from_stale_cache_replaces_old_payload(tmp_path: Path, monkeypatch) -> None:
-    """Regression fixture for the exact defect ZRF-67/PR9 exists to fix:
+    """Regression fixture for the exact defect SHR-67/PR9 exists to fix:
     Claude Code resolves an installed plugin's version from plugin.json
     first, and skips newer repo commits when that string looks unchanged.
     PR9 changed plugin.json/marketplace.json *content* (a rebrand) without
@@ -189,11 +191,11 @@ def test_upgrade_from_stale_cache_replaces_old_payload(tmp_path: Path, monkeypat
         _git(root, "add", "-A")
         _git(root, "commit", "-qm", "seed")
 
-    import zeref
+    import shiroe
 
-    monkeypatch.setattr(zeref, "__version__", "2.0.0-alpha.2", raising=False)
+    monkeypatch.setattr(shiroe, "__version__", "2.0.0-alpha.2", raising=False)
     old_manifest = build_manifest(old_root)
-    monkeypatch.setattr(zeref, "__version__", "2.0.0-alpha.3", raising=False)
+    monkeypatch.setattr(shiroe, "__version__", "2.0.0-alpha.3", raising=False)
     new_manifest = build_manifest(new_root)
 
     # The payload genuinely changed (not just the version string).
@@ -223,7 +225,7 @@ def test_memory_survives_manifest_rebuild(tmp_path: Path) -> None:
         '[project]\nname = "zeref-os"\n', encoding="utf-8"
     )
     (root / "AGENTS.md").write_text("# AGENTS.md\n", encoding="utf-8")
-    (root / "zeref-registry.json").write_text("{}", encoding="utf-8")
+    (root / "shiroe-registry.json").write_text("{}", encoding="utf-8")
 
     before_digest = build_manifest(root).package_digest
     packaged_rel_paths = {str(p.relative_to(root)) for p in _packaged_files(root)}

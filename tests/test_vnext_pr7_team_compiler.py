@@ -10,15 +10,15 @@ from pathlib import Path
 
 import pytest
 
-from zeref.capabilities import (
+from shiroe.capabilities import (
     approve,
     inspect_source,
     register_discovery,
 )
-from zeref.capabilities.discovery import DiscoveredCapability
-from zeref.capabilities.store import CapabilityStore
-from zeref.storage import StateDB
-from zeref.teams import (
+from shiroe.capabilities.discovery import DiscoveredCapability
+from shiroe.capabilities.store import CapabilityStore
+from shiroe.storage import StateDB
+from shiroe.teams import (
     CompiledTeamPlan,
     NoEligibleCapabilityError,
     SelfReviewError,
@@ -26,7 +26,7 @@ from zeref.teams import (
     resolve_seat,
     score_capability,
 )
-from zeref.teams.resolver import CandidateCapability
+from shiroe.teams.resolver import CandidateCapability
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 

@@ -5,8 +5,8 @@ from __future__ import annotations
 import sys
 
 from benchmarks.helpers import add_atom, axis_result, print_json_result, temp_memory_root
-from zeref.memory.indexer import rebuild_index
-from zeref.memory.recall import explain_search, recall
+from shiroe.memory.indexer import rebuild_index
+from shiroe.memory.recall import explain_search, recall
 
 
 def _top_evidence(result: dict, expected_id: str) -> str:

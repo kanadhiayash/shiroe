@@ -1,0 +1,793 @@
+"""
+shiroe.privacy — Deterministic PII abstraction module (Sprint 2, hardened WS2).
+
+Replaces prose-only privacy-abstraction skill with code-level enforcement.
+Reads REDACT.md classes and applies a raw-first, decode-as-additive pipeline:
+
+    1. raw surface          — credential patterns run on the UNTOUCHED input
+                              before any normalization or decoding can mutate
+                              a token body out from under the detectors.
+    2. normalized surface   — NFKC + homoglyph fold, credentials re-scanned.
+    3. whitespace surface   — anchored provider prefixes re-scanned with all
+                              whitespace collapsed (catches tokens split by
+                              spaces or newlines); matches map back to, and
+                              redact, the original span.
+    4. encoded surfaces     — base64/hex blobs are decoded into a validated
+                              side container and PROBED for credentials; on a
+                              hit the original encoded blob is redacted. The
+                              decoded text is never substituted back into the
+                              working string. Nested encodings are followed
+                              to a bounded depth.
+    5. class redaction      — remaining enabled REDACT.md classes (pii,
+                              email, paths, ...) run on the normalized text.
+
+Usage:
+    from shiroe.privacy import scrub, audit
+
+    clean, report = scrub("My name is John Doe, email: john@example.com")
+    print(clean)   # "My name is [PII:pii], email: [PII:email]"
+    print(report)  # ScrubReport(redacted=2, classes_hit=['pii', 'email'], ...)
+"""
+
+from __future__ import annotations
+
+import base64
+import binascii
+import os
+import re
+import unicodedata
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Optional
+
+# ---------------------------------------------------------------------------
+# Homoglyph table — common lookalike substitutions used to evade regex
+# ---------------------------------------------------------------------------
+_HOMOGLYPHS: dict[str, str] = {
+    # lowercase Cyrillic
+    "а": "a",   # Cyrillic а  U+0430
+    "е": "e",   # Cyrillic е  U+0435
+    "о": "o",   # Cyrillic о  U+043E
+    "р": "p",   # Cyrillic р  U+0440
+    "с": "c",   # Cyrillic с  U+0441
+    "х": "x",   # Cyrillic х  U+0445
+    "і": "i",   # Cyrillic і  U+0456
+    "ӏ": "l",   # Cyrillic ӏ  U+04CF
+    "у": "y",   # Cyrillic у  U+0443
+    "ѕ": "s",   # Cyrillic ѕ  U+0455 (dze) — defends sk-/xoxb-style lowercase prefixes
+    "ј": "j",   # Cyrillic ј  U+0458
+    "һ": "h",   # Cyrillic һ  U+04BB — defends ghp_/github_pat_ prefixes
+    # uppercase Cyrillic — needed to defend AKIA/AIza/PEM-style uppercase patterns
+    "А": "A",   # Cyrillic А  U+0410
+    "В": "B",   # Cyrillic В  U+0412
+    "Е": "E",   # Cyrillic Е  U+0415
+    "К": "K",   # Cyrillic К  U+041A
+    "М": "M",   # Cyrillic М  U+041C
+    "Н": "H",   # Cyrillic Н  U+041D (looks like H)
+    "О": "O",   # Cyrillic О  U+041E
+    "Р": "P",   # Cyrillic Р  U+0420
+    "С": "C",   # Cyrillic С  U+0421
+    "Т": "T",   # Cyrillic Т  U+0422
+    "Х": "X",   # Cyrillic Х  U+0425
+    "І": "I",   # Cyrillic І  U+0406
+    "Ѕ": "S",   # Cyrillic Ѕ  U+0405
+    "Ј": "J",   # Cyrillic Ј  U+0408
+    "У": "Y",   # Cyrillic У  U+0423
+    # Greek lookalikes
+    "Α": "A",   # Greek Alpha   U+0391
+    "Β": "B",   # Greek Beta    U+0392
+    "Ε": "E",   # Greek Epsilon U+0395
+    "Ζ": "Z",   # Greek Zeta    U+0396
+    "Η": "H",   # Greek Eta     U+0397
+    "Ι": "I",   # Greek Iota    U+0399
+    "Κ": "K",   # Greek Kappa   U+039A
+    "Μ": "M",   # Greek Mu      U+039C
+    "Ν": "N",   # Greek Nu      U+039D
+    "Ο": "O",   # Greek Omicron U+039F
+    "Ρ": "P",   # Greek Rho     U+03A1
+    "Τ": "T",   # Greek Tau     U+03A4
+    "Υ": "Y",   # Greek Upsilon U+03A5
+    "Χ": "X",   # Greek Chi     U+03A7
+}
+
+
+# ---------------------------------------------------------------------------
+# Provider-shaped credential tokens — high-precision patterns that catch
+# specific issuer prefixes regardless of whether a label precedes them.
+# Order matters: these are evaluated before the generic credentials regex
+# so a structured match wins.
+# ---------------------------------------------------------------------------
+_PROVIDER_PATTERNS: dict[str, re.Pattern] = {
+    "credentials_openai_project": re.compile(
+        r"sk-proj-[A-Za-z0-9_\-]{20,}",
+    ),
+    "credentials_openai_bare": re.compile(
+        # bare sk-... but not the project-prefixed form (handled above)
+        r"\bsk-(?!proj-)[A-Za-z0-9]{20,}\b",
+    ),
+    "credentials_github_pat": re.compile(
+        r"github_pat_[A-Za-z0-9_]{20,}",
+    ),
+    "credentials_github_ghp": re.compile(
+        r"\bghp_[A-Za-z0-9]{20,}\b",
+    ),
+    "credentials_slack_bot": re.compile(
+        r"\bxoxb-[A-Za-z0-9\-]{10,}\b",
+    ),
+    "credentials_google_api": re.compile(
+        r"\bAIza[A-Za-z0-9_\-]{30,}\b",
+    ),
+    "credentials_aws_access_key": re.compile(
+        r"\bAKIA[A-Z0-9]{16}\b",
+    ),
+    "credentials_pem_block": re.compile(
+        r"-----BEGIN (?:RSA |EC |DSA |OPENSSH |ENCRYPTED |PGP )?PRIVATE KEY-----"
+        r"[\s\S]{1,8192}?"
+        r"-----END (?:RSA |EC |DSA |OPENSSH |ENCRYPTED |PGP )?PRIVATE KEY-----",
+    ),
+    "credentials_natural_language": re.compile(
+        # "API key sk-...", "secret key abc123", "access token xoxb-..."
+        r"""(?xi)
+        \b(?:api\ key|secret\ key|access\ token)
+        \s*[:=]?\s*
+        ['"]?
+        ([A-Za-z0-9_\-][A-Za-z0-9_\-./+=]{7,})
+        ['"]?
+        """,
+    ),
+}
+
+
+# ---------------------------------------------------------------------------
+# Built-in regex patterns per REDACT.md class
+# ---------------------------------------------------------------------------
+_BUILTIN_PATTERNS: dict[str, re.Pattern] = {
+    # Generic labelled-credential pattern. Precision requirements (WS2):
+    #   * keyword starts at a word boundary,
+    #   * an explicit separator (whitespace / colon / equals / quote) must
+    #     follow the keyword — underscore/hyphen joins are identifiers
+    #     ("tokens_input_max"), not leaks,
+    #   * the value must contain at least one digit — real high-entropy
+    #     secrets essentially always do, prose words ("token estimate")
+    #     essentially never do.
+    # These make a zero-tolerance credentials gate viable without carpeting
+    # runtime modules in allowlist markers. Provider-shaped tokens are
+    # handled by the always-on _PROVIDER_PATTERNS regardless of this one.
+    "credentials": re.compile(
+        r"""(?xi)
+        \b(?:api[_\-]?key|token|secret|password|passwd|bearer|auth)
+        [\s:='"]{1,4}
+        (?=[A-Za-z0-9+/=\-_]*\d)
+        [A-Za-z0-9+/=\-_]{8,}
+        """,
+    ),
+    "pii": re.compile(
+        r"""(?x)
+        (?:
+            # v2.5 L1: negative lookahead blocks action verbs as first name token
+            \b(?!(?:Hire|Call|Email|Tell|Send|Meet|Ask|See|Visit|With|Hired|Called|
+                     Emailed|Told|Sent|Met|Asked|Saw|Visited|Will|Can|May|Should|
+                     Would|Shall|Did|Was|Were|Has|Have|Had|Benchmark|Failure|
+                     Analysis)\b)
+            [A-Z][a-z]{1,20}\ [A-Z][a-z]{1,20}\b      # Firstname Lastname
+            | \b\d{3}-\d{2}-\d{4}\b                    # SSN
+            | \b\d{3}[.\-\ ]\d{3}[.\-\ ]\d{4}\b        # Phone
+        )
+        """,
+    ),
+    "email": re.compile(
+        r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}",
+    ),
+    "internal_paths": re.compile(
+        r"""(?x)
+        (?:
+            /(?:Users|home|var|etc|opt|srv)/[^\s"'<>]+
+            | [A-Za-z]:\\[^\s"'<>]+
+        )
+        """,
+    ),
+    "client_data": re.compile(
+        r"""(?xi)
+        \b(?:client|customer|account|contract)[_\- ]?
+        (?:id|name|number|ref)[_\- :='"]{0,4}[A-Za-z0-9\-]{3,}
+        """,
+    ),
+    "financial": re.compile(
+        r"""(?x)
+        (?:
+            \b\d{4}[\ \-]?\d{4}[\ \-]?\d{4}[\ \-]?\d{4}\b
+            | \$[ ]*\d[\d,]*(?:\.\d{2})?
+            | \b(?:IBAN|BIC|SWIFT)[:\s]+[A-Z0-9]{8,34}
+        )
+        """,
+    ),
+    "proprietary_code": re.compile(
+        r"""(?xi)
+        \b(?:
+            [A-Z]{2,6}-\d{3,8}
+            | v\d+\.\d+\.\d+[-\w]+
+        )\b
+        """,
+    ),
+}
+
+
+# ---------------------------------------------------------------------------
+# Data structures
+# ---------------------------------------------------------------------------
+@dataclass
+class RedactClass:
+    name: str
+    enabled: bool
+    replacement: str = "[REDACTED]"
+    pattern: Optional[str] = None
+
+
+@dataclass
+class ScrubReport:
+    redacted: int = 0
+    classes_hit: list[str] = field(default_factory=list)
+    provenance: str = ""
+    audit_trail: list[dict] = field(default_factory=list)
+
+    def summary(self) -> str:
+        if self.redacted == 0:
+            return "No PII detected."
+        lines = [f"Redacted {self.redacted} token(s) across {len(self.classes_hit)} class(es):"]
+        for entry in self.audit_trail:
+            lines.append(f"  [{entry['class']}] {entry['count']} hit(s) → {entry['replacement']}")
+        return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# REDACT.md parser
+# ---------------------------------------------------------------------------
+def _load_redact_md(path: Path) -> list[RedactClass]:
+    """Parse REDACT.md YAML frontmatter into RedactClass list."""
+    if not path.exists():
+        return [
+            RedactClass(name=n, enabled=True, replacement=f"[PII:{n}]")
+            for n in _BUILTIN_PATTERNS
+        ]
+
+    text = path.read_text()
+    if text.startswith("---"):
+        parts = text.split("---", 2)
+        if len(parts) >= 3:
+            try:
+                import yaml
+                data = yaml.safe_load(parts[1])
+                if isinstance(data, dict):
+                    return _parse_yaml_classes(data)
+            except ImportError:
+                pass
+
+    # Regex fallback parser
+    classes: list[RedactClass] = []
+    for m in re.finditer(
+        r"-\s+name:\s*(\S+).*?enabled:\s*(true|false)(?:.*?replacement:\s*(.+?))?(?=\s+-\s+name:|\Z)",
+        text,
+        re.DOTALL,
+    ):
+        classes.append(RedactClass(
+            name=m.group(1),
+            enabled=m.group(2) == "true",
+            replacement=(m.group(3) or f"[PII:{m.group(1)}]").strip(),
+        ))
+
+    return classes or [
+        RedactClass(name=n, enabled=True, replacement=f"[PII:{n}]")
+        for n in _BUILTIN_PATTERNS
+    ]
+
+
+def _parse_yaml_classes(data: dict) -> list[RedactClass]:
+    out: list[RedactClass] = []
+    raw = data.get("classes", [])
+
+    # Format A: list of {name, enabled, ...} dicts
+    if isinstance(raw, list):
+        for item in raw:
+            if isinstance(item, dict):
+                name = item.get("name", "unknown")
+                out.append(RedactClass(
+                    name=name,
+                    enabled=bool(item.get("enabled", False)),
+                    replacement=item.get("replacement", f"[PII:{name}]"),
+                    pattern=item.get("pattern"),
+                ))
+    # Format B: dict of {name: {enabled, patterns, ...}} — actual REDACT.md format
+    elif isinstance(raw, dict):
+        for name, cfg in raw.items():
+            if isinstance(cfg, dict):
+                out.append(RedactClass(
+                    name=name,
+                    enabled=bool(cfg.get("enabled", False)),
+                    replacement=cfg.get("replacement", f"[PII:{name}]"),
+                    pattern=cfg.get("pattern"),
+                ))
+
+    # Fallback: all built-ins enabled
+    return out or [
+        RedactClass(name=n, enabled=True, replacement=f"[PII:{n}]")
+        for n in _BUILTIN_PATTERNS
+    ]
+
+
+# ---------------------------------------------------------------------------
+# Core pipeline stages
+# ---------------------------------------------------------------------------
+def _unicode_normalize(text: str) -> str:
+    return unicodedata.normalize("NFKC", text)
+
+
+def _homoglyph_normalize(text: str) -> str:
+    return "".join(_HOMOGLYPHS.get(ch, ch) for ch in text)
+
+
+# Encoded-surface scanning (WS2). Candidate blobs are decoded into a validated
+# side container and probed for credentials; the ORIGINAL encoded blob is what
+# gets redacted on a hit. Decoded text is never substituted into the working
+# string — the historical substitution step let an attacker (or an unlucky
+# numeric token body) mutate a credential before the detectors ran.
+_ENCODED_RUN_RE = re.compile(r"[A-Za-z0-9+/_\-]{16,}={0,2}")
+_HEX_RUN_RE = re.compile(r"(?<![0-9a-fA-F])(?:[0-9a-fA-F]{2}){12,}(?![0-9a-fA-F])")
+_ENCODED_MAX_DEPTH = 3
+_URLSAFE_TO_STANDARD = str.maketrans("-_", "+/")
+
+
+def _validate_decoded_container(raw: bytes) -> Optional[str]:
+    """Accept decoded bytes only when they form plausible embedded text.
+
+    Requires strict UTF-8 and printable characters (tab/newline tolerated) so
+    that random binary — hashes, compressed data, honest base64 payloads —
+    never enters the credential probe.
+    """
+    try:
+        decoded = raw.decode("utf-8", errors="strict")
+    except UnicodeDecodeError:
+        return None
+    if len(decoded) < 8:
+        return None
+    if not all(ch.isprintable() or ch in "\t\n\r" for ch in decoded):
+        return None
+    return decoded
+
+
+def _decode_base64_container(blob: str) -> Optional[str]:
+    """Decode a base64-looking run (standard or urlsafe alphabet) or return None."""
+    body = blob.rstrip("=")
+    padded = body + "=" * (-len(body) % 4)
+    candidates = [padded]
+    translated = padded.translate(_URLSAFE_TO_STANDARD)
+    if translated != padded:
+        candidates.append(translated)
+    for candidate in candidates:
+        try:
+            raw = base64.b64decode(candidate, validate=True)
+        except (binascii.Error, ValueError):
+            continue
+        return _validate_decoded_container(raw)
+    return None
+
+
+def _decode_hex_container(blob: str) -> Optional[str]:
+    """Decode a hex-looking run or return None."""
+    try:
+        raw = bytes.fromhex(blob)
+    except ValueError:
+        return None
+    return _validate_decoded_container(raw)
+
+
+def _probe_for_credentials(decoded: str, remaining_decodes: int) -> bool:
+    """Return True when decoded text contains a credential on any surface.
+
+    Checks the raw decoded text and its normalized fold against provider
+    patterns and the generic credentials pattern, then recurses into any
+    encoded runs nested inside the decoded text. `remaining_decodes` bounds
+    how many further decode levels may be spent on nested encodings.
+    """
+    surfaces = [decoded]
+    normalized = _homoglyph_normalize(_unicode_normalize(decoded))
+    if normalized != decoded:
+        surfaces.append(normalized)
+    for surface in surfaces:
+        for pattern in _PROVIDER_PATTERNS.values():
+            if pattern.search(surface):
+                return True
+        if _BUILTIN_PATTERNS["credentials"].search(surface):
+            return True
+    if remaining_decodes > 0:
+        for match in _ENCODED_RUN_RE.finditer(decoded):
+            inner = _decode_base64_container(match.group(0))
+            if inner is not None and _probe_for_credentials(inner, remaining_decodes - 1):
+                return True
+        for match in _HEX_RUN_RE.finditer(decoded):
+            inner = _decode_hex_container(match.group(0))
+            if inner is not None and _probe_for_credentials(inner, remaining_decodes - 1):
+                return True
+    return False
+
+
+def _scan_encoded_surfaces(text: str, max_depth: int = _ENCODED_MAX_DEPTH) -> list[tuple[int, int]]:
+    """Find encoded blobs whose decoded content contains credentials.
+
+    Returns (start, end) spans in `text` covering the encoded blobs to redact.
+    Purely additive: nothing in `text` is modified here.
+    """
+    spans: list[tuple[int, int]] = []
+    for regex, decoder in ((_ENCODED_RUN_RE, _decode_base64_container),
+                           (_HEX_RUN_RE, _decode_hex_container)):
+        for match in regex.finditer(text):
+            decoded = decoder(match.group(0))
+            # One decode level is spent reaching `decoded`; the probe may
+            # spend the rest on nested encodings (3 levels total).
+            if decoded is not None and _probe_for_credentials(decoded, max_depth - 1):
+                spans.append((match.start(), match.end()))
+    return _merge_spans(spans)
+
+
+# Whitespace-collapsed surface (WS2). Only anchored, high-precision provider
+# prefixes participate — the generic credentials pattern relies on separators
+# and label words, and collapsing whitespace under it would invite false
+# positives. PEM blocks and natural-language forms are likewise excluded
+# because their patterns are whitespace-aware by construction.
+_WS_SCAN_PROVIDERS: tuple[str, ...] = (
+    "credentials_openai_project",
+    "credentials_openai_bare",
+    "credentials_github_pat",
+    "credentials_github_ghp",
+    "credentials_slack_bot",
+    "credentials_google_api",
+    "credentials_aws_access_key",
+)
+
+
+def _scan_whitespace_collapsed(text: str) -> list[tuple[int, int]]:
+    """Find provider tokens that survive only because whitespace splits them.
+
+    Collapses all whitespace while keeping an index map back to `text`, runs
+    the anchored provider patterns over the collapsed view, and returns spans
+    in the ORIGINAL text (including the interior whitespace) for any match
+    whose original span actually contains whitespace — matches without any
+    are already handled by the raw/normalized surfaces.
+    """
+    collapsed_chars: list[str] = []
+    index_map: list[int] = []
+    for position, ch in enumerate(text):
+        if not ch.isspace():
+            collapsed_chars.append(ch)
+            index_map.append(position)
+    collapsed = "".join(collapsed_chars)
+    spans: list[tuple[int, int]] = []
+    for name in _WS_SCAN_PROVIDERS:
+        for match in _PROVIDER_PATTERNS[name].finditer(collapsed):
+            start, end = match.span()
+            if end <= start:
+                continue
+            orig_start = index_map[start]
+            orig_end = index_map[end - 1] + 1
+            if any(text[j].isspace() for j in range(orig_start, orig_end)):
+                spans.append((orig_start, orig_end))
+    return _merge_spans(spans)
+
+
+def _merge_spans(spans: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    """Merge overlapping/adjacent (start, end) spans; result sorted ascending."""
+    if not spans:
+        return []
+    ordered = sorted(spans)
+    merged = [ordered[0]]
+    for start, end in ordered[1:]:
+        last_start, last_end = merged[-1]
+        if start <= last_end:
+            merged[-1] = (last_start, max(last_end, end))
+        else:
+            merged.append((start, end))
+    return merged
+
+
+def _redact_spans(text: str, spans: list[tuple[int, int]], replacement: str) -> str:
+    """Replace each span (assumed merged + sorted) with `replacement`."""
+    for start, end in reversed(spans):
+        text = text[:start] + replacement + text[end:]
+    return text
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+def _record_credential_hits(report: ScrubReport, class_name: str, count: int,
+                            replacement: str) -> None:
+    report.redacted += count
+    if "credentials" not in report.classes_hit:
+        report.classes_hit.append("credentials")
+    report.audit_trail.append({
+        "class": class_name,
+        "count": count,
+        "replacement": replacement,
+    })
+
+
+def _scan_credentials_surface(working: str, report: ScrubReport,
+                              generic_pattern: Optional[re.Pattern],
+                              generic_replacement: str) -> str:
+    """Run provider patterns + the generic credentials pattern on one surface."""
+    for name, pattern in _PROVIDER_PATTERNS.items():
+        matches = list(pattern.finditer(working))
+        if matches:
+            _record_credential_hits(report, name, len(matches), "[REDACTED:credentials]")
+            working = pattern.sub("[REDACTED:credentials]", working)
+    if generic_pattern is not None:
+        matches = list(generic_pattern.finditer(working))
+        if matches:
+            _record_credential_hits(report, "credentials", len(matches), generic_replacement)
+            working = generic_pattern.sub(generic_replacement, working)
+    return working
+
+
+def scrub(
+    text: str,
+    redact_md_path: Path = Path("REDACT.md"),
+    provenance: str = "",
+) -> tuple[str, ScrubReport]:
+    """
+    Scrub PII from text using the deterministic pipeline.
+
+    Detection order is raw-first, decode-as-additive (see module docstring):
+    credentials are scanned on the untouched input, again after NFKC +
+    homoglyph normalization, again on a whitespace-collapsed view (anchored
+    provider prefixes only), and finally encoded blobs (base64/hex, nested up
+    to 3 levels) are decoded into a side container and probed — a hit redacts
+    the original encoded blob, never substituting decoded text into the
+    output. Remaining REDACT.md classes run on the normalized text.
+
+    credentials class is ALWAYS applied regardless of REDACT.md enabled flag.
+
+    Returns (cleaned_text, ScrubReport).
+    """
+    classes = _load_redact_md(redact_md_path)
+    report = ScrubReport(provenance=provenance)
+
+    # Resolve the generic credentials pattern/replacement (always-on; may be
+    # customized by REDACT.md).
+    credentials_cls = next((cls for cls in classes if cls.name == "credentials"), None)
+    if credentials_cls is not None and credentials_cls.pattern:
+        generic_pattern: Optional[re.Pattern] = re.compile(
+            credentials_cls.pattern, re.IGNORECASE | re.VERBOSE
+        )
+    else:
+        generic_pattern = _BUILTIN_PATTERNS.get("credentials")
+    generic_replacement = (
+        credentials_cls.replacement if credentials_cls is not None
+        else "[REDACTED:credentials]"
+    )
+
+    # Surface 1 — RAW input. Runs before any normalization or decoding so a
+    # token body that also parses as base64/hex cannot be mutated out from
+    # under the detectors.
+    working = _scan_credentials_surface(text, report, generic_pattern, generic_replacement)
+
+    # Surface 2 — normalized (NFKC + homoglyph fold), credentials re-scanned.
+    working = _unicode_normalize(working)
+    working = _homoglyph_normalize(working)
+    working = _scan_credentials_surface(working, report, generic_pattern, generic_replacement)
+
+    # Surface 3 — whitespace-collapsed view, anchored provider prefixes only.
+    ws_spans = _scan_whitespace_collapsed(working)
+    if ws_spans:
+        _record_credential_hits(
+            report, "credentials_whitespace_split", len(ws_spans), "[REDACTED:credentials]"
+        )
+        working = _redact_spans(working, ws_spans, "[REDACTED:credentials]")
+
+    # Surface 4 — encoded blobs (additive probe; original blob is redacted).
+    encoded_spans = _scan_encoded_surfaces(working)
+    if encoded_spans:
+        _record_credential_hits(
+            report, "credentials_encoded", len(encoded_spans), "[REDACTED:credentials]"
+        )
+        working = _redact_spans(working, encoded_spans, "[REDACTED:credentials]")
+
+    # Surface 5 — remaining enabled classes (credentials already applied above).
+    for cls in classes:
+        if cls.name == "credentials":
+            continue
+        if not cls.enabled:
+            continue
+        pattern = (
+            re.compile(cls.pattern, re.IGNORECASE | re.VERBOSE)
+            if cls.pattern
+            else _BUILTIN_PATTERNS.get(cls.name)
+        )
+        if pattern is None:
+            continue
+        matches = list(pattern.finditer(working))
+        if matches:
+            report.redacted += len(matches)
+            if cls.name not in report.classes_hit:
+                report.classes_hit.append(cls.name)
+            report.audit_trail.append({
+                "class": cls.name,
+                "count": len(matches),
+                "replacement": cls.replacement,
+            })
+            working = pattern.sub(cls.replacement, working)
+
+    return working, report
+
+
+# Allowlist markers — recognized inside file content:
+#   * File-level:  `privacy-audit: allow-file "<reason>"`
+#                  anywhere in the first 40 lines; skips the whole file.
+#   * Line-level:  `noqa: privacy-audit`  or  `privacy-audit: allow`
+#                  on the same line; scrubbers ignore that single line.
+# Every marker must be human-authored with a rationale in adjacent prose or
+# comment. Do NOT sprinkle these — each allow is a policy assertion.
+_ALLOW_FILE_RE = re.compile(r"privacy-audit:\s*allow-file", re.IGNORECASE)
+_ALLOW_LINE_RE = re.compile(
+    r"(?:noqa:\s*privacy-audit|privacy-audit:\s*(?:allow|ignore))",
+    re.IGNORECASE,
+)
+
+
+def _file_allowlisted(text: str) -> bool:
+    head = "\n".join(text.splitlines()[:40])
+    return bool(_ALLOW_FILE_RE.search(head))
+
+
+def _filter_noqa_lines(text: str) -> str:
+    return "\n".join(line for line in text.splitlines()
+                     if not _ALLOW_LINE_RE.search(line))
+
+
+def _tracked_files(directory: Path) -> set[Path] | None:
+    """Resolved paths of git-tracked files under `directory`.
+
+    Returns None when `directory` is not a git checkout (or git is
+    unavailable), which callers treat as "scan everything".
+    """
+    import subprocess
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(directory), "ls-files", "-z"],
+            capture_output=True, timeout=30, check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if proc.returncode != 0:
+        return None
+    names = [n for n in proc.stdout.decode("utf-8", "ignore").split("\0") if n]
+    if not names:
+        return None
+    return {(directory / n).resolve() for n in names}
+
+
+def audit(
+    directory: Path = Path("."),
+    redact_md_path: Path = Path("REDACT.md"),
+    strict: bool = False,
+) -> dict:
+    """
+    Read-only audit: scan tracked-file extensions under directory for PII hits.
+    Default skips `tests/fixtures/` (documented-historical).
+    When strict=True, scanned extensions expand to include .py/.json/.yml/.yaml/.toml/.jsonl.
+    Files carrying `privacy-audit: allow-file "<reason>"` in their first 40 lines
+    are skipped entirely; lines carrying `noqa: privacy-audit` are excluded from
+    the scan input. Returns {scanned, total_hits, by_file, by_class, allowlisted}.
+    """
+    # Trees that intentionally cite PII-shaped tokens as content, examples,
+    # or historical spec text are skipped in strict mode. The scan focuses
+    # on trees where a real leak would be an accidental egress:
+    #   scanned in strict:  root *.md, config/, shiroe/, .github/, benchmarks/*.py
+    #   skipped in strict:  docs/, references/, skills/, team-packs/, tests/,
+    #                       CHANGELOG.md (release history), and self-referential
+    #                       modules whose docstrings document detection patterns.
+    # Skip rules match whole path COMPONENTS (or an exact repo-relative path),
+    # never a substring of the joined path. A substring test silently exempts
+    # any file whose name merely contains a skip token — "notdocs.md" matching
+    # "docs", "distribution.md" matching "dist" — which is a fail-open hole in
+    # a scan whose entire job is to catch accidental egress.
+    _SKIP_DIRS = {
+        "docs", "references", "skills", "team-packs", "team",
+        "tests", ".git", "__pycache__", "node_modules", "assets",
+        # Third-party and generated trees. These are not authored surfaces:
+        # dependency source legitimately contains credential-shaped example
+        # strings, and scanning them made the release gate fail purely because
+        # a local virtualenv existed. Agent worktrees hold full repo copies,
+        # so scanning them double-counts every finding.
+        ".venv", "venv", "site-packages", ".tox", ".nox",
+        "build", "dist", ".claude",
+        ".pytest_cache", ".mypy_cache", ".ruff_cache",
+    }
+    # Exact repo-relative paths (POSIX separators).
+    _SKIP_PATHS = {
+        "CHANGELOG.md",
+        # detection modules whose own docstrings show pattern examples
+        "shiroe/privacy.py", "shiroe/security/policy.py",
+        # generated benchmark report
+        "benchmarks/BENCHMARK_REPORT.md",
+    }
+
+    def _skipped(rel_path: Path) -> bool:
+        if rel_path.as_posix() in _SKIP_PATHS:
+            return True
+        parts = rel_path.parts
+        if any(part in _SKIP_DIRS for part in parts):
+            return True
+        # Packaging metadata directories are named "<project>.egg-info".
+        return any(part.endswith(".egg-info") for part in parts)
+    exts = {".md"} if not strict else {".md", ".py", ".json", ".yml", ".yaml", ".toml", ".jsonl"}
+    results: dict = {
+        "scanned": 0, "total_hits": 0, "by_file": {}, "by_class": {},
+        "strict": strict, "allowlisted": [],
+        # Severity-class accounting (WS2): total HIT counts per class (unlike
+        # by_class, which counts affected files), with provider-shaped
+        # subclasses folded into "credentials". credential_files maps each
+        # file containing credentials-class hits to its hit count — release
+        # gates treat any entry here as a hard failure.
+        "hits_by_class": {}, "credential_files": {},
+    }
+
+    directory = Path(directory)
+    tracked = _tracked_files(directory)
+    for path in sorted(directory.rglob("*")):
+        if not path.is_file():
+            continue
+        if path.suffix not in exts:
+            continue
+        # Inside a git checkout, assess only tracked content. A release gate
+        # answers "is what we publish clean?" — untracked local files (audit
+        # inputs, scratch notes, downloaded fixtures) are never published, so
+        # flagging them blocks releases over material that cannot leak. When
+        # the directory is not a git repo (scaffolded temp dirs, fresh inits)
+        # `tracked` is None and every file is scanned, as before.
+        if tracked is not None and path.resolve() not in tracked:
+            continue
+        rel = path.relative_to(directory) if path.is_absolute() else path
+        if _skipped(Path(rel)):
+            continue
+        if _is_macos_dataless_placeholder(path):
+            continue
+        try:
+            text = path.read_text(errors="ignore")
+        except (OSError, UnicodeDecodeError):
+            continue
+        if _file_allowlisted(text):
+            results["allowlisted"].append(str(path))
+            continue
+        text = _filter_noqa_lines(text)
+        _, report = scrub(text, redact_md_path)
+        results["scanned"] += 1
+        if report.redacted:
+            results["total_hits"] += report.redacted
+            results["by_file"][str(path)] = report.redacted
+            for cls in report.classes_hit:
+                results["by_class"][cls] = results["by_class"].get(cls, 0) + 1
+            for entry in report.audit_trail:
+                severity_class = (
+                    "credentials"
+                    if str(entry["class"]).startswith("credentials")
+                    else str(entry["class"])
+                )
+                results["hits_by_class"][severity_class] = (
+                    results["hits_by_class"].get(severity_class, 0) + entry["count"]
+                )
+                if severity_class == "credentials":
+                    results["credential_files"][str(path)] = (
+                        results["credential_files"].get(str(path), 0) + entry["count"]
+                    )
+
+    return results
+
+
+def _is_macos_dataless_placeholder(path: Path) -> bool:
+    """Avoid blocking on cloud-backed files that have metadata but no local bytes."""
+    try:
+        flags = os.stat(path).st_flags
+    except (AttributeError, OSError):
+        return False
+    # macOS exposes dataless cloud placeholders with an undocumented high bit.
+    # Reading those can block while the OS attempts to materialize the file.
+    return bool(flags & 0x40000000)

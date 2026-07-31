@@ -1,9 +1,9 @@
-"""ZRF-60: provider capability registry — fail-closed model verification.
+"""SHR-60: provider capability registry — fail-closed model verification.
 
 Before this ticket, ``JsonProviderAdapter`` validated only the ``schema``
 string and that class keys were known reasoning classes; any ``model_id``
 string resolved, invented or retired alike (the RED-FIRST defect captured
-in ``docs/_evidence/ZRF-60/baseline.txt``). This suite locks in the fix:
+in ``docs/_evidence/SHR-60/baseline.txt``). This suite locks in the fix:
 schema v2 lifecycle/verification, fail-closed live-call resolution, v1
 back-compat as unverified, single-level fallback that never changes what
 the gateway granted, and a refresh command that only ever writes fields it
@@ -17,21 +17,21 @@ from pathlib import Path
 
 import pytest
 
-from zeref.adapters.providers import available_providers, get_provider, resolve_model
-from zeref.adapters.providers.base import (
+from shiroe.adapters.providers import available_providers, get_provider, resolve_model
+from shiroe.adapters.providers.base import (
     PROVIDER_SCHEMA_V1,
     PROVIDER_SCHEMA_V2,
     JsonProviderAdapter,
 )
-from zeref.adapters.providers.refresh import (
+from shiroe.adapters.providers.refresh import (
     STALE_ON_REFRESH,
     _apply_refresh,
     _lifecycle_from_presence,
     refresh_provider,
 )
-from zeref.core.reasoning import ReasoningPolicyError
-from zeref.routing.gateway import ModelCallRequest, RoutingError, route
-from zeref.security import ConnectorDisabledError
+from shiroe.core.reasoning import ReasoningPolicyError
+from shiroe.routing.gateway import ModelCallRequest, RoutingError, route
+from shiroe.security import ConnectorDisabledError
 
 REPO = Path(__file__).resolve().parents[1]
 
@@ -231,8 +231,8 @@ def test_fallback_preserves_gateway_entitlement_placement_and_privacy(
         },
     }
     _write(tmp_path, "fallbacktest.json", fixture)
-    monkeypatch.setattr("zeref.adapters.providers._PKG_DIR", tmp_path)
-    monkeypatch.setattr("zeref.adapters.providers._cache", {})
+    monkeypatch.setattr("shiroe.adapters.providers._PKG_DIR", tmp_path)
+    monkeypatch.setattr("shiroe.adapters.providers._cache", {})
 
     decision = route(ModelCallRequest(
         criticality="HIGH", purpose="fallback preserves entitlement",
@@ -412,7 +412,7 @@ def test_capability_matrix_is_recorded_as_pr_evidence() -> None:
             )
     matrix = "\n".join(rows) + "\n"
 
-    out_dir = REPO / "docs" / "_evidence" / "ZRF-60"
+    out_dir = REPO / "docs" / "_evidence" / "SHR-60"
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "capability_matrix.txt").write_text(matrix, encoding="utf-8")
     print("\n" + matrix)

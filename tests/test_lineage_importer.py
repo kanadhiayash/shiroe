@@ -3,8 +3,8 @@ from __future__ import annotations
 import csv
 from pathlib import Path
 
-from zeref.lineage.importer import SourceIdentity, import_lineage, inventory_tree
-from zeref.lineage.intake import REQUIRED_COLUMNS
+from shiroe.lineage.importer import SourceIdentity, import_lineage, inventory_tree
+from shiroe.lineage.intake import REQUIRED_COLUMNS
 
 
 def _write_csv(path: Path, rows: list[dict[str, str]]) -> None:
@@ -61,7 +61,7 @@ def test_import_lineage_dedupes_repositories_in_dry_run(tmp_path: Path) -> None:
     assert result["source_count"] == 1
     assert result["sources"][0]["identity"]["row_ids"] == [1, 2]
     assert result["sources"][0]["planned_action"] == "resolve_only"
-    assert not (tmp_path / ".zeref-sandbox").exists()
+    assert not (tmp_path / ".shiroe-sandbox").exists()
 
 
 def test_inventory_tree_records_lines_hashes_and_exclusions(tmp_path: Path) -> None:
