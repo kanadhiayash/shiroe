@@ -102,8 +102,8 @@ def _seed(tmp_path: Path) -> str:
 
     # Allow subprocess actions so the sample capability adapter doesn't
     # bounce; the fake invoker below never actually spawns anything.
-    (tmp_path / ".zeref" / "policy").mkdir(parents=True)
-    (tmp_path / ".zeref" / "policy" / "defaults.json").write_text(
+    (tmp_path / ".shiroe" / "policy").mkdir(parents=True)
+    (tmp_path / ".shiroe" / "policy" / "defaults.json").write_text(
         json.dumps({"allow": ["subprocess", "memory.write"]}),
         encoding="utf-8",
     )
@@ -234,7 +234,7 @@ def test_resume_never_reruns_completed_irreversible_step(tmp_path: Path) -> None
     sup.close()
 
     # exactly one step PASSED on the first attempt
-    conn = sqlite3.connect(tmp_path / "memory" / "state" / "zeref2.sqlite")
+    conn = sqlite3.connect(tmp_path / "memory" / "state" / "shiroe.sqlite")
     try:
         passed_1 = conn.execute(
             "SELECT step_name FROM execution_steps "
@@ -279,7 +279,7 @@ def test_pre_revoked_capability_causes_failure(tmp_path: Path) -> None:
     exercise the digest / lifecycle logic itself.
     """
     run_id = _seed(tmp_path)
-    conn = sqlite3.connect(tmp_path / "memory" / "state" / "zeref2.sqlite")
+    conn = sqlite3.connect(tmp_path / "memory" / "state" / "shiroe.sqlite")
     try:
         row = conn.execute(
             "SELECT capability_id FROM team_assignments "

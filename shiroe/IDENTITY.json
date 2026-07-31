@@ -8,6 +8,6 @@
   "repo": "kanadhiayash/shiroe",
   "repo_url": "https://github.com/kanadhiayash/shiroe",
   "registry_manifest": "shiroe-registry.json",
-  "workspace_dir": ".zeref",
+  "workspace_dir": ".shiroe",
   "work_item_prefix": "SHR"
 }

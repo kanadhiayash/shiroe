@@ -12,6 +12,8 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+
+from shiroe.env import getenv as env_get
 import ssl
 import subprocess
 import urllib.error
@@ -107,7 +109,7 @@ class SourceIdentity:
 def default_csv_path(root: Path | None = None) -> Path:
     """Return the conventional local intake path without committing it."""
     base = root or Path.cwd()
-    env_path = os.environ.get("ZEREF_LINEAGE_INTAKE_CSV")
+    env_path = env_get("LINEAGE_INTAKE_CSV")
     if env_path:
         return Path(env_path)
     local = base / "ZRF_64_repo_lineage_intake.csv"

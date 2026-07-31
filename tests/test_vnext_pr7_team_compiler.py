@@ -229,7 +229,7 @@ def test_compile_team_build_mission_persists_plan(tmp_path: Path) -> None:
     assert seat_to_name["verifier"] == "reviewer"
 
     # SQLite side: rows persisted
-    conn = sqlite3.connect(tmp_path / "memory" / "state" / "zeref2.sqlite")
+    conn = sqlite3.connect(tmp_path / "memory" / "state" / "shiroe.sqlite")
     try:
         (state,) = conn.execute(
             "SELECT state FROM team_runs WHERE id=?", (plan.run_id,),
@@ -261,7 +261,7 @@ def test_compiled_plan_stores_rationale(tmp_path: Path) -> None:
     plan = compile_team(
         tmp_path, task_id="task_r", mission_id="build",
     )
-    conn = sqlite3.connect(tmp_path / "memory" / "state" / "zeref2.sqlite")
+    conn = sqlite3.connect(tmp_path / "memory" / "state" / "shiroe.sqlite")
     try:
         rows = conn.execute(
             "SELECT seat_id, rationale FROM team_assignments WHERE run_id=?",

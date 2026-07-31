@@ -4,7 +4,7 @@ shiroe.lock — Advisory single-writer lock + atomic write helpers.
 Two primitives:
 
 1. MemoryLock — context manager. Creates memory/.lock atomically via O_EXCL.
-   Writers wait with bounded retries + backoff (default ZEREF_LOCK_TIMEOUT_SECONDS,
+   Writers wait with bounded retries + backoff (default SHIROE_LOCK_TIMEOUT_SECONDS,
    overridable per lock). On timeout, LockError carries holder PID + timestamp.
    Pass timeout_seconds=0 for the legacy fail-fast behaviour.
 
@@ -20,6 +20,8 @@ Usage:
 from __future__ import annotations
 
 import os
+
+from shiroe.env import getenv as env_get
 import random
 import time
 from pathlib import Path
@@ -31,8 +33,8 @@ _BACKOFF_MAX_SECONDS = 0.25
 
 
 def default_lock_timeout() -> float:
-    """Bounded lock wait in seconds; configurable via ZEREF_LOCK_TIMEOUT_SECONDS."""
-    raw = os.environ.get("ZEREF_LOCK_TIMEOUT_SECONDS", "")
+    """Bounded lock wait in seconds; configurable via SHIROE_LOCK_TIMEOUT_SECONDS."""
+    raw = env_get("LOCK_TIMEOUT_SECONDS", "")
     try:
         value = float(raw)
     except ValueError:

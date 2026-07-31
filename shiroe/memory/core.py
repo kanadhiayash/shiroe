@@ -453,7 +453,7 @@ def scaffold_project(
             "Network egress is denied by default (fail-closed). To enable it,\n"
             "change the `network:` entry to `- allowed` AND set\n"
             "`external_transmission: on` in PRIVACY.md, or export\n"
-            "`ZEREF_ALLOW_NETWORK=1` for a single session.\n",
+            "`SHIROE_ALLOW_NETWORK=1` for a single session.\n",
             encoding="utf-8",
         )
 

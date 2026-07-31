@@ -32,7 +32,11 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-DEFAULT_ROOT = Path(os.environ.get("ZEREF_BENCHMARK_DATA", Path.home() / "shiroe-benchmark-data"))
+DEFAULT_ROOT = Path(
+    os.environ.get("SHIROE_BENCHMARK_DATA")
+    or os.environ.get("ZEREF_BENCHMARK_DATA")  # deprecated, pre-rebrand name
+    or Path.home() / "shiroe-benchmark-data"
+)
 USER_AGENT = "shiroe-benchmark-fetch/1.0 (+https://github.com/kanadhiayash/shiroe)"
 HF = "https://huggingface.co"
 

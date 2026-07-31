@@ -7,8 +7,8 @@ Design goals:
 - Env-var opt-in for the session override lane so scripted / CI work
   can consent without editing tracked files:
 
-    ZEREF_ALLOW_NETWORK=1                    # blanket per-session allow
-    ZEREF_ALLOW_CONNECTOR=github,litellm     # per-connector allow
+    SHIROE_ALLOW_NETWORK=1                    # blanket per-session allow
+    SHIROE_ALLOW_CONNECTOR=github,litellm     # per-connector allow
 
 - Every call site (LLM egress, lineage GitHub API, sync outbound)
   routes through `require_connector` / `require_network` before running.
@@ -16,6 +16,8 @@ Design goals:
 from __future__ import annotations
 
 import os
+
+from shiroe.env import getenv as env_get
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -161,11 +163,11 @@ def load_policy(project_root: Path | None = None) -> SecurityPolicy:
 
 
 def _env_allow_network() -> bool:
-    return os.environ.get("ZEREF_ALLOW_NETWORK", "").strip() in ("1", "true", "yes", "on")
+    return (env_get("ALLOW_NETWORK", "") or "").strip() in ("1", "true", "yes", "on")
 
 
 def _env_allowed_connectors() -> set[str]:
-    raw = os.environ.get("ZEREF_ALLOW_CONNECTOR", "")
+    raw = env_get("ALLOW_CONNECTOR", "") or ""
     return {c.strip().lower() for c in raw.split(",") if c.strip()}
 
 
@@ -178,7 +180,7 @@ def require_network(policy: SecurityPolicy, *, purpose: str) -> None:
     raise NetworkDeniedError(
         f"Network egress denied for {purpose}. "
         f"Enable in config/PERMISSIONS.md + PRIVACY.md external_transmission, "
-        f"or set ZEREF_ALLOW_NETWORK=1 for the session."
+        f"or set SHIROE_ALLOW_NETWORK=1 for the session."
     )
 
 
@@ -193,5 +195,5 @@ def require_connector(policy: SecurityPolicy, name: str, *, purpose: str) -> Non
     raise ConnectorDisabledError(
         f"Connector '{name_l}' disabled by SHARING_POLICY.md for {purpose}. "
         f"Enable it in SHARING_POLICY.md, or set "
-        f"ZEREF_ALLOW_CONNECTOR={name_l} for the session."
+        f"SHIROE_ALLOW_CONNECTOR={name_l} for the session."
     )

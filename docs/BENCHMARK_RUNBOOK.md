@@ -17,8 +17,8 @@ found, never its value. Confirm without printing it:
 python3 -c "import sys; sys.path.insert(0,'.'); from benchmarks.external.judges.gemini import GeminiJudgeClient; print('key found:', GeminiJudgeClient().has_key())"
 ```
 
-**2. Data.** Datasets live outside the repo, by default `~/zeref-benchmark-data`.
-Override with `ZEREF_BENCHMARK_DATA`. Fetch (resumable — re-running skips files
+**2. Data.** Datasets live outside the repo, by default `~/shiroe-benchmark-data`.
+Override with `SHIROE_BENCHMARK_DATA`. Fetch (resumable — re-running skips files
 already present):
 
 ```bash
@@ -32,7 +32,7 @@ python3 -c "
 import sys; sys.path.insert(0,'.')
 from pathlib import Path
 from benchmarks.external.loaders import locomo, longmemeval, convomem
-root = Path.home()/'zeref-benchmark-data'
+root = Path.home()/'shiroe-benchmark-data'
 for m, name in ((locomo,'locomo'), (longmemeval,'longmemeval'), (convomem,'convomem')):
     c = m.check(root/name)
     print(f'{name}: ok={c.ok} tasks={c.task_count} pinned_match={c.sha256_actual==c.sha256_pinned}')
@@ -50,7 +50,7 @@ Dry run is the default: ingest and recall only, zero network calls, no cost. It
 prints the cost estimate a live run *would* incur.
 
 ```bash
-python3 -m shiroe.cli benchmark external --benchmark locomo --data ~/zeref-benchmark-data/locomo --arms all --limit 20
+python3 -m shiroe.cli benchmark external --benchmark locomo --data ~/shiroe-benchmark-data/locomo --arms all --limit 20
 ```
 
 Read the `cost estimate:` line before going further. If that number surprises
@@ -65,13 +65,13 @@ Requires `--live --confirm`, and the estimate must fit under `--max-cost`.
 Start small and confirm the pipeline end to end:
 
 ```bash
-python3 -m shiroe.cli benchmark external --benchmark locomo --data ~/zeref-benchmark-data/locomo --arms all --limit 20 --live --confirm --max-cost 2 --out results/locomo-smoke.json
+python3 -m shiroe.cli benchmark external --benchmark locomo --data ~/shiroe-benchmark-data/locomo --arms all --limit 20 --live --confirm --max-cost 2 --out results/locomo-smoke.json
 ```
 
 Then the full dataset:
 
 ```bash
-python3 -m shiroe.cli benchmark external --benchmark locomo --data ~/zeref-benchmark-data/locomo --arms all --live --confirm --max-cost 60 --out results/locomo-full.json
+python3 -m shiroe.cli benchmark external --benchmark locomo --data ~/shiroe-benchmark-data/locomo --arms all --live --confirm --max-cost 60 --out results/locomo-full.json
 ```
 
 ### `--max-cost` is PER INVOCATION, not global
@@ -96,13 +96,13 @@ no shared state. One benchmark per terminal:
 
 ```bash
 # terminal 1
-python3 -m shiroe.cli benchmark external --benchmark locomo --data ~/zeref-benchmark-data/locomo --arms all --live --confirm --max-cost 60 --out results/locomo.json
+python3 -m shiroe.cli benchmark external --benchmark locomo --data ~/shiroe-benchmark-data/locomo --arms all --live --confirm --max-cost 60 --out results/locomo.json
 
 # terminal 2
-python3 -m shiroe.cli benchmark external --benchmark longmemeval --data ~/zeref-benchmark-data/longmemeval --arms all --live --confirm --max-cost 60 --out results/longmemeval.json
+python3 -m shiroe.cli benchmark external --benchmark longmemeval --data ~/shiroe-benchmark-data/longmemeval --arms all --live --confirm --max-cost 60 --out results/longmemeval.json
 
 # terminal 3
-python3 -m shiroe.cli benchmark external --benchmark convomem --data ~/zeref-benchmark-data/convomem --arms all --live --confirm --max-cost 60 --limit 500 --out results/convomem.json
+python3 -m shiroe.cli benchmark external --benchmark convomem --data ~/shiroe-benchmark-data/convomem --arms all --live --confirm --max-cost 60 --limit 500 --out results/convomem.json
 ```
 
 Do **not** run the same benchmark in two terminals expecting it to go faster.

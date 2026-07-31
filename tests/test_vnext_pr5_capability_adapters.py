@@ -108,8 +108,8 @@ def test_generic_skill_missing_source_returns_error(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 def _write_deny_subprocess(tmp_path: Path) -> None:
-    (tmp_path / ".zeref" / "policy").mkdir(parents=True)
-    (tmp_path / ".zeref" / "policy" / "deny.json").write_text(
+    (tmp_path / ".shiroe" / "policy").mkdir(parents=True)
+    (tmp_path / ".shiroe" / "policy" / "deny.json").write_text(
         json.dumps({"deny": ["subprocess"]}), encoding="utf-8",
     )
 
@@ -118,8 +118,8 @@ def _write_allow_subprocess(tmp_path: Path) -> None:
     (tmp_path / "config").mkdir(exist_ok=True)
     # PERMISSIONS.md doesn't yet vocabulary "subprocess", so route through
     # explicit-user-grant via project-defaults JSON.
-    (tmp_path / ".zeref" / "policy").mkdir(parents=True, exist_ok=True)
-    (tmp_path / ".zeref" / "policy" / "defaults.json").write_text(
+    (tmp_path / ".shiroe" / "policy").mkdir(parents=True, exist_ok=True)
+    (tmp_path / ".shiroe" / "policy" / "defaults.json").write_text(
         json.dumps({"allow": ["subprocess"]}), encoding="utf-8",
     )
 
@@ -182,7 +182,7 @@ def test_probe_writes_adapter_status_row(tmp_path: Path) -> None:
     assert report.healthy
     assert report.adapter == "generic-skill"
 
-    conn = sqlite3.connect(tmp_path / "memory" / "state" / "zeref2.sqlite")
+    conn = sqlite3.connect(tmp_path / "memory" / "state" / "shiroe.sqlite")
     try:
         row = conn.execute(
             "SELECT adapter, enforcement_level, last_health_check, failure_reason "
@@ -204,7 +204,7 @@ def test_probe_updates_existing_row(tmp_path: Path) -> None:
     r1 = probe(tmp_path, cid)
     r2 = probe(tmp_path, cid)
 
-    conn = sqlite3.connect(tmp_path / "memory" / "state" / "zeref2.sqlite")
+    conn = sqlite3.connect(tmp_path / "memory" / "state" / "shiroe.sqlite")
     try:
         (n,) = conn.execute(
             "SELECT COUNT(*) FROM adapter_status WHERE adapter=?",
@@ -232,7 +232,7 @@ def test_probe_of_unknown_capability_records_unhealthy(tmp_path: Path) -> None:
     assert not report.healthy
     assert "no version record" in (report.failure_reason or "")
 
-    conn = sqlite3.connect(tmp_path / "memory" / "state" / "zeref2.sqlite")
+    conn = sqlite3.connect(tmp_path / "memory" / "state" / "shiroe.sqlite")
     try:
         row = conn.execute(
             "SELECT failure_reason FROM adapter_status WHERE adapter='unknown'"
@@ -253,7 +253,7 @@ def test_unhealthy_adapter_never_swaps_silently(tmp_path: Path) -> None:
     (tmp_path / "memory").mkdir()
     report = probe(tmp_path, "generic:nope")
 
-    conn = sqlite3.connect(tmp_path / "memory" / "state" / "zeref2.sqlite")
+    conn = sqlite3.connect(tmp_path / "memory" / "state" / "shiroe.sqlite")
     try:
         rows = conn.execute(
             "SELECT adapter, failure_reason FROM adapter_status"

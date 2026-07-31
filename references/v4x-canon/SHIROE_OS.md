@@ -227,7 +227,7 @@ Connector Rules:
 |---------|-------------|-------------|
 | Claude Code | CLAUDE.md: See @AGENTS.md | Native AGENTS.md support |
 | Codex | AGENTS.md | Native AGENTS.md support |
-| Cursor | .cursor/rules/zeref.mdc | Cursor rules format pointing to AGENTS.md |
+| Cursor | .cursor/rules/shiroe.mdc | Cursor rules format pointing to AGENTS.md |
 | Gemini CLI / Antigravity | AGENTS.md | Native AGENTS.md support |
 | Windsurf | .windsurfrules stub pointing to AGENTS.md | Windsurf rules format |
 | Aider | .aider.conf.yml + AGENTS.md | Convention-based |

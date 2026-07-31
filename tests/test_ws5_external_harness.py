@@ -220,7 +220,7 @@ def test_lineage_axes_skip_visibly_without_intake_csv(monkeypatch, tmp_path: Pat
     """Clean-clone honesty: lineage axes SKIP with a reason, never crash or pass."""
     from benchmarks import lineage_import_coverage
 
-    monkeypatch.setenv("ZEREF_LINEAGE_INTAKE_CSV", str(tmp_path / "absent.csv"))
+    monkeypatch.setenv("SHIROE_LINEAGE_INTAKE_CSV", str(tmp_path / "absent.csv"))
     result = lineage_import_coverage.run()
     assert result["skipped"] is True
     assert result["score"] is None
@@ -230,7 +230,7 @@ def test_lineage_axes_skip_visibly_without_intake_csv(monkeypatch, tmp_path: Pat
 def test_run_all_completes_on_clean_clone_env(monkeypatch, tmp_path: Path) -> None:
     """python3 benchmarks/run-all.py must complete without FileNotFoundError
     even when the lineage intake CSV is absent (clean clone)."""
-    env = {"ZEREF_LINEAGE_INTAKE_CSV": str(tmp_path / "absent.csv")}
+    env = {"SHIROE_LINEAGE_INTAKE_CSV": str(tmp_path / "absent.csv")}
     completed = subprocess.run(
         [sys.executable, str(REPO / "benchmarks" / "run-all.py"),
          "--out-report", str(tmp_path / "report.md"),

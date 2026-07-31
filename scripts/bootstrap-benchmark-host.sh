@@ -14,8 +14,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DATA_ROOT="${ZEREF_BENCHMARK_DATA:-$HOME/shiroe-benchmark-data}"
-OLLAMA_MODEL="${ZEREF_OLLAMA_MODEL:-llama3.1:8b}"
+DATA_ROOT="${SHIROE_BENCHMARK_DATA:-$HOME/shiroe-benchmark-data}"
+OLLAMA_MODEL="${SHIROE_OLLAMA_MODEL:-llama3.1:8b}"
 VERIFY_ONLY=0
 [ "${1:-}" = "--verify" ] && VERIFY_ONLY=1
 
@@ -85,7 +85,7 @@ printf '  Prompt-processing time grows ~4x per doubling — measure before plann
 # --- datasets ----------------------------------------------------------------
 
 say "Datasets -> $DATA_ROOT"
-export ZEREF_BENCHMARK_DATA="$DATA_ROOT"
+export SHIROE_BENCHMARK_DATA="$DATA_ROOT"
 if [ "$VERIFY_ONLY" -eq 0 ]; then
     # Resumable: files already present are skipped, and transient drops retry.
     python3 "$REPO_ROOT/scripts/fetch-benchmark-data.py" --all
@@ -97,7 +97,7 @@ import os, sys
 from pathlib import Path
 sys.path.insert(0, os.environ.get("REPO_ROOT", "."))
 from benchmarks.external.loaders import locomo, longmemeval, personamem, convomem
-root = Path(os.environ["ZEREF_BENCHMARK_DATA"])
+root = Path(os.environ["SHIROE_BENCHMARK_DATA"])
 bad = 0
 for mod, name in ((locomo, "locomo"), (longmemeval, "longmemeval"),
                   (personamem, "personamem"), (convomem, "convomem")):
@@ -135,11 +135,11 @@ cat <<EOF
 
   Proxy run — retrieval quality, zero network, minutes:
     python3 -m shiroe.cli benchmark external --benchmark locomo \\
-      --data \$ZEREF_BENCHMARK_DATA/locomo --arms all
+      --data \$SHIROE_BENCHMARK_DATA/locomo --arms all
 
   Scored run — checkpointed, resumable, resume by re-running the same command:
     python3 -m shiroe.cli benchmark external --benchmark locomo \\
-      --data \$ZEREF_BENCHMARK_DATA/locomo --arms all \\
+      --data \$SHIROE_BENCHMARK_DATA/locomo --arms all \\
       --provider ollama --provider-model $OLLAMA_MODEL --num-ctx 32768 \\
       --judge gemini --live --confirm --max-cost 1 \\
       --checkpoint-dir benchmarks/runs/locomo-01

@@ -47,7 +47,7 @@ def test_scan_store_detects_same_title_conflict(tmp_path: Path) -> None:
         claim="Linear is the delivery source of truth.",
         privacy_class="internal",
         evidence_grade="B",
-        source_refs=["docs/plans/ZEREF_HARDENING_RECON.md"],
+        source_refs=["docs/plans/SHIROE_HARDENING_RECON.md"],
     )
     second = store.add_card(
         type="decision",
@@ -55,7 +55,7 @@ def test_scan_store_detects_same_title_conflict(tmp_path: Path) -> None:
         claim="GitHub Issues are the delivery source of truth.",
         privacy_class="internal",
         evidence_grade="B",
-        source_refs=["docs/plans/ZEREF_HARDENING_RECON.md"],
+        source_refs=["docs/plans/SHIROE_HARDENING_RECON.md"],
     )
 
     conflicts = scan_store(store)
@@ -113,7 +113,7 @@ def test_contradictions_cli_scan_and_resolve(repo_root: Path, tmp_path: Path) ->
         claim="Use Linear as delivery source of truth.",
         privacy_class="internal",
         evidence_grade="B",
-        source_refs=["docs/plans/ZEREF_HARDENING_RECON.md"],
+        source_refs=["docs/plans/SHIROE_HARDENING_RECON.md"],
     )
     store.add_card(
         type="decision",
@@ -121,7 +121,7 @@ def test_contradictions_cli_scan_and_resolve(repo_root: Path, tmp_path: Path) ->
         claim="Use GitHub as delivery source of truth.",
         privacy_class="internal",
         evidence_grade="B",
-        source_refs=["docs/plans/ZEREF_HARDENING_RECON.md"],
+        source_refs=["docs/plans/SHIROE_HARDENING_RECON.md"],
     )
 
     scan = _run(repo_root, tmp_path, ["contradictions", "scan", "memory/"])

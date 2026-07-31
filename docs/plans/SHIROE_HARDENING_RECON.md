@@ -1,5 +1,11 @@
 # Shiroe Hardening Recon
 
+> **Superseded snapshot.** Recorded before the Zeref -> Shiroe rebrand, when
+> the module, CLI, and distribution were all still named `zeref`. Its
+> "Facts" describe the tree as it stood then, so the old names are left
+> intact -- rewriting them would make the record claim something that was
+> not true at the time. Current state lives in `AGENTS.md` and `CHANGELOG.md`.
+
 ## Facts
 
 - Existing CLI entry point: `shiroe/cli.py`, exposed through `pyproject.toml` as `zeref = "shiroe.cli:main"`.

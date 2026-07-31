@@ -1,7 +1,5 @@
 # Shiroe — Wiki
 
-<p align="center"><img src="https://raw.githubusercontent.com/kanadhiayash/shiroe/main/assets/zeref-os-hero.png" alt="Shiroe" width="640"></p>
-
 > Imagine you are an **architect** on a major building, and every morning a different contractor shows up. Before anyone lays a brick you re-explain the blueprint, the constraints, the decisions you and the last contractor made, and what is already built. Every conversation starts from zero.
 >
 > That is what working with AI assistants is like. Each new session starts blind, and context evaporates when the window closes.

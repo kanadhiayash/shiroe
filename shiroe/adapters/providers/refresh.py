@@ -129,7 +129,7 @@ def _apply_refresh(data: dict, ids: set[str], url: str, digest: str, checked_at:
 def refresh_provider(provider: str, *, project_root: Path | None = None) -> dict:
     """Refresh model existence/lifecycle for one provider from its
     list-models endpoint. Requires the ``provider_refresh`` connector to be
-    enabled (SHARING_POLICY.md or ``ZEREF_ALLOW_CONNECTOR=provider_refresh``)
+    enabled (SHARING_POLICY.md or ``SHIROE_ALLOW_CONNECTOR=provider_refresh``)
     — disabled by default, so this is a no-op-by-refusal in CI and tests.
     """
     from shiroe.memory.core import discover_project_root

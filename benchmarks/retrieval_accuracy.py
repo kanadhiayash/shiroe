@@ -36,7 +36,7 @@ def run() -> dict:
         add_atom(root, atom_type="risk", claim="Do not load full Markdown memory by default.")
         rebuild_index(root)
         indexed = recall(root, "SQLite FTS", atom_type="decision")
-        fallback_db = root / "memory" / "indexes" / "zeref.sqlite"
+        fallback_db = root / "memory" / "indexes" / "shiroe.sqlite"
         fallback_db.unlink()
         fallback = recall(root, "SQLite FTS", atom_type="decision")
         explained = explain_search(root, "SQLite FTS", atom_type="decision")

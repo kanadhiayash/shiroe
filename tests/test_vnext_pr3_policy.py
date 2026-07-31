@@ -178,8 +178,8 @@ def test_loader_reads_existing_permissions_md(tmp_path: Path) -> None:
 
 
 def test_loader_project_deny_json(tmp_path: Path) -> None:
-    (tmp_path / ".zeref" / "policy").mkdir(parents=True)
-    (tmp_path / ".zeref" / "policy" / "deny.json").write_text(
+    (tmp_path / ".shiroe" / "policy").mkdir(parents=True)
+    (tmp_path / ".shiroe" / "policy" / "deny.json").write_text(
         json.dumps({"deny": ["fs.delete"]}), encoding="utf-8",
     )
     stack = load_policy_stack(tmp_path, global_root=tmp_path / "no-such")
