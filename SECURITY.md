@@ -10,7 +10,7 @@ Use private reporting.
 
 Use GitHub Private Vulnerability Reporting from the repository Security tab:
 
-    https://github.com/kanadhiayash/zeref-memory-engine/security
+    https://github.com/kanadhiayash/shiroe/security
 
 Include:
 
@@ -58,7 +58,7 @@ Out of scope:
 
 Published advisories live at:
 
-    https://github.com/kanadhiayash/zeref-memory-engine/security/advisories
+    https://github.com/kanadhiayash/shiroe/security/advisories
 
 ## Safety principles
 

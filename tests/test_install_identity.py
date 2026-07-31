@@ -70,8 +70,10 @@ def test_no_display_surface_renders_old_name(repo_root: Path) -> None:
 def test_compat_identifier_intact(repo_root: Path) -> None:
     """The shiroe package/plugin identifier is the namespace-rename target
     (SHR-namespace-rename) and must be consistent across every distribution
-    manifest, while the registry schema host (zeref-os.dev) — a branding
-    surface, not a technical identifier — stays untouched."""
+    manifest. The registry's `$schema` is not just branding text either: it
+    must point at a schema file that actually exists in the repo, and the
+    registry must actually validate against it — an operational contract,
+    not a dangling pointer."""
     pyproject_text = (repo_root / "pyproject.toml").read_text(encoding="utf-8")
     assert 'name = "shiroe"' in pyproject_text
 
@@ -83,7 +85,30 @@ def test_compat_identifier_intact(repo_root: Path) -> None:
     assert marketplace["plugins"][0]["name"] == "shiroe"
 
     registry = json.loads((repo_root / "shiroe-registry.json").read_text(encoding="utf-8"))
-    assert "zeref-os" in registry["$schema"]
+    schema_url = registry["$schema"]
+    assert schema_url == (
+        "https://raw.githubusercontent.com/kanadhiayash/shiroe/main/"
+        "registry/shiroe-registry.schema.json"
+    )
+
+    # The URL's path must resolve to a real, committed file — not a dangling
+    # pointer to a domain the project doesn't control.
+    schema_repo_path = schema_url.split("/main/", 1)[1]
+    schema_path = repo_root / schema_repo_path
+    assert schema_path.is_file(), f"{schema_repo_path} does not exist in the repo"
+
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
+
+    # The registry must actually validate against the committed schema —
+    # run it through the same validator the CI `validate` job and
+    # `shiroe release check` invoke on every run.
+    result = subprocess.run(
+        [sys.executable, str(repo_root / "scripts" / "shiroe-validate.py")],
+        cwd=str(repo_root), capture_output=True, text=True,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "Registry schema:  valid" in result.stdout
 
 
 # ---------------------------------------------------------------------------
@@ -94,7 +119,7 @@ def test_manifest_well_formed_and_digests_match_actual_files(repo_root: Path) ->
     manifest = build_manifest(repo_root)
 
     assert manifest.schema_version == 1
-    assert manifest.product_name == "Zeref Memory Engine"
+    assert manifest.product_name == "Shiroe AI Tactician"
     assert manifest.compat_id == "shiroe"
     assert manifest.package_file_count > 0
     assert manifest.package_digest.startswith("sha256:")
@@ -152,14 +177,14 @@ def _init_repo(path: Path) -> None:
 def _seed_installable(root: Path, *, version: str, plugin_description: str) -> None:
     (root / "AGENTS.md").write_text("# AGENTS.md\n", encoding="utf-8")
     (root / "pyproject.toml").write_text(
-        f'[project]\nname = "zeref-os"\nversion = "{version}"\n', encoding="utf-8",
+        f'[project]\nname = "shiroe-os"\nversion = "{version}"\n', encoding="utf-8",
     )
     (root / "shiroe-registry.json").write_text(
         json.dumps({"version": version}), encoding="utf-8",
     )
     (root / ".claude-plugin").mkdir(exist_ok=True)
     (root / ".claude-plugin" / "plugin.json").write_text(
-        json.dumps({"name": "zeref-os", "version": version, "description": plugin_description}),
+        json.dumps({"name": "shiroe-os", "version": version, "description": plugin_description}),
         encoding="utf-8",
     )
 
@@ -184,7 +209,7 @@ def test_upgrade_from_stale_cache_replaces_old_payload(tmp_path: Path, monkeypat
 
     for root, version, desc in (
         (old_root, "2.0.0-alpha.2", "Zeref OS — old descriptor text"),
-        (new_root, "2.0.0-alpha.3", "Zeref Memory Engine — rebranded descriptor text"),
+        (new_root, "2.0.0-alpha.3", "Shiroe — rebranded descriptor text"),
     ):
         _init_repo(root)
         _seed_installable(root, version=version, plugin_description=desc)
@@ -222,7 +247,7 @@ def test_memory_survives_manifest_rebuild(tmp_path: Path) -> None:
     marker = root / "memory" / "hot.md"
     marker.write_text("user-private-note", encoding="utf-8")
     (root / "pyproject.toml").write_text(
-        '[project]\nname = "zeref-os"\n', encoding="utf-8"
+        '[project]\nname = "shiroe-os"\n', encoding="utf-8"
     )
     (root / "AGENTS.md").write_text("# AGENTS.md\n", encoding="utf-8")
     (root / "shiroe-registry.json").write_text("{}", encoding="utf-8")

@@ -1,6 +1,6 @@
 <!-- privacy-audit: allow-file "Llama harness stub references AGENTS.md + example paths." -->
 
-# LLAMA.md — Llama-family harness shim (Zeref)
+# LLAMA.md — Llama-family harness shim (Shiroe)
 
 **Canonical spec: `AGENTS.md`** — read it first. This file only adds
 Llama-specific notes (Ollama, llama.cpp, llamafile, vLLM, LM Studio,
@@ -9,12 +9,12 @@ Open WebUI, and any harness that fronts a Llama-family model).
 ## Llama-specific
 
 - These harnesses generally have no built-in concept of "skill" or
-  "agent". Zeref still works — the memory layer is plain Markdown and
+  "agent". Shiroe still works — the memory layer is plain Markdown and
   reading-order is enforced by `AGENTS.md`.
 - Recommended invocation: point the model's system prompt at `AGENTS.md`
   via a wrapper script or the harness's prompt-template feature.
 - For tool-calling harnesses (Open WebUI, vLLM with function calling),
-  expose `zeref` as a subprocess tool: `python3 -m shiroe status`,
+  expose `shiroe` as a subprocess tool: `python3 -m shiroe status`,
   `python3 -m shiroe write-decision …`, `python3 -m shiroe audit-privacy`.
 
 ## First action every session

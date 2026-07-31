@@ -1,6 +1,6 @@
 """Deterministic, inspectable query expansion over tokenize() output.
 
-Zeref's retrieval story only holds together if every match is explainable —
+Shiroe's retrieval story only holds together if every match is explainable —
 a black-box expansion (embeddings, an LLM call, a hidden synonym service)
 would break that guarantee even if it improved recall. So expansion here is:
 

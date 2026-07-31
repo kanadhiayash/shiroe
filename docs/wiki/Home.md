@@ -1,12 +1,12 @@
-# Zeref Memory Engine — Wiki
+# Shiroe — Wiki
 
-<p align="center"><img src="https://raw.githubusercontent.com/kanadhiayash/zeref-memory-engine/main/assets/zeref-os-hero.png" alt="Zeref Memory Engine" width="640"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/kanadhiayash/shiroe/main/assets/zeref-os-hero.png" alt="Shiroe" width="640"></p>
 
 > Imagine you are an **architect** on a major building, and every morning a different contractor shows up. Before anyone lays a brick you re-explain the blueprint, the constraints, the decisions you and the last contractor made, and what is already built. Every conversation starts from zero.
 >
 > That is what working with AI assistants is like. Each new session starts blind, and context evaporates when the window closes.
 >
-> **Zeref is a local-first memory engine for AI agents.** Project memory lives in your repository as files you can read and diff. Sessions read it before they act, write to it through a guarded path, and hand it to the next session cleanly. The memory travels with the project, not with the tool.
+> **Shiroe is a local-first AI work control plane for AI agents.** Project memory lives in your repository as files you can read and diff. Sessions read it before they act, write to it through a guarded path, and hand it to the next session cleanly. The memory travels with the project, not with the tool.
 
 ## Read these first
 
@@ -21,16 +21,16 @@
 - **[[Team-Packs]]** — on-demand multi-agent configurations
 - **[[Pattern-Detection]]** — how repeated work becomes a reviewable draft
 - **[[Glossary]]** — canonical terms
-- **[[Stack]]** — projects Zeref routes alongside
+- **[[Stack]]** — projects Shiroe routes alongside
 - **[[Inspirations]]** — engineering lineage
 
 ## The two properties worth understanding
 
-Most memory tools store text and retrieve it. Two design decisions separate Zeref from that baseline, and both are enforced in code rather than described in prose.
+Most memory tools store text and retrieve it. Two design decisions separate Shiroe from that baseline, and both are enforced in code rather than described in prose.
 
 **Reads are boundary-first.** A session does not load a project to answer a question about the project. It reads `memory/hot.md`, consults `memory/index.md` only if hot is insufficient, then loads a single named section of a single named page. Read cost tracks the question, not the age of the project. See [[Memory-Model]].
 
-**Contradictions go to a human.** When a new claim conflicts with a stored one, the write halts, both sides are recorded with their provenance, and the conflict waits for you. Zeref refuses to settle it by recency, by evidence grade, by dropping one side quietly, or by deferring forever — each of those makes a judgment call while appearing not to. See [[Memory-Model]].
+**Contradictions go to a human.** When a new claim conflicts with a stored one, the write halts, both sides are recorded with their provenance, and the conflict waits for you. Shiroe refuses to settle it by recency, by evidence grade, by dropping one side quietly, or by deferring forever — each of those makes a judgment call while appearing not to. See [[Memory-Model]].
 
 ## What the engine does
 
@@ -47,8 +47,7 @@ Most memory tools store text and retrieve it. Two design decisions separate Zere
 
 ## Honest posture
 
-- **Zeref is not an operating system.** It is a memory and governance layer that a harness reads and writes through.
-- **Zeref performs no inference.** Your harness calls the model.
+- **Shiroe performs no inference.** Your harness calls the model.
 - **No benchmark scores are published.** Loaders for five public suites are scaffolded; no runs have been performed. See [[Architecture]].
 - **MIT licensed, no warranty.** The privacy scrubber is defense-in-depth, not a licence to paste production credentials into prompts.
 
@@ -64,4 +63,4 @@ Most memory tools store text and retrieve it. Two design decisions separate Zere
 
 ---
 
-[`README`](https://github.com/kanadhiayash/zeref-memory-engine) · [`AGENTS.md`](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/AGENTS.md) · [`SECURITY.md`](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/SECURITY.md) · [`CONTRIBUTING.md`](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/CONTRIBUTING.md)
+[`README`](https://github.com/kanadhiayash/shiroe) · [`AGENTS.md`](https://github.com/kanadhiayash/shiroe/blob/main/AGENTS.md) · [`SECURITY.md`](https://github.com/kanadhiayash/shiroe/blob/main/SECURITY.md) · [`CONTRIBUTING.md`](https://github.com/kanadhiayash/shiroe/blob/main/CONTRIBUTING.md)

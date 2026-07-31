@@ -2,7 +2,7 @@
 
 Every external unit of work — a skill, agent, plugin, MCP server, CLI,
 repository tool, script, workflow, evaluator, or API service — enters
-Zeref through this package. Nothing runs until it is ``approved`` (or a
+Shiroe through this package. Nothing runs until it is ``approved`` (or a
 lifecycle state past it) AND its stored digest still matches the source
 on disk.
 

@@ -96,7 +96,7 @@ def _check_readme(root: Path, expected: str) -> tuple[str, str | None]:
 
 def _check_wiki_install(root: Path, expected: str) -> tuple[str, str | None]:
     text = _read(root, "docs/wiki/Installation.md")
-    m = re.search(r"zeref-os@zeref-os\s+v(\d+\.\d+\.\d+(?:[-+][\w.\-]+)?)", text)
+    m = re.search(r"shiroe@shiroe\s+v(\d+\.\d+\.\d+(?:[-+][\w.\-]+)?)", text)
     return ("docs/wiki/Installation.md", m.group(1) if m else None)
 
 

@@ -1,4 +1,4 @@
-"""Lineage analysis tools for Zeref upgrade planning."""
+"""Lineage analysis tools for Shiroe upgrade planning."""
 
 from shiroe.lineage.intake import audit_csv, load_rows
 

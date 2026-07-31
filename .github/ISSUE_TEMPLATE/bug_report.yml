@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a reproducible Zeref bug
+description: Report a reproducible Shiroe bug
 title: "bug: "
 labels: ["type:bug", "evidence:needs-source"]
 body:

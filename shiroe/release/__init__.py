@@ -1,1 +1,1 @@
-"""Release readiness helpers for Zeref."""
+"""Release readiness helpers for Shiroe."""

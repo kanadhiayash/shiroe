@@ -1,6 +1,6 @@
 # COST_POLICY.md
 
-Zeref chooses the cheapest safe executor for memory work.
+Shiroe chooses the cheapest safe executor for memory work.
 
 Default rules:
 

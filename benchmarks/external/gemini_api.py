@@ -158,7 +158,7 @@ def post(model_id: str, key: str, body: bytes, *, what: str) -> dict:
         headers={
             "Content-Type": "application/json",
             "x-goog-api-key": key,
-            "User-Agent": f"zeref-benchmark-{what}/1.0",
+            "User-Agent": f"shiroe-benchmark-{what}/1.0",
         },
         method="POST",
     )

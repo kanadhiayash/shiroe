@@ -1,4 +1,4 @@
-"""Memory APIs for Zeref.
+"""Memory APIs for Shiroe.
 
 This package preserves the existing Memory Core layout/write API while adding
 the v2 atom schema and append-only JSONL store. Legacy Markdown files remain

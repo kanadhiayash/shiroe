@@ -1,4 +1,4 @@
-# Deprecations — Zeref vNext
+# Deprecations — Shiroe vNext
 
 One-cycle alias map introduced by the vNext architecture reset (2.0.0-alpha.1). Aliases resolve today; removal target is **2.1.0**.
 

@@ -45,7 +45,7 @@ def _fact(claim: str, **overrides) -> dict:
 
 def test_valid_time_and_transaction_time_are_independent_axes() -> None:
     # "The launch date was always Sept 1, but we only found out Tuesday":
-    # true in the world since June 1; Zeref only learned it on July 22.
+    # true in the world since June 1; Shiroe only learned it on July 22.
     atom = _fact(
         "Launch date is 2026-09-01",
         valid_from="2026-06-01T00:00:00Z",
@@ -68,7 +68,7 @@ def test_valid_time_and_transaction_time_are_independent_axes() -> None:
 
 
 def test_as_of_recorded_survives_supersession_as_of_recorded_still_sees_old_belief() -> None:
-    # What Zeref believed on date X should still include a fact that was
+    # What Shiroe believed on date X should still include a fact that was
     # later superseded, as long as X is before the supersession.
     atom = _fact(
         "Rate limit is 100 rps",
@@ -271,7 +271,7 @@ def test_search_ranking_never_lets_superseded_outrank_current(fake_repo: Path) -
     store = AtomStore(fake_repo)
     old = store.append(
         _fact(
-            "Zeref rate limit is 100 rps",
+            "Shiroe rate limit is 100 rps",
             recorded_at="2026-01-01T00:00:00Z",
             superseded_at="2026-06-01T00:00:00Z",
             status="superseded",
@@ -280,10 +280,10 @@ def test_search_ranking_never_lets_superseded_outrank_current(fake_repo: Path) -
     )
     new = store.append(
         _fact(
-            "Zeref rate limit is 100 rps",
+            "Shiroe rate limit is 100 rps",
             recorded_at="2026-06-01T00:00:00Z",
             created_at="2026-06-01T00:00:00Z",
-            provenance="Zeref rate limit is 100 rps v2",
+            provenance="Shiroe rate limit is 100 rps v2",
         )
     )
     assert old["id"] != new["id"]

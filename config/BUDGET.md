@@ -14,11 +14,11 @@ pattern_detection: true         # set false to disable pattern-observer
 
 # Token Budget
 
-The `budget-governor` skill scales output verbosity and read patterns to the active model tier and remaining budget. God Mode activates automatically when a high-tier model is detected (per ZEREF_OS §5 + D5).
+The `budget-governor` skill scales output verbosity and read patterns to the active model tier and remaining budget. God Mode activates automatically when a high-tier model is detected (per SHIROE_OS §5 + D5).
 
 ## Tier table
 
-| Tier | Reasoning class | Example models | Zeref behavior | Per-skill cap |
+| Tier | Reasoning class | Example models | Shiroe behavior | Per-skill cap |
 |---|---|---|---|---|
 | **Free** | `fast` | Gemini Flash, local Ollama, Mistral (provider examples) | Aggressive compaction, minimal wiki writes, short `/status` outputs | 4 000 tok |
 | **Standard** | `balanced` | GPT-4o mini (provider example), `balanced` class (sonnet alias) | Normal operation, full wiki writes, standard conflict scans | 8 000 tok |
@@ -54,4 +54,4 @@ The `budget-governor` skill scales output verbosity and read patterns to the act
 
 ## No hardcoded limits
 
-User sets the ceiling above. Zeref warns before approaching it. Free to install; capability scales with the user's own model tier.
+User sets the ceiling above. Shiroe warns before approaching it. Free to install; capability scales with the user's own model tier.

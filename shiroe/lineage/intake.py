@@ -1,4 +1,4 @@
-"""CSV intake validation for the 64-source Zeref lineage program."""
+"""CSV intake validation for the 64-source Shiroe lineage program."""
 
 from __future__ import annotations
 

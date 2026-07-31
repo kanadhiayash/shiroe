@@ -21,7 +21,7 @@ Watch for repeated work patterns. When a task signature repeats ≥3× in 48-80h
 
 ## Source log
 
-- `memory/patterns/PATTERNS.jsonl` (per ZEREF_OS §3.5)
+- `memory/patterns/PATTERNS.jsonl` (per SHIROE_OS §3.5)
 - Append-only. Every tool invocation sequence captured here by the active agent.
 - Harness-agnostic: any harness writes to the same file.
 - Historical predecessor (pre-v4.3): `memory/archive/session-events-v4.2.jsonl`. Skip unless user requests an extended historical scan.

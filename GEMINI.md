@@ -1,6 +1,6 @@
 <!-- privacy-audit: allow-file "Gemini harness stub references AGENTS.md + example paths." -->
 
-# GEMINI.md — Gemini harness shim (Zeref)
+# GEMINI.md — Gemini harness shim (Shiroe)
 
 **Canonical spec: `AGENTS.md`** — read it first. This file only adds Gemini-specific notes.
 

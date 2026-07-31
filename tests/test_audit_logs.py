@@ -120,4 +120,4 @@ def test_audit_report_and_corrupt_jsonl_handling(repo_root: Path, tmp_path: Path
 
     cli = _run(repo_root, tmp_path, ["audit", "report", "--format", "md"])
     assert cli.returncode == 0, cli.stderr
-    assert "# Zeref Audit Report" in cli.stdout
+    assert "# Shiroe Audit Report" in cli.stdout

@@ -14,10 +14,10 @@ REFERENCE_IMPLEMENTATIONS: dict[int, dict[str, str]] = {
     5: {"form": "graph-contrast", "gate": "no duplicate graph system in core"},
     9: {"form": "council-guardrail", "gate": "debate requires evidence and strict scope"},
     19: {"form": "scope-guardrail", "gate": "no multimodal expansion before text memory is stable"},
-    20: {"form": "scope-guardrail", "gate": "no neuroscience framing in public Zeref positioning"},
+    20: {"form": "scope-guardrail", "gate": "no neuroscience framing in public Shiroe positioning"},
     26: {"form": "lifecycle-fixture", "gate": "no cloud runtime assumption"},
     28: {"form": "lifecycle-fixture", "gate": "no platform-specific lifecycle assumption"},
-    36: {"form": "connector-guardrail", "gate": "connectors cannot own Zeref trust boundary"},
+    36: {"form": "connector-guardrail", "gate": "connectors cannot own Shiroe trust boundary"},
     38: {"form": "export-guardrail", "gate": "docs export must not leak private memory"},
     42: {"form": "security-containment", "gate": "read-only defensive reference"},
     43: {"form": "security-containment", "gate": "no offensive capability bundled"},
@@ -27,8 +27,8 @@ REFERENCE_IMPLEMENTATIONS: dict[int, dict[str, str]] = {
     54: {"form": "benchmark-fixture", "gate": "do not ingest embodied-AI code"},
     59: {"form": "downstream-ui-reference", "gate": "frontend libraries stay outside core"},
     60: {"form": "downstream-ui-reference", "gate": "component libraries stay outside core"},
-    61: {"form": "workflow-reference", "gate": "Zeref is not marketing-specific"},
-    62: {"form": "architecture-guardrail", "gate": "training-stack complexity stays out of Zeref"},
+    61: {"form": "workflow-reference", "gate": "Shiroe is not marketing-specific"},
+    62: {"form": "architecture-guardrail", "gate": "training-stack complexity stays out of Shiroe"},
 }
 
 

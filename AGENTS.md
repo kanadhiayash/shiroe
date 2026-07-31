@@ -1,21 +1,15 @@
-<!-- privacy-audit: allow-file "Canonical spec text. Names author (Yash Kanadhia) + Fairy Tail character (Zeref Dragneel) + describes credential/PII pattern classes AS spec content. All apparent PII/credential matches are documentation of what the scrubber detects, not leaks." -->
+<!-- privacy-audit: allow-file "Canonical spec text. Names author (Yash Kanadhia) + describes credential/PII pattern classes AS spec content. All apparent PII/credential matches are documentation of what the scrubber detects, not leaks." -->
 
-# AGENTS.md - Zeref Memory Engine Canonical Spec
+# AGENTS.md - Shiroe Canonical Spec
 
-> **Naming note.** The product is **Zeref Memory Engine** (short form: **Zeref**).
-> The plugin and install identifier is `zeref-os`; the name does not imply an
-> operating system.
-> **Zeref is not an operating system.** It is a persistent memory and
-> context layer that plugs into your existing AI harness. See
-> [`README.md`](README.md) for the full disclaimer set.
+> **Naming note.** The product is **Shiroe**. The plugin and install
+> identifier is `shiroe`.
 
-This is the canonical agent specification for **Zeref**. All harness-specific files (`CLAUDE.md`, `CODEX.md`, `GEMINI.md`, `LLAMA.md`, `.cursor/rules/shiroe.mdc`, `.windsurfrules`, `.aider.conf.yml`) defer to this document.
+This is the canonical agent specification for **Shiroe**. All harness-specific files (`CLAUDE.md`, `CODEX.md`, `GEMINI.md`, `LLAMA.md`, `.cursor/rules/shiroe.mdc`, `.windsurfrules`, `.aider.conf.yml`) defer to this document.
 
 ## Identity
 
-Zeref is a local-first context and memory engine. Harness-agnostic, model-agnostic, privacy-first. Per-project canonical wiki (flat `memory/` layout) + append-only pattern log + snapshots.
-
-The name comes from Zeref Dragneel in *Fairy Tail* — the immortal scholar whose ancient knowledge transcended form, time, and faction. Zeref is built in that lineage: long-horizon memory, faithful to the user's accumulated decisions, portable across every AI harness.
+Shiroe is a local-first AI work control plane. Harness-agnostic, model-agnostic, privacy-first. Per-project canonical wiki (flat `memory/` layout) + append-only pattern log + snapshots.
 
 ## First action every session (reading order — ZEREF_OS §0)
 
@@ -222,7 +216,7 @@ When `memory-keeper` detects a conflict between an incoming write and existing w
 
 | Team | Agents | Use |
 |---|---|---|
-| solo | 1 primary + memory engine | default |
+| solo | 1 primary + Shiroe AI Tactician | default |
 | build | Planner + Implementer + Reviewer | multi-module features |
 | research | Investigator + Synthesizer + Fact-checker | tech evaluation |
 | red | Attacker + Security reviewer + Constraint checker + Evidence recorder (read-only) | adversarial review |
@@ -233,7 +227,7 @@ Max 4 agents per pack. Outputs land in `team/`. Activate via `/team [type]`. Def
 
 ## Connector Advisory (per ZEREF_OS §9)
 
-Zeref ships with **zero** bundled MCP tools. Recommendation-only after `pattern-observer` detects repeated manual behavior. All connectors OFF by default in `SHARING_POLICY.md`. Recommended free stack documented in `references/connector-advisory.md`.
+Shiroe ships with **zero** bundled MCP tools. Recommendation-only after `pattern-observer` detects repeated manual behavior. All connectors OFF by default in `SHARING_POLICY.md`. Recommended free stack documented in `references/connector-advisory.md`.
 
 ## Harness Translation Map (per ZEREF_OS §10)
 
@@ -249,12 +243,12 @@ Zeref ships with **zero** bundled MCP tools. Recommendation-only after `pattern-
 
 Full table + adding-a-harness procedure: `references/harness-translation-map.md`.
 
-## What Zeref is NOT (and what those mean)
+## What Shiroe is NOT (and what those mean)
 
-- **Not itself a harness.** Zeref plugs *into* the user's harness. It is the memory layer they read — not a replacement for the harness.
-- **Not a hosted service.** No Zeref server. Memory lives in local markdown in the project repo. Optional MCP connectors talk to hosted services only after explicit enable in `SHARING_POLICY.md`.
+- **Not itself a harness.** Shiroe plugs *into* the user's harness. It is the memory layer they read — not a replacement for the harness.
+- **Not a hosted service.** No Shiroe server. Memory lives in local markdown in the project repo. Optional MCP connectors talk to hosted services only after explicit enable in `SHARING_POLICY.md`.
 - **Not bundled with any MCP tools.** Recommendation-only. Never installs a connector on the user's behalf.
 - **Not a sprawling skill catalog.** A small set of skills with strict triggers, not a large catalogue of specialists.
 - **Not an always-on multi-agent panel.** Team packs are on-demand only and capped at 4 agents.
-- **Not a persona.** Context + memory engine, not a simulated role.
+- **Not a persona.** Context + memory layer, not a simulated role.
 - **Not dedicated to any single user or organization.** Free to install; use any model the user brings.

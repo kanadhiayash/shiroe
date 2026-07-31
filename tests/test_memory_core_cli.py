@@ -60,9 +60,9 @@ def test_memory_cli_add_search_get_update_history_explain(repo_root: Path, tmp_p
             "--title",
             "memory state decision",
             "--body",
-            "SQLite state should support explainable recall for Zeref.",
+            "SQLite state should support explainable recall for Shiroe.",
             "--entity",
-            "Zeref",
+            "Shiroe",
             "--tag",
             "retrieval",
             "--layer",
@@ -96,7 +96,7 @@ def test_memory_cli_add_search_get_update_history_explain(repo_root: Path, tmp_p
     searched = _run(
         repo_root,
         tmp_path,
-        ["memory", "search", "recall", "--entity", "Zeref", "--layer", "L2", "--json"],
+        ["memory", "search", "recall", "--entity", "Shiroe", "--layer", "L2", "--json"],
     )
     assert searched.returncode == 0, searched.stderr
     results = json.loads(searched.stdout)

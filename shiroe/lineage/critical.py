@@ -13,9 +13,9 @@ from shiroe.memory.schemas import REQUIRED_FIELDS, STATUS_VALUES
 
 CRITICAL_IMPLEMENTATIONS: dict[int, dict[str, str]] = {
     1: {
-        "source": "Zeref Memory Engine",
+        "source": "Shiroe",
         "implemented_as": "source invariants",
-        "gate": "lineage intake, council, and critical audit keep Zeref identity primary",
+        "gate": "lineage intake, council, and critical audit keep Shiroe identity primary",
     },
     3: {
         "source": "claude-obsidian",
@@ -66,7 +66,7 @@ CRITICAL_IMPLEMENTATIONS: dict[int, dict[str, str]] = {
 
 
 def audit_critical(csv_path: str | Path | None = None, *, strict: bool = False) -> dict[str, Any]:
-    """Audit that all critical lineage rows have executable Zeref implementation gates."""
+    """Audit that all critical lineage rows have executable Shiroe implementation gates."""
     path = Path(csv_path) if csv_path else default_csv_path()
     rows = load_rows(path)
     critical_rows = [row for row in rows if row.priority == "critical"]

@@ -16,7 +16,7 @@
 
 set -e
 
-REPO="kanadhiayash/zeref-os"
+REPO="kanadhiayash/shiroe"
 NOTION="https://copper-tv-288.notion.site/Zeref-Agent-OS-Command-Center-358d695d836a81af9f6adf30770217c3"
 DRY_RUN=true
 if [ "${1:-}" = "--apply" ]; then
@@ -137,7 +137,7 @@ create_release "v4.0.0" \
 - Command center: $NOTION
 
 ## What changed (MAJOR ideology shift)
-- **Deleted**: 109 specialist skills, 5 agents (fleet-router, council-convener, executive-qa, release-governor, context-engine), 3 identity files (ZEREF.md, ZEREFOS.md, ZEREFPROJECT.md), 14 zeref-prefixed commands, output-styles, registry, 5 v3 helper scripts
+- **Deleted**: 109 specialist skills, 5 agents (fleet-router, council-convener, executive-qa, release-governor, context-engine), 3 identity files (ZEREF.md, ZEREFOS.md, ZEREFPROJECT.md), 14 shiroe-prefixed commands, output-styles, registry, 5 v3 helper scripts
 - **Built**: 10 disciplined skills, 6 disciplined agents, 7 commands, 5 config files
 - Memory/ scaffold with append-only event log + snapshots
 - 3 privacy modes (exact/abstract/local-only)
@@ -146,7 +146,7 @@ create_release "v4.0.0" \
 - Always-on context: 5,035 → 905 tokens (82% reduction)
 
 ## Ideology shift
-**The shape clicked.** Local-first context + memory engine. Harness-agnostic. Privacy-first. Human arbitration on contradictions. Progressive activation.
+**The shape clicked.** Local-first AI work control plane. Harness-agnostic. Privacy-first. Human arbitration on contradictions. Progressive activation.
 
 ## Status
 Legacy (pre-rebrand). Tag restored from existing commit SHA \`d551d8a\`. This is the architectural foundation that v1.0.0 (post-rebrand) inherited.
@@ -242,7 +242,7 @@ create_release "v1.0.0" \
 - Command center: $NOTION
 
 ## What changed
-Plugin renamed (Zeref Skills Fleet / Agent OS → **Zeref OS**). Version clock reset. Wholesale nomenclature adoption from v4.x canon.
+Plugin renamed (Shiroe Skills Fleet / Agent OS → **Zeref OS**). Version clock reset. Wholesale nomenclature adoption from v4.x canon.
 
 - Flat memory/ layout (no more memory/wiki/)
 - Root privacy templates (PRIVACY/REDACT/SHARING_POLICY at repo root)
@@ -283,7 +283,7 @@ create_release "v2.5.0" \
 
 ### Phase D — Operational Workarounds (L1-L11)
 - L1 PII regex tightened; L2 email enabled; L3 runner.py
-- L4 db-status; L5 \`zeref init\`; L6 dogfood
+- L4 db-status; L5 \`shiroe init\`; L6 dogfood
 - L7 connector-stub; L8 grep-with-context draft; L9 MemoryLock
 - L10 atomic_write; L11 PII scrub before disk
 
@@ -316,7 +316,7 @@ create_release "v2.6.0" \
 
 ## What changed (MAJOR architecture shift)
 
-Zeref shifts from **reactive memory engine** to **proactive auto-gated execution system**. Every major task passes 4 sequential gates before any execution-model token spend:
+Shiroe shifts from **reactive memory layer** to **proactive auto-gated execution system**. Every major task passes 4 sequential gates before any execution-model token spend:
 
 \`budget classification → skill-stack selection → prompt restructuring → handoff\`
 
@@ -431,7 +431,7 @@ Execution = 9 (not 10) because cascade-replay test deferred to v2.7.
 - Cross-harness live runs (SHR-B07) — Cursor / Aider / Gemini
 - Cascade-replay test (path to 10.00 Execution)
 - pipx PyPI publish
-- 'Zeref OS' → 'Zeref' rebrand
+- 'Zeref OS' → 'Shiroe' rebrand
 
 ## Decision record
 [docs/adr/zeref_audit-hardening-l1-l15_adr_approved_yk_2026-06-08_v1.0.md](../blob/main/docs/adr/zeref_audit-hardening-l1-l15_adr_approved_yk_2026-06-08_v1.0.md)

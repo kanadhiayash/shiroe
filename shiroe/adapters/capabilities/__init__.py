@@ -1,9 +1,9 @@
 """Capability adapters + probing (vNext PR 5, master plan §12).
 
-An adapter is the runtime bridge between an approved capability and Zeref's
+An adapter is the runtime bridge between an approved capability and Shiroe's
 executor. Every adapter reports:
 
-- ``enforcement_level`` — how much control Zeref actually has:
+- ``enforcement_level`` — how much control Shiroe actually has:
   ``A`` embedded (native hooks / subprocess we own),
   ``B`` sidecar/proxy (routed through our CLI or MCP),
   ``C`` context-only (we can only assemble the prompt).

@@ -1,4 +1,4 @@
-# Zeref Memory Engine
+# Shiroe
 
 - [[Home]]
 
@@ -17,6 +17,6 @@
 - [[Glossary]]
 - [[Stack]]
 - [[Inspirations]]
-- [README](https://github.com/kanadhiayash/zeref-memory-engine)
-- [AGENTS.md](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/AGENTS.md)
-- [SECURITY.md](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/SECURITY.md)
+- [README](https://github.com/kanadhiayash/shiroe)
+- [AGENTS.md](https://github.com/kanadhiayash/shiroe/blob/main/AGENTS.md)
+- [SECURITY.md](https://github.com/kanadhiayash/shiroe/blob/main/SECURITY.md)

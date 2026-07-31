@@ -2,9 +2,9 @@
 privacy-audit: allow-file "Tests reference env-var names, synthetic fixture text, and a sentinel string standing in for a key value; no real credentials or user data."
 
 Wave 4 — external benchmark harness: ConvoMem loader, the three-arm runner
-(zeref / full_context / bm25), the Gemini JudgeClient interface (tested only
+(shiroe / full_context / bm25), the Gemini JudgeClient interface (tested only
 via DeterministicFakeJudge), the pre-run cost estimator, and the
-`zeref benchmark external` CLI.
+`shiroe benchmark external` CLI.
 
 No network, no API key, no dataset download: every test here runs against
 the tiny synthetic fixtures already committed under benchmarks/external/
@@ -420,7 +420,7 @@ def test_cli_missing_dataset_fails_clearly(capsys) -> None:
     from shiroe import cli_benchmark
 
     args = argparse.Namespace(
-        benchmark_command="external", benchmark="locomo", data="/nonexistent/zeref-bench-path",
+        benchmark_command="external", benchmark="locomo", data="/nonexistent/shiroe-bench-path",
         arms="all", dry_run=False, live=False, confirm=False, max_cost=None,
         provider="anthropic", judge="fake", seed=0, limit=None, out=None, format="text",
     )
@@ -539,7 +539,7 @@ def test_chunking_splits_single_session_haystacks() -> None:
 
 
 def test_arms_diverge_on_a_multi_chunk_task() -> None:
-    """zeref / full_context / bm25 must not all receive the same context."""
+    """shiroe / full_context / bm25 must not all receive the same context."""
     from benchmarks.external.harness import build_prompt, ingest_task
     from benchmarks.external.runner import ARM_BACKENDS
     from benchmarks.external.schema import Task, Turn

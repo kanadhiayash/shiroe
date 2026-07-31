@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Zeref local cleanup: remove worktrees and branches whose work is already on dev.
+# Shiroe local cleanup: remove worktrees and branches whose work is already on dev.
 #
 # Safety model — a branch is deleted only if BOTH are true:
 #   1. it is not dev or main, and
@@ -12,7 +12,7 @@
 
 set -euo pipefail
 
-REPO="$HOME/Desktop/ZEREF/zeref"
+REPO="$HOME/Desktop/SHIROE/shiroe"
 APPLY=0
 [ "${1:-}" = "--apply" ] && APPLY=1
 

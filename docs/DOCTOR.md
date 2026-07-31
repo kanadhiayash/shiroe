@@ -1,6 +1,6 @@
 # Doctor
 
-`zeref doctor` reports local installation and project health.
+`shiroe doctor` reports local installation and project health.
 
 It checks:
 

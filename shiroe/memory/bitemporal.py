@@ -5,7 +5,7 @@ Two independent time axes, never collapsed into one:
 - **Valid time** (``valid_from`` / ``valid_until``) — when the fact was true
   IN THE WORLD. Half-open interval: valid from (inclusive) until (exclusive).
   A null bound means "unknown/open on that side" — never fabricate one.
-- **Transaction time** (``recorded_at`` / ``superseded_at``) — when Zeref
+- **Transaction time** (``recorded_at`` / ``superseded_at``) — when Shiroe
   LEARNED (and, if applicable, un-learned) the fact. A null ``superseded_at``
   means the row is still the current belief.
 
@@ -13,7 +13,7 @@ Two independent time axes, never collapsed into one:
 early ``valid_from`` and a late ``recorded_at`` — the two axes answer
 different questions and must be queryable independently:
 ``as_of_valid(date)`` = what was true on that date; ``as_of_recorded(date)``
-= what Zeref believed as of that date.
+= what Shiroe believed as of that date.
 
 Supersession never destructively updates a row: the prior atom's
 ``superseded_at`` is closed via :func:`shiroe.memory.atom_store.AtomStore.patch`
@@ -82,7 +82,7 @@ def as_of_valid(atoms: list[dict[str, Any]], ref: str | None = None) -> list[dic
 # ---------------------------------------------------------------------------
 
 def is_recorded_at(atom: dict[str, Any], ref: str | None = None) -> bool:
-    """True when Zeref's belief-set included ``atom`` as of ``ref``.
+    """True when Shiroe's belief-set included ``atom`` as of ``ref``.
 
     Half-open interval [recorded_at, superseded_at). A null superseded_at
     means the atom was never superseded (still current knowledge).
@@ -98,7 +98,7 @@ def is_recorded_at(atom: dict[str, Any], ref: str | None = None) -> bool:
 
 
 def as_of_recorded(atoms: list[dict[str, Any]], ref: str | None = None) -> list[dict[str, Any]]:
-    """Atoms Zeref believed as of ``ref`` — the transaction-time axis.
+    """Atoms Shiroe believed as of ``ref`` — the transaction-time axis.
 
     Answers "what did we believe on date X", independent of whether that
     belief was ever, later, true in the world.

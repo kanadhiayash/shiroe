@@ -89,7 +89,7 @@ def test_convomem_licence_is_flagged_non_commercial() -> None:
 
 
 def test_all_three_arms_are_constructible() -> None:
-    """A Zeref-only number is unfalsifiable, so all three arms must exist
+    """A Shiroe-only number is unfalsifiable, so all three arms must exist
     before any scored run — not be discovered missing partway through one.
     """
     from benchmarks.external.runner import ALL_ARMS, ARM_BACKENDS

@@ -8,7 +8,7 @@ Packs come in two kinds, and they answer different questions. **Role packs** ans
 
 | Pack | Roster | Use |
 |---|---|---|
-| `solo` | One primary plus the memory engine | Default. Single-agent operation. |
+| `solo` | One primary plus Shiroe AI Tactician | Default. Single-agent operation. |
 | `build` | Planner, Implementer, Reviewer | Multi-module features: plan, execute, review. |
 | `research` | Investigator, Synthesizer, Fact-checker | Evaluating an approach or technology. |
 | `red` | Attacker, Security reviewer, Constraint checker, Evidence recorder | Adversarial review. **Read-only by default.** |

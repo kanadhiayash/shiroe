@@ -5,7 +5,7 @@
 > [`benchmarks/external/`](../benchmarks/external/README.md); no external
 > scores are claimed until full-dataset runs are published.
 
-Zeref Memory Core retrieval is self-checked with deterministic local fixtures
+Shiroe Memory Core retrieval is self-checked with deterministic local fixtures
 in `benchmarks/fixtures/retrieval_cases.json` and `benchmarks/retrieval.py`.
 
 ## What Is Measured

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-# The six canonical reasoning classes (ZEREF vNext §3.5).
+# The six canonical reasoning classes (SHIROE vNext §3.5).
 FAST = "fast"
 BALANCED = "balanced"
 DEEP = "deep"

@@ -9,7 +9,7 @@ output_dir: team/
 
 # ship team pack
 
-> Sourced from ZEREF_OS §8.
+> Sourced from SHIROE_OS §8.
 
 ## Roster
 

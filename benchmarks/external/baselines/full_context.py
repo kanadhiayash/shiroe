@@ -5,7 +5,7 @@ the current task — no ranking, no retrieval, `k` is ignored. This is the arm
 that answers "what if we just handed the model the whole conversation and
 skipped memory entirely?" Published research shows full-context frequently
 beats purpose-built memory products at small-to-medium context lengths, so a
-Zeref number is only honest when reported next to this arm (see
+Shiroe number is only honest when reported next to this arm (see
 `shiroe/release/claim_gate.py`'s `missing_baseline_pair` constraint).
 """
 

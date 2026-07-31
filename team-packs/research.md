@@ -9,7 +9,7 @@ output_dir: team/
 
 # research team pack
 
-> Sourced from ZEREF_OS §8.
+> Sourced from SHIROE_OS §8.
 
 ## Roster
 
@@ -48,4 +48,4 @@ output_dir: team/
 
 ## Anti-hallucination
 
-This team consumes `references/shared-anti-hallucination.md`. Fact-checker has explicit instruction to refute by default when uncertain (per `references/zeref-qa-gate.md`).
+This team consumes `references/shared-anti-hallucination.md`. Fact-checker has explicit instruction to refute by default when uncertain (per `references/shiroe-qa-gate.md`).

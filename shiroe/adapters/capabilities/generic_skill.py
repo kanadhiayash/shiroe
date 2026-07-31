@@ -1,6 +1,6 @@
 """Generic skill adapter — reads SKILL.md, provides context only.
 
-A "skill" in the current Zeref repo is markdown-only guidance; there is no
+A "skill" in the current Shiroe repo is markdown-only guidance; there is no
 runtime hook that can force the harness to follow it. That's Level C —
 we assemble a prompt bundle but we do not execute anything.
 """

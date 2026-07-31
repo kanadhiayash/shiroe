@@ -1,6 +1,6 @@
 <!-- privacy-audit: allow-file "Shared safety spec. Documents pattern-shaped credential/PII examples as detection specifications, not real data." -->
 
-# Zeref — Shared Rules
+# Shiroe — Shared Rules
 
 Rules repeated across ≥3 skills, extracted here to reduce drift. Reference this file from individual SKILL.md Safety sections as "per `_shared/rules.md`."
 

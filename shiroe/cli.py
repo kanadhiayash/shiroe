@@ -1,7 +1,7 @@
 """
 privacy-audit: allow-file "CLI help text names example commands, env-var-shaped tokens (ZEREF_ALLOW_*, GITHUB_TOKEN) as documentation of the security policy."
 
-shiroe.cli — Reference CLI for Zeref (Sprint 2).
+shiroe.cli — Reference CLI for Shiroe (Sprint 2).
 
 Commands:
     shiroe status          Print hot.md summary + active tier
@@ -29,7 +29,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 def _project_root() -> Path:
-    """Walk up from cwd until AGENTS.md found (Zeref root)."""
+    """Walk up from cwd until AGENTS.md found (Shiroe root)."""
     from shiroe.memory import MemoryRoot
 
     return MemoryRoot.discover().root
@@ -112,7 +112,7 @@ def cmd_init(args: argparse.Namespace) -> int:
     from shiroe.memory import normalize_init_values, scaffold_project
 
     root = Path(args.directory).resolve() if args.directory else Path.cwd()
-    print(f"\nInitialising Zeref layout at {root}")
+    print(f"\nInitialising Shiroe layout at {root}")
 
     # Use `is None` so empty-string CLI args (e.g. --parent "") skip the prompt.
     # Non-TTY stdin (piped install, CI) also skips prompts and uses defaults.
@@ -331,7 +331,7 @@ def cmd_db_status(args: argparse.Namespace) -> int:
     try: import litellm; backends["litellm"] = True
     except ImportError: pass
 
-    print("\nzeref backend status:")
+    print("\nshiroe backend status:")
     for k, v in backends.items():
         icon = "✔" if v else "✘"
         print(f"  {icon} {k:<10} {'available' if v else 'not installed'}")
@@ -1352,7 +1352,7 @@ def _print_memory_item(item) -> None:
 
 def _build_parser() -> argparse.ArgumentParser:
     from shiroe import __version__ as _v
-    p = argparse.ArgumentParser(prog="shiroe", description=f"Zeref CLI v{_v}")
+    p = argparse.ArgumentParser(prog="shiroe", description=f"Shiroe CLI v{_v}")
     p.add_argument("--version", action="version", version=f"shiroe {_v}")
     sub = p.add_subparsers(dest="command", required=True)
 
@@ -1677,7 +1677,7 @@ def _build_parser() -> argparse.ArgumentParser:
     claims_matrix.add_argument("--format", choices=["text", "json"], default="text")
     claims_sub.add_parser("check", help="Scan public docs for blocked claim patterns")
 
-    doctor = sub.add_parser("doctor", help="Run local Zeref health checks")
+    doctor = sub.add_parser("doctor", help="Run local Shiroe health checks")
     doctor.add_argument("--format", choices=["text", "json"], default="text")
     doctor.add_argument("--installation", action="store_true",
                         help="Report the installed-state manifest (identity, version, git SHA, content digests) instead of the standard health checks")
@@ -1707,7 +1707,7 @@ def _build_parser() -> argparse.ArgumentParser:
     handoff_sub = handoff.add_subparsers(dest="handoff_command", required=True)
     for target in ["codex", "claude", "cursor", "github", "human"]:
         handoff_target = handoff_sub.add_parser(target, help=f"Write {target} handoff")
-        handoff_target.add_argument("--objective", default="Continue from current Zeref memory state.")
+        handoff_target.add_argument("--objective", default="Continue from current Shiroe memory state.")
         handoff_target.add_argument("--include-private", action="store_true",
                                     help="Also export 'private'/'unknown' atoms (audited override); "
                                          "'local-only' atoms are never exported")

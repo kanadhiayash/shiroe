@@ -1,4 +1,4 @@
-"""Local task routing policy for Zeref commands."""
+"""Local task routing policy for Shiroe commands."""
 
 from __future__ import annotations
 

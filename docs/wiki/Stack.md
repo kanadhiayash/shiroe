@@ -1,8 +1,8 @@
-# Stack — projects Zeref sits alongside
+# Stack — projects Shiroe sits alongside
 
-Zeref is the memory layer. These are projects that do other parts of the job in the maintainer's own working setup.
+Shiroe is the memory layer. These are projects that do other parts of the job in the maintainer's own working setup.
 
-This is a credits and context list, not an integration matrix. Zeref does not bundle, vendor, or require any of them, and listing a project here is not a claim that Zeref invokes it. Your setup will differ.
+This is a credits and context list, not an integration matrix. Shiroe does not bundle, vendor, or require any of them, and listing a project here is not a claim that Shiroe invokes it. Your setup will differ.
 
 If your project belongs here and is missing, open an issue.
 
@@ -13,7 +13,7 @@ If your project belongs here and is missing, open an issue.
 
 ## Operating skills and harnesses
 
-- **[garrytan / gstack](https://github.com/garrytan/gstack)** — operating skills for shipping, reviewing, browsing, and QA. Where Zeref carries memory, gstack carries motion.
+- **[garrytan / gstack](https://github.com/garrytan/gstack)** — operating skills for shipping, reviewing, browsing, and QA. Where Shiroe carries memory, gstack carries motion.
 - **[JuliusBrussee / caveman](https://github.com/JuliusBrussee/caveman)** — grammar-based prompt compression.
 - **[affaan-m / ECC](https://github.com/affaan-m/ECC)** — multi-perspective review patterns.
 

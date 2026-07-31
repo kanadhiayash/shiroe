@@ -1,5 +1,5 @@
-# DECISION_LOG.md — Zeref 4.x Design Decisions
-> All architectural decisions made during the Zeref 4.0 upgrade session (May 2026).
+# DECISION_LOG.md — Shiroe 4.x Design Decisions
+> All architectural decisions made during the Shiroe 4.0 upgrade session (May 2026).
 
 ---
 
@@ -18,7 +18,7 @@
 ---
 
 ## D3: Context Rot / Supersession
-**Decision:** Zeref detects contradictions automatically. User resolves from flagged list only. Confidence decays after 90 days without reference. Global rules define system behavior; project wikis manage project-specific decay.
+**Decision:** Shiroe detects contradictions automatically. User resolves from flagged list only. Confidence decays after 90 days without reference. Global rules define system behavior; project wikis manage project-specific decay.
 **Status:** Confirmed
 
 ---
@@ -78,13 +78,13 @@
 ## Rejected Directions
 | Direction | Why Rejected |
 |-----------|-------------|
-| Zeref as agent harness | Breaks portability |
-| Zeref as skill fleet | Forces unwanted scope on users |
-| Zeref dedicated to single user | Limits adoption |
+| Shiroe as agent harness | Breaks portability |
+| Shiroe as skill fleet | Forces unwanted scope on users |
+| Shiroe dedicated to single user | Limits adoption |
 | Ruflo, LLM Council as core | Too opinionated, removed |
 | CEO persona | Wrong framing for a context engine |
 | Bundled tools | Forces tool choices before consent |
 | Claude-first architecture | Breaks harness-agnostic goal |
-| Hosted Zeref service | Not needed. Free install is the model. |
+| Hosted Shiroe service | Not needed. Free install is the model. |
 | Hermes-exclusive pattern detection | Breaks harness-agnostic goal |
 | Manual rot-hunting by user | Does not scale |

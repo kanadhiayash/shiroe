@@ -193,7 +193,7 @@ _TRIPLE_FIXTURES: list[tuple[str, tuple[str, str, str] | None]] = [
     ("The manager manages the release calendar.", ("The manager", "manages", "the release calendar")),
     ("The API belongs to the platform team.", ("The API", "belongs to", "the platform team")),
     ("The intern is responsible for the changelog.", ("The intern", "is responsible for", "the changelog")),
-    ("Zeref depends on the SQLite backend.", ("Zeref", "depends on", "the SQLite backend")),
+    ("Shiroe depends on the SQLite backend.", ("Shiroe", "depends on", "the SQLite backend")),
     # -- negatives: each exercises one precision guard --
     ("This decision supersedes the 2024 policy.", None),  # pronoun subject ("This")
     ("It depends on the weather.", None),  # pronoun subject ("It")

@@ -115,11 +115,11 @@ deliberately, to score the whole thing.
 
 ## All three arms, always
 
-`--arms all` runs `zeref`, `full_context`, and `bm25`.
+`--arms all` runs `shiroe`, `full_context`, and `bm25`.
 
-A Zeref-only number is unfalsifiable. Plain full-context beats several
+A Shiroe-only number is unfalsifiable. Plain full-context beats several
 purpose-built memory products on their own published numbers, and a lexical
-BM25 ranker is a genuinely strong baseline on LoCoMo. If Zeref loses to either,
+BM25 ranker is a genuinely strong baseline on LoCoMo. If Shiroe loses to either,
 that is the result — publish it. Do not narrow `--arms` to the one that looks
 best, and do not adjust the rubric after seeing scores.
 

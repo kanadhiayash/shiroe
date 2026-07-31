@@ -1,4 +1,4 @@
-# Zeref Hardening Recon
+# Shiroe Hardening Recon
 
 ## Facts
 
@@ -25,7 +25,7 @@
 
 - Whether all previous stacked PRs will merge before this hardening stack lands.
 - Whether benchmark adapter full-dataset runs will be executed outside default CI.
-- Whether v1.1 will keep package metadata as `zeref-os` for install compatibility or rename in a later release.
+- Whether v1.1 will keep package metadata as `shiroe` for install compatibility or rename in a later release.
 
 ## Risks
 

@@ -169,7 +169,7 @@ class AnthropicProvider(Provider):
                 "content-type": "application/json",
                 "x-api-key": self.api_key or "",
                 "anthropic-version": ANTHROPIC_VERSION,
-                "User-Agent": "zeref-benchmark-provider/1.0",
+                "User-Agent": "shiroe-benchmark-provider/1.0",
             },
             method="POST",
         )

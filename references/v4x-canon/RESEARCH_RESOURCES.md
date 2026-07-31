@@ -1,4 +1,4 @@
-# RESEARCH_RESOURCES.md — Zeref 4.x Reference Links and Sources
+# RESEARCH_RESOURCES.md — Shiroe 4.x Reference Links and Sources
 
 ---
 
@@ -51,9 +51,9 @@
 - ballred/obsidian-claude-pkm (PARA starter kit): https://github.com/ballred/obsidian-claude-pkm
 - AgriciDaniel/claude-obsidian (Karpathy-style LLM Wiki): https://github.com/AgriciDaniel/claude-obsidian
 
-### Zeref Space Source References
+### Shiroe Space Source References
 - bytebytego.com/courses/system-design-interview/scale-from-zero-to-millions-of-users
-- copper-tv-288.notion.site/Zeref-Skills-Fleet-Command-Center-358d695d836a81af9f6adf30770217c3
+- copper-tv-288.notion.site/Shiroe-Skills-Fleet-Command-Center-358d695d836a81af9f6adf30770217c3
 - gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
 - github.com/addyosmani/agent-skills
 - github.com/affaan-m/ecc
@@ -75,8 +75,8 @@
 
 ---
 
-## Zeref Choices That Diverge From Community Defaults
-| Community Default | Zeref 4.x Choice | Reason |
+## Shiroe Choices That Diverge From Community Defaults
+| Community Default | Shiroe 4.x Choice | Reason |
 |------------------|-----------------|--------|
 | CLAUDE.md as primary file | AGENTS.md primary, CLAUDE.md = stub | Harness-agnostic |
 | Skills bundled in harness | Skills recommended only | User consent and portability |

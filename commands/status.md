@@ -1,5 +1,5 @@
 ---
-description: Show current session state without modifying anything. Read-only. Operates over flat memory/ layout per ZEREF_OS §0.
+description: Show current session state without modifying anything. Read-only. Operates over flat memory/ layout per SHIROE_OS §0.
 ---
 
 Read-only. Do not write to memory or modify config.
@@ -13,7 +13,7 @@ Read-only. Do not write to memory or modify config.
 7. Count pending skill drafts in `skills/drafts/`.
 8. Output:
    ```
-   == Zeref Status ==
+   == Shiroe Status ==
    Project: <name>
    Privacy: <mode> | Tier: <Free | Standard | Enterprise> | Parent sync: <on|off>
    Active team: <solo | build | research | red | audit | ship>

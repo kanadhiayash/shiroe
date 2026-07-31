@@ -1,7 +1,7 @@
 """Hand-rolled YAML subset parser (stdlib only) — see plan §PR 6.
 
 Deliberately NOT a general YAML parser. Handles the shapes actually used in
-Zeref's mission and execution-policy files:
+Shiroe's mission and execution-policy files:
 
 - scalars: strings (bare + quoted), ints, floats, booleans, null
 - flow scalars only for values (no flow-style maps or sequences)

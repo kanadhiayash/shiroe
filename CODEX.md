@@ -1,4 +1,4 @@
-# CODEX.md — Codex harness shim (Zeref)
+# CODEX.md — Codex harness shim (Shiroe)
 
 **Canonical spec: `AGENTS.md`** — read it first. This file only adds
 Codex-specific notes.
