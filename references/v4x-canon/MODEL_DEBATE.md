@@ -110,17 +110,14 @@ Shiroe satisfies all six through hot.md startup, AGENTS.md lean protocol, token 
 
 ---
 
-## Shiroe Ratings by Parameter (Cross-Model Average)
+## Ratings by Parameter — removed
 
-| Parameter | Score /10 | Notes |
-|-----------|-----------|-------|
-| Harness portability | 9.5 | AGENTS.md standard + translation map. Near-universal. |
-| Memory persistence | 10 | File-based, works with any harness, any model. |
-| Privacy protection | 9.5 | PRIVACY.md + REDACT.md + SHARING_POLICY.md. Best-in-class. |
-| Token efficiency | 9 | hot.md startup + deep retrieval. God Mode for heavy work. |
-| Developer experience | 9 | Git-first, conversational setup, skill-draft review. |
-| Rule compliance | 8 | 70% community baseline. Shiroe improves via lean file + Two-Strikes. |
-| Scalability | 9 | Parent-child wiki rollup handles org-wide knowledge. |
-| Free model support | 9.5 | Free tier explicitly designed. Graceful degradation defined. |
-| Pattern intelligence | 8.5 | 48-80hr detection window, file-based log. Improves over time. |
-| Privacy-aware context sharing | 9.5 | Strongest differentiator vs. comparable systems. |
+This section held a table of self-assigned scores out of 10, averaged
+across models in a design debate. No measurement backed any of them, and
+one row claimed "best-in-class" against no named comparison. Scores
+invented in a discussion are not evidence, so they are not kept here.
+
+What the project will state about itself is limited to what a committed,
+reproducible check produces. See `docs/PUBLIC_SURFACE.md` for the claim
+rules and `benchmarks/` for what actually runs.
+
