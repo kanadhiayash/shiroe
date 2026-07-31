@@ -201,6 +201,22 @@ _UNSCORED_DISCLAIMER_MARKERS = (
     "no scores exist", "no dataset runs", "unscored", "no external benchmark",
     "no score", "explicitly unscored",
 )
+# (d) issue #153 gap: a generic "we're the best" claim needs no vendor name
+# and no percentage to be a problem — references/v4x-canon/MODEL_DEBATE.md
+# carried exactly this shape ("Best-in-class", "Strongest differentiator vs.
+# comparable systems") for a long time, unevidenced, unseen because
+# references/ was never scanned. Phrases here are drawn directly from the
+# project's own banned-wording lists (docs/PUBLIC_SURFACE.md's "Not allowed"
+# row, CONTRIBUTING.md, docs/RELEASE_PROCESS.md) plus the real phrasing that
+# shipped. The owner's rule is unconditional: no claim of "best" or any
+# roundabout superiority claim may ship without a public benchmark behind it,
+# and none exists yet (see _external_benchmark_has_run).
+_SUPERIORITY_PHRASES = (
+    "best-in-class", "best in class", "world top", "world best", "world's best",
+    "worlds best", "top ranked", "top-ranked", "10/10", "production-grade",
+    "production grade", "production secure", "secure by default",
+    "strongest differentiator",
+)
 
 
 @dataclass(frozen=True)
@@ -216,16 +232,44 @@ class ClaimFinding:
 
 
 def _public_docs(root: Path) -> list[Path]:
+    """Every file a visitor can read before cloning or installing Shiroe.
+
+    issue #172 originally covered README.md + docs/*.md. That missed two real
+    gaps:
+
+    - `references/` was never scanned at all. An unevidenced self-rating
+      table sat in references/v4x-canon/MODEL_DEBATE.md for a long time,
+      claiming "Best-in-class" and "Strongest differentiator" with no
+      benchmark behind either — the gate never saw it because it lives under
+      references/. That table is gone now, but the blind spot was real.
+    - SECURITY.md, CONTRIBUTING.md and AGENTS.md are named as "primary
+      surfaces" in docs/PUBLIC_SURFACE.md itself, yet were never scanned.
+
+    Excluded on purpose, not silently skipped:
+    - docs/_evidence/, docs/_research/ — internal working notes, not public.
+    - docs/adr/, docs/audits/release-evidence/ — frozen historical records
+      (architecture decisions and dated release-evidence blobs). Editing
+      history to satisfy a gate would falsify the record, so these paths are
+      excluded from scanning rather than ever being hand-edited to pass.
+    - CHANGELOG.md — historical by definition; was never scanned and stays
+      that way for the same reason.
+    """
     out = []
-    readme = root / "README.md"
-    if readme.exists():
-        out.append(readme)
-    docs_dir = root / "docs"
-    if docs_dir.is_dir():
-        out.extend(
-            p for p in sorted(docs_dir.rglob("*.md"))
-            if "_evidence" not in p.parts and "_research" not in p.parts
-        )
+    for name in ("README.md", "SECURITY.md", "CONTRIBUTING.md", "AGENTS.md"):
+        candidate = root / name
+        if candidate.exists():
+            out.append(candidate)
+
+    def _walk(base: Path) -> list[Path]:
+        if not base.is_dir():
+            return []
+        return [
+            p for p in sorted(base.rglob("*.md"))
+            if not ({"_evidence", "_research", "adr", "release-evidence"} & set(p.parts))
+        ]
+
+    out.extend(_walk(root / "docs"))
+    out.extend(_walk(root / "references"))
     return out
 
 
@@ -314,6 +358,28 @@ def scan_public_claims(root: Path) -> list[ClaimFinding]:
                             "unscored' is the only correct public posture"
                         ),
                     ))
+
+            # (d) generic superiority claim ("best", "world top", "10/10", ...)
+            # about the product, with no public benchmark behind it. Requires
+            # a product name on the line — same guard as (b1)/(b2) — so this
+            # does not trip on CONTRIBUTING.md / docs/RELEASE_PROCESS.md /
+            # docs/PUBLIC_SURFACE.md, which list these exact phrases as
+            # banned wording rather than making the claim.
+            if any(p in lowered for p in _PRODUCT_NAMES) and any(
+                s in lowered for s in _SUPERIORITY_PHRASES
+            ):
+                findings.append(ClaimFinding(
+                    path=rel, line=lineno,
+                    constraint="unverified_superiority_claim",
+                    excerpt=line.strip(),
+                    reason=(
+                        "roundabout claim of superiority ('best', 'world "
+                        "top', '10/10', 'production-grade', ...) with no "
+                        "public benchmark-verified result behind it — "
+                        "docs/PUBLIC_SURFACE.md bans this wording outright, "
+                        "regardless of which surface it appears on"
+                    ),
+                ))
 
     return findings
 

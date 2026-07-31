@@ -10,14 +10,18 @@ today), so it never proves the hard-fail path fires at all.
 
 from __future__ import annotations
 
-from datetime import date
+import os
+from datetime import date, timedelta
 from pathlib import Path
+
+import pytest
 
 from shiroe.prompt.target_profile import (
     ProfileSchemaError,
     grade_profile_freshness,
     load_profile,
 )
+from shiroe.release import checks as release_checks
 
 _MINIMAL_FIELDS = """\
 target_id: {target_id}
@@ -118,3 +122,50 @@ def test_missing_source_authority_field_is_schema_error(tmp_path: Path) -> None:
     status, reason = grade_profile_freshness(project_root=tmp_path, today=_TODAY)
     assert status == "fail"
     assert "source_authority" in reason
+
+
+# ---------------------------------------------------------------------------
+# Release-gate level (issue #153): checks.py::_check_target_profiles must now
+# fail closed on a missing/unreadable profiles dir, since profiles ship.
+# grade_profile_freshness has no `today` override plumbed through the gate,
+# so these use real (relative-to-now) dates instead of the _TODAY fixture.
+# ---------------------------------------------------------------------------
+
+def test_gate_passes_when_profiles_present_and_fresh(tmp_path: Path) -> None:
+    _write_profile(tmp_path, "model-a", updated_at=date.today().isoformat(), authority="official")
+    finding = release_checks._check_target_profiles(tmp_path)
+    assert finding.status == "pass"
+
+
+def test_gate_fails_closed_when_profiles_dir_missing(tmp_path: Path) -> None:
+    finding = release_checks._check_target_profiles(tmp_path)
+    assert finding.status == "fail"
+    assert "153" in finding.reason
+
+
+@pytest.mark.skipif(hasattr(os, "getuid") and os.getuid() == 0,
+                     reason="root ignores permission bits")
+def test_gate_fails_closed_when_profiles_dir_unreadable(tmp_path: Path) -> None:
+    _write_profile(tmp_path, "model-a", updated_at=date.today().isoformat(), authority="official")
+    d = tmp_path / "references" / "target-model-profiles"
+    d.chmod(0o000)
+    try:
+        finding = release_checks._check_target_profiles(tmp_path)
+    finally:
+        d.chmod(0o755)  # restore so tmp_path fixture cleanup can remove it
+    assert finding.status == "fail"
+    assert "unreadable" in finding.reason
+
+
+def test_gate_warns_not_fails_on_stale_third_party_profile(tmp_path: Path) -> None:
+    stale = (date.today() - timedelta(days=61)).isoformat()
+    _write_profile(tmp_path, "model-a", updated_at=stale, authority="third_party")
+    finding = release_checks._check_target_profiles(tmp_path)
+    assert finding.status == "warn"
+
+
+def test_gate_fails_on_stale_official_profile(tmp_path: Path) -> None:
+    stale = (date.today() - timedelta(days=61)).isoformat()
+    _write_profile(tmp_path, "model-a", updated_at=stale, authority="official")
+    finding = release_checks._check_target_profiles(tmp_path)
+    assert finding.status == "fail"
