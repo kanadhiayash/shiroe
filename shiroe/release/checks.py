@@ -71,20 +71,39 @@ def _check_claim_gate(root: Path) -> ReleaseFinding:
 def _check_target_profiles(root: Path) -> ReleaseFinding:
     """Phase 14 profiles: schema-valid + source-graded freshness (issue #175).
 
-    Fail-open when the profiles directory is absent (pre-v1.2). A stale
-    `official`-sourced profile hard-fails; a stale `third_party`/`derived`
-    profile emits a non-blocking WARNING instead — see
+    Fail-closed (issue #153): profiles now ship — `references/target-model-
+    profiles/` is populated as of v1.2 — so a missing or unreadable profiles
+    directory is no longer the expected pre-release state and is refused
+    like every other gate check, instead of the old fail-open behavior.
+    A stale `official`-sourced profile still hard-fails; a stale
+    `third_party`/`derived` profile still only emits a non-blocking WARNING
+    (issue #175, unchanged — there is no authoritative publisher to
+    re-verify a mirrored/reconstructed profile against). See
     `shiroe.prompt.target_profile.grade_profile_freshness` for the shared
-    grading logic (also used by `shiroe doctor`)."""
+    grading logic (also used by `shiroe doctor`, which keeps its own
+    fail-open read since it is a local dev diagnostic, not a release gate)."""
     try:
         from shiroe.prompt.target_profile import grade_profile_freshness
     except ImportError:
         return _pass("target_profiles", "loader unavailable — pre-v1.2 skip")
+    # pathlib's glob() silently swallows PermissionError (treats it like an
+    # empty directory), so an unreadable dir would otherwise be indistinguishable
+    # from "no profiles" and fall through to the skip branch below. Check
+    # readability explicitly first.
+    profiles_dir = root / "references" / "target-model-profiles"
+    if profiles_dir.exists() and not os.access(profiles_dir, os.R_OK | os.X_OK):
+        return _fail("target_profiles", f"profiles directory unreadable: {profiles_dir}")
     status, reason = grade_profile_freshness(project_root=root, max_age_days=60)
     if status == "fail":
         return _fail("target_profiles", reason)
     if status == "warn":
         return _warn("target_profiles", reason)
+    if status == "skip":
+        return _fail(
+            "target_profiles",
+            f"profiles now ship (issue #153), a missing directory no longer "
+            f"fails open: {reason}",
+        )
     return _pass("target_profiles", reason)
 
 
