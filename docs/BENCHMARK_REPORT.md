@@ -6,7 +6,7 @@
 > External-dataset benchmarking lives in [`benchmarks/external/`](../benchmarks/external/README.md);
 > no external scores are claimed until full-dataset runs are published.
 
-_Generated: 2026-07-31. Rubric: [`benchmarks/RUBRIC.md`](benchmarks/RUBRIC.md)._
+_Generated: 2026-08-01. Rubric: [`benchmarks/RUBRIC.md`](benchmarks/RUBRIC.md)._
 
 ## Verdict
 
