@@ -15,7 +15,7 @@ max_turns: 30
 
 Turn repeated work into reusable skills. Draft from `pattern-observer` candidates. Review-first — never auto-activate.
 
-Per ZEREF_OS §3.5 + D4: drafts land in `skills/drafts/`. User approves via `/review-skill`.
+Per SHIROE_OS §3.5 + D4: drafts land in `skills/drafts/`. User approves via `/review-skill`.
 
 Two-Strikes Rule applies: do not draft a skill from a single occurrence. `pattern-observer` enforces this with its 3× clustering threshold. See `references/two-strikes-rule.md`.
 
@@ -27,7 +27,7 @@ Two-Strikes Rule applies: do not draft a skill from a single occurrence. `patter
 3. If candidate already has draft in `skills/drafts/` (check by cluster_id provenance) → update existing, do not duplicate
 
 ### 2. Synthesize skill metadata
-- `name`: candidate `suggested_skill_name`, kebab-case, lowercase, no `zeref-` prefix
+- `name`: candidate `suggested_skill_name`, kebab-case, lowercase, no `shiroe-` prefix
 - `description`: 1–2 sentences. Pattern: "<verb> <subject> based on <N> repeated events in <hours>h. Use when <trigger context>."
 - `trigger`: extract from member events
   - If verb = "wiki-write" → trigger on "user produces <subject>-style content"

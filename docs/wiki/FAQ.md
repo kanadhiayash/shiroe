@@ -1,16 +1,16 @@
 # FAQ
 
-Direct answers to the questions engineers ask before adopting Zeref.
+Direct answers to the questions engineers ask before adopting Shiroe.
 
 ## How do I give an AI agent persistent project memory?
 
-Point every AI tool you use at the same `AGENTS.md` in your project root, and let Zeref own the files underneath it. `AGENTS.md` is the behavior contract: what a session reads first, what it may write, and what it must stop and ask about.
+Point every AI tool you use at the same `AGENTS.md` in your project root, and let Shiroe own the files underneath it. `AGENTS.md` is the behavior contract: what a session reads first, what it may write, and what it must stop and ask about.
 
 Because the contract and the memory both live in the repo, adding a second or third tool needs no syncing step. Each session starts with your decisions, open questions, risks, and conflicts already loaded.
 
 ## What is local-first LLM memory?
 
-Local-first LLM memory keeps the canonical copy on your machine, in your version control, rather than in a vendor account. Zeref keeps current state in SQLite, append-only history in JSONL, and human-readable views in Markdown — all inside the project directory.
+Local-first LLM memory keeps the canonical copy on your machine, in your version control, rather than in a vendor account. Shiroe keeps current state in SQLite, append-only history in JSONL, and human-readable views in Markdown — all inside the project directory.
 
 Nothing is transmitted unless you enable it. Connectors are off by default, and `local-only` mode blocks external transmission outright.
 
@@ -34,7 +34,7 @@ The next session performs a boundary-first read and resumes from stored state.
 
 ## How do I stop an AI assistant from forgetting project decisions?
 
-Store decisions where the assistant reads them at session start, and make contradicting one an event that requires your judgment. Zeref records each decision with provenance and an evidence grade.
+Store decisions where the assistant reads them at session start, and make contradicting one an event that requires your judgment. Shiroe records each decision with provenance and an evidence grade.
 
 When a later claim conflicts, the write halts rather than overwriting. Both sides are recorded and queued for you to arbitrate.
 
@@ -50,31 +50,31 @@ The write halts, both sides are appended to `memory/CONFLICTS.md` with their pro
 
 Four resolution shortcuts are refused by design: recency-wins, grade-wins, silent-drop, and indefinite-snooze. Each of those decides the question while appearing not to.
 
-## Which AI tools does Zeref work with?
+## Which AI tools does Shiroe work with?
 
 Any harness that can read a Markdown instruction file can participate. Adapters are registered for Claude Code, Codex, Gemini CLI, Hermes, Kimi Code, Odysseus, and Grok.
 
 Each adapter declares an enforcement level — embedded, sidecar/proxy, or context-only — so the docs never claim more control than the integration actually has.
 
-## Which model providers does Zeref support?
+## Which model providers does Shiroe support?
 
-Zeref does not call model APIs at all; it is a memory engine, not an inference layer. What it does is decide which *class* of model a task is entitled to.
+Shiroe does not call model APIs at all; it is a control plane, not an inference layer. What it does is decide which *class* of model a task is entitled to.
 
-Core code names reasoning classes (`fast`, `balanced`, `deep`, `frontier`, plus the `local` and `private` placement constraints) and never vendor model IDs. Concrete IDs are resolved at the edge from declarative JSON descriptors in `zeref/adapters/providers/`, shipped for `anthropic` and `openai`. Adding a provider is a config file, not a code change.
+Core code names reasoning classes (`fast`, `balanced`, `deep`, `frontier`, plus the `local` and `private` placement constraints) and never vendor model IDs. Concrete IDs are resolved at the edge from declarative JSON descriptors in `shiroe/adapters/providers/`, shipped for `anthropic` and `openai`. Adding a provider is a config file, not a code change.
 
 ## Can two sessions write to the same memory file at once?
 
-No. Writes go through a single-writer path with an advisory lock in `zeref/lock.py`; a second concurrent writer aborts with a clear error rather than interleaving.
+No. Writes go through a single-writer path with an advisory lock in `shiroe/lock.py`; a second concurrent writer aborts with a clear error rather than interleaving.
 
 Writes are atomic, so an interrupted write does not leave a half-written file.
 
 ## How does redaction work?
 
-Deterministically, in code. `zeref/privacy.py` applies redaction rules before a write; nothing depends on a model choosing to be careful.
+Deterministically, in code. `shiroe/privacy.py` applies redaction rules before a write; nothing depends on a model choosing to be careful.
 
 Input is NFKC-normalized, homoglyphs are folded to ASCII, and base64 payloads are decoded before pattern matching, so a credential cannot slip past a rule by changing its encoding.
 
-## Does Zeref publish benchmark scores?
+## Does Shiroe publish benchmark scores?
 
 No. Loaders exist for five public suites — LoCoMo, LongMemEval, PersonaMem, RULER, and HELMET — but no dataset runs have been performed and no scores exist.
 
@@ -90,7 +90,7 @@ Five checks on the write path: `fact_guard`, `evidence_guard`, `privacy_guard`, 
 
 Prefer not to write one by hand. Let `pattern-observer` surface a candidate from repeated work, let `pattern-to-skill` draft it, then approve it via `/review-skill`. Drafts land in `skills/drafts/` and are never auto-activated.
 
-If you do write one manually, add it under `skills/<name>/SKILL.md` with proper frontmatter, register it, and run `python3 scripts/zeref-validate.py`.
+If you do write one manually, add it under `skills/<name>/SKILL.md` with proper frontmatter, register it, and run `python3 scripts/shiroe-validate.py`.
 
 ## How are team packs different from skill stacks?
 

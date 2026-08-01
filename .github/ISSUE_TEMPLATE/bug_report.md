@@ -12,7 +12,7 @@ assignees: []
 
 ## Environment
 
-- Zeref OS version: <!-- e.g. v4.2.0 -->
+- Shiroe version: <!-- e.g. v4.2.0 -->
 - Claude Code version: <!-- output of `claude --version` -->
 - OS: <!-- macOS 14.x / Linux distro / Windows -->
 - Installed via: <!-- `claude plugin install` / local marketplace / direct clone -->

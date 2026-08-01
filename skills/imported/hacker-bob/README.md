@@ -7,7 +7,7 @@ license: unknown-verify-with-owner
 outbound_write: forbidden
 foreign_code_containment: pass
 imported_at: 2026-07-10
-imported_by: audit(zeref-consistency-audit)
+imported_by: audit(shiroe-consistency-audit)
 scope: bug-bounty-hunting
 ---
 
@@ -19,7 +19,7 @@ hacker-bob is a user-local MCP server for bug-bounty hunting, invoked from an op
 
 ## Classification: restricted
 
-- `abstract` privacy mode required for any Zeref memory touching hacker-bob outputs.
+- `abstract` privacy mode required for any Shiroe memory touching hacker-bob outputs.
 - No hacker-bob artifact crosses into the tracked repo tree.
 - All engagements logged to local-only journals bound to the bounty program's rules of engagement.
 
@@ -35,7 +35,7 @@ No source vendored. MCP invoked out-of-band. This directory documents the bounda
 
 - Executing hacker-bob from within this repo's worktree.
 - Any target outside a bounty program's declared scope.
-- Committing hacker-bob output into `zeref-memory-engine`.
+- Committing hacker-bob output into `shiroe`.
 
 ## Council pack membership
 

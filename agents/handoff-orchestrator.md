@@ -2,7 +2,7 @@
 name: handoff-orchestrator
 description: Packages compact cross-model/cross-harness handoff artifacts. Activates on /stop or explicit model switch. Invokes handoff-compiler skill. Reads flat memory/ layout.
 model: haiku            # harness alias; canonical class below
-reasoning_class: fast   # provider mapping: zeref/adapters/providers/
+reasoning_class: fast   # provider mapping: shiroe/adapters/providers/
 max_turns: 10
 ---
 

@@ -13,11 +13,12 @@ Run any loader with ``python3 -m benchmarks.external.loaders.<name> --check DIR`
 
 from __future__ import annotations
 
-from benchmarks.external.loaders import helmet, locomo, longmemeval, personamem, ruler
+from benchmarks.external.loaders import convomem, helmet, locomo, longmemeval, personamem, ruler
 
 LOADERS = {
     locomo.NAME: locomo,
     longmemeval.NAME: longmemeval,
+    convomem.NAME: convomem,
     personamem.NAME: personamem,
     ruler.NAME: ruler,
     helmet.NAME: helmet,

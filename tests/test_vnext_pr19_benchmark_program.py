@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from zeref.benchmark.program import (
+from shiroe.benchmark.program import (
     ArtifactValidationError,
     BenchmarkArtifact,
     BenchmarkCategory,
@@ -17,7 +17,7 @@ from zeref.benchmark.program import (
     validate_artifact,
     write_artifact,
 )
-from zeref.benchmark.program.artifact import new_id, sha256_of
+from shiroe.benchmark.program.artifact import new_id, sha256_of
 
 
 # ---------------------------------------------------------------------------
@@ -27,8 +27,8 @@ from zeref.benchmark.program.artifact import new_id, sha256_of
 def _artifact_kwargs(**overrides) -> dict:
     base = dict(
         id=new_id(), category="conformance",
-        name="conformance/example", zeref_version="2.0.0-alpha.1",
-        zeref_commit="deadbeef", harness="claude-code",
+        name="conformance/example", shiroe_version="2.0.0-alpha.1",
+        shiroe_commit="deadbeef", harness="claude-code",
         harness_version="1.2.3",
         model_or_provider="fast:haiku",
         dataset_version="fixture-v1", configuration={},
@@ -43,28 +43,28 @@ def _artifact_kwargs(**overrides) -> dict:
 
 def test_artifact_validates_required_fields() -> None:
     d = _artifact_kwargs()
-    d["schema"] = "zeref.benchmark-artifact/v1"
+    d["schema"] = "shiroe.benchmark-artifact/v1"
     validate_artifact(d)
 
 
 def test_artifact_rejects_missing_required() -> None:
     d = _artifact_kwargs()
     d.pop("harness")
-    d["schema"] = "zeref.benchmark-artifact/v1"
+    d["schema"] = "shiroe.benchmark-artifact/v1"
     with pytest.raises(ArtifactValidationError):
         validate_artifact(d)
 
 
 def test_artifact_rejects_bad_classification() -> None:
     d = _artifact_kwargs(classification="propaganda")
-    d["schema"] = "zeref.benchmark-artifact/v1"
+    d["schema"] = "shiroe.benchmark-artifact/v1"
     with pytest.raises(ArtifactValidationError):
         validate_artifact(d)
 
 
 def test_artifact_requires_sha256_prefix() -> None:
     d = _artifact_kwargs(raw_artifact_hash="notprefixed")
-    d["schema"] = "zeref.benchmark-artifact/v1"
+    d["schema"] = "shiroe.benchmark-artifact/v1"
     with pytest.raises(ArtifactValidationError):
         validate_artifact(d)
 
@@ -74,7 +74,7 @@ def test_write_artifact_persists_to_benchmarks_artifacts(tmp_path: Path) -> None
     target = write_artifact(tmp_path, art)
     assert target.parent == tmp_path / "benchmarks" / "artifacts"
     payload = json.loads(target.read_text(encoding="utf-8"))
-    assert payload["schema"] == "zeref.benchmark-artifact/v1"
+    assert payload["schema"] == "shiroe.benchmark-artifact/v1"
     assert payload["classification"] == "fixture"
 
 
@@ -128,8 +128,8 @@ def test_benchmark_result_wraps_into_valid_artifact(tmp_path: Path) -> None:
     result = run_benchmark("conformance/state-transitions")
     art = BenchmarkArtifact(
         id=new_id(), category=result.category.value,
-        name=result.name, zeref_version="2.0.0-alpha.1",
-        zeref_commit="deadbeef", harness="claude-code",
+        name=result.name, shiroe_version="2.0.0-alpha.1",
+        shiroe_commit="deadbeef", harness="claude-code",
         harness_version="1.2.3", model_or_provider="fast:haiku",
         dataset_version="fixture-v1", configuration={},
         seed=42, runs=result.runs, mean=result.mean,

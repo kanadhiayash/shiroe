@@ -8,7 +8,7 @@ from __future__ import annotations
 import sys
 
 from benchmarks.helpers import axis_result, print_json_result
-from zeref.memory.cost_router import estimate_tokens, route_operation
+from shiroe.memory.cost_router import estimate_tokens, route_operation
 
 
 def _score_markdown_guard() -> tuple[float, str]:
@@ -54,7 +54,7 @@ def _score_target_aware_reduction() -> tuple[float, str]:
     with score 5.0 when no profiles exist (canary state before Phase 14 land).
     """
     try:
-        from zeref.prompt.target_profile import list_profiles, load_profile
+        from shiroe.prompt.target_profile import list_profiles, load_profile
     except ImportError:
         return 5.0, "target_profile loader unavailable"
 

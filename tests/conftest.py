@@ -1,5 +1,5 @@
 """
-Shared pytest fixtures for the Zeref OS test suite.
+Shared pytest fixtures for the Shiroe test suite.
 
 Every test that touches disk uses a tmp_path-rooted "fake repo" so the real
 checkout is never modified. The fake repo carries only the files the unit
@@ -51,6 +51,6 @@ def chdir(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.fixture(autouse=True)
 def _ensure_repo_on_path() -> None:
-    """Tests import `zeref` from the repo, not from any installed copy."""
+    """Tests import `shiroe` from the repo, not from any installed copy."""
     if str(REPO_ROOT) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT))

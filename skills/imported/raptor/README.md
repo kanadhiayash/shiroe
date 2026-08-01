@@ -7,7 +7,7 @@ license: unknown-verify-with-owner
 outbound_write: forbidden
 foreign_code_containment: pass
 imported_at: 2026-07-10
-imported_by: audit(zeref-consistency-audit)
+imported_by: audit(shiroe-consistency-audit)
 scope: autonomous-security-research
 ---
 
@@ -21,7 +21,7 @@ raptor is a user-local autonomous security research harness kept at an operator-
 
 Same rules as [mantishack](../mantishack/README.md):
 
-- Zeref memory writes touching raptor artifacts require `abstract` privacy mode.
+- Shiroe memory writes touching raptor artifacts require `abstract` privacy mode.
 - No raptor output crosses into tracked repo tree.
 - All invocations logged to local-only journals.
 
@@ -36,8 +36,8 @@ No source vendored. raptor is invoked out-of-band from its own local checkout. T
 ## Forbidden
 
 - Executing raptor from within this repo's worktree.
-- Passing Zeref memory into raptor.
-- Committing raptor output into `zeref-memory-engine`.
+- Passing Shiroe memory into raptor.
+- Committing raptor output into `shiroe`.
 - Autonomous scans against third-party infrastructure without prior written authorization.
 
 ## Council pack membership

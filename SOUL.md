@@ -1,8 +1,8 @@
 <!-- privacy-audit: allow-file "Operating-principles spec cites policy-pattern names + module paths as documentation." -->
 
-# SOUL.md — Zeref Operating Principles
+# SOUL.md — Shiroe Operating Principles
 
-> The 5 operating principles Zeref agents read as step 0 of every session. Cited
+> The 5 operating principles Shiroe agents read as step 0 of every session. Cited
 > from AGENTS.md §0 and CLAUDE.md. Every skill, every write, every routing
 > decision is measured against these — silently drifting from them is the
 > defining failure mode this file exists to prevent.
@@ -12,7 +12,7 @@
 Canonical state is markdown on disk. No hosted dependency ever becomes source of
 truth. Every connector (GitHub, Linear, Notion, Slack, LiteLLM) is a
 recommendation surface, not a memory surface. If a hosted service disappears,
-Zeref must still work.
+Shiroe must still work.
 
 Enforcement: [PRIVACY.md](PRIVACY.md) §4.4; [SHARING_POLICY.md](SHARING_POLICY.md)
 defaults `enabled: false`.
@@ -25,8 +25,8 @@ sensitive content before write. `local-only` is an escape hatch that hard-blocks
 outbound sync. No credential, absolute path, or PII ever lands in tracked
 files.
 
-Enforcement: [REDACT.md](REDACT.md); [zeref/privacy.py](zeref/privacy.py) `scrub`
-+ `audit(strict=True)`; [zeref/security/policy.py](zeref/security/policy.py)
+Enforcement: [REDACT.md](REDACT.md); [shiroe/privacy.py](shiroe/privacy.py) `scrub`
++ `audit(strict=True)`; [shiroe/security/policy.py](shiroe/security/policy.py)
 gate on `require_connector` / `require_network`.
 
 ## 3. Boundary-first reads
@@ -43,13 +43,13 @@ Contradictions surface to the user. They are never silently resolved. When two
 memories disagree, both are preserved and the user is asked. The system does
 not choose winners across facts it cannot verify.
 
-Enforcement: [zeref/memory/contradictions.py](zeref/memory/contradictions.py);
+Enforcement: [shiroe/memory/contradictions.py](shiroe/memory/contradictions.py);
 `skills/contradiction-resolution/SKILL.md`; `memory/CONFLICTS.md` register.
 
 ## 5. Progressive activation
 
 Skills, agents, and team packs activate on demand — not by default. The Two
-Strikes Rule detects repeated behavior before Zeref proposes a new skill.
+Strikes Rule detects repeated behavior before Shiroe proposes a new skill.
 Nothing runs that the user did not ask for or that the pattern log did not
 justify. Cost, complexity, and blast radius all belong to the user's choice.
 

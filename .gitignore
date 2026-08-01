@@ -36,10 +36,10 @@ ruvector.db
 agentdb.rvf
 agentdb.rvf.lock
 
-# Zeref trace logs (local runtime)
-zeref-trace.jsonl
+# Shiroe trace logs (local runtime)
+shiroe-trace.jsonl
 
-# Zeref structured memory state (local runtime)
+# Shiroe structured memory state (local runtime)
 memory/state/*.sqlite
 memory/state/*.sqlite-*
 
@@ -49,6 +49,8 @@ __pycache__/
 *.pyo
 *.pyd
 .env
+.env.*
+!.env.example
 .venv/
 venv/
 build/
@@ -70,7 +72,7 @@ npm-debug.log
 .claude/launch.json
 .claude/
 
-# Zeref local runtime memory artifacts
+# Shiroe local runtime memory artifacts
 memory/hot.md
 memory/index.md
 memory/MEMORY.md
@@ -86,11 +88,18 @@ memory/views/
 memory/snapshots/
 memory/sync/
 
-# Release-check evidence blobs are generated locally by zeref/release/checks.py.
+# Release-check evidence blobs are generated locally by shiroe/release/checks.py.
 # Raw evidence dumps are operator records kept outside this repository
 # and must not re-enter the public tree.
 docs/audits/release-evidence/
 
+# Working evidence dumps for individual tickets (classification tables, scratch
+# notes) — operator records, not deliverables.
+docs/_evidence/
+
 # Local lineage sandbox imports. Foreign repository clones and inventories are
-# generated evidence only and must not enter Zeref core.
-.zeref-sandbox/
+# generated evidence only and must not enter Shiroe core.
+.shiroe-sandbox/
+
+# Local verification evidence (never published; see hardening program governance)
+docs/_evidence/

@@ -2,7 +2,7 @@
 
 > Imagine your editor noticing you run the same five-step ritual every week, and offering — but never imposing — a macro. That is what pattern detection does.
 
-Zeref extends itself only through review-first drafts. Repeated work is surfaced as a candidate, drafted into a skill, and held for your approval. Nothing self-installs.
+Shiroe extends itself only through review-first drafts. Repeated work is surfaced as a candidate, drafted into a skill, and held for your approval. Nothing self-installs.
 
 ## The loop
 
@@ -35,7 +35,7 @@ Automation that proposes is useful. Automation that installs is a governance pro
 
 One occurrence is noise. Two is a pattern. Codifying on the first produces brittle rules that encode a coincidence and then have to be maintained forever.
 
-See [`references/two-strikes-rule.md`](https://github.com/kanadhiayash/zeref-memory-engine/blob/main/references/two-strikes-rule.md).
+See [`references/two-strikes-rule.md`](https://github.com/kanadhiayash/shiroe/blob/main/references/two-strikes-rule.md).
 
 ## How candidates are found
 

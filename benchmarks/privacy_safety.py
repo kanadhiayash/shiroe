@@ -8,8 +8,8 @@ from __future__ import annotations
 import sys
 
 from benchmarks.helpers import add_atom, axis_result, print_json_result, temp_memory_root
-from zeref.handoff.compiler import compile_handoff
-from zeref.privacy import scrub
+from shiroe.handoff.compiler import compile_handoff
+from shiroe.privacy import scrub
 
 
 def run() -> dict:

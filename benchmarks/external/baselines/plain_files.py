@@ -2,7 +2,7 @@
 
 Ingests every session as a plain text file and, on recall, returns chunks
 ranked by naive keyword overlap (falling back to full-context order). This is
-the weakest honest baseline: any memory engine should beat it on token cost,
+the weakest honest baseline: any memory system should beat it on token cost,
 and must beat it on accuracy to justify itself.
 """
 
@@ -26,7 +26,7 @@ class PlainFilesBackend:
     name = "plain_files"
 
     def __init__(self, root: str | Path | None = None) -> None:
-        self.root = Path(root) if root else Path(tempfile.mkdtemp(prefix="zeref-bench-plainfiles-"))
+        self.root = Path(root) if root else Path(tempfile.mkdtemp(prefix="shiroe-bench-plainfiles-"))
         self.root.mkdir(parents=True, exist_ok=True)
         self._chunks: list[tuple[str, str]] = []  # (chunk_id, text)
 

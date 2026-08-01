@@ -15,7 +15,7 @@ def _env(repo_root: Path) -> dict:
 
 def _run(repo_root: Path, cwd: Path, args: list[str]) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, "-m", "zeref", *args],
+        [sys.executable, "-m", "shiroe", *args],
         capture_output=True,
         text=True,
         cwd=str(cwd),
@@ -44,7 +44,7 @@ def _add(repo_root: Path, root: Path, claim: str, evidence: str = "A") -> str:
 
 def test_evidence_grade_and_fact_audit(repo_root: Path, tmp_path: Path) -> None:
     _init(repo_root, tmp_path)
-    _add(repo_root, tmp_path, "Zeref maybe beats every benchmark.", evidence="unverified")
+    _add(repo_root, tmp_path, "Shiroe maybe beats every benchmark.", evidence="unverified")
 
     graded = _run(repo_root, tmp_path, ["evidence", "grade", "Claim from file", "--source", "README.md", "--source-type", "file"])
     assert graded.returncode == 0

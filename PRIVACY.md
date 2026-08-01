@@ -1,5 +1,5 @@
 ---
-mode: abstract                  # exact | abstract | local-only — DEFAULT abstract per ZEREF_OS §4.3
+mode: abstract                  # exact | abstract | local-only — DEFAULT abstract per SHIROE_OS §4.3
 abstract_rules:
   strip_pii: true
   strip_internal_paths: true
@@ -8,7 +8,7 @@ abstract_rules:
 local_only_blocks:
   - memory/sync/outbound/
   - memory/sync/parent/
-connectors_default: off         # per ZEREF_OS §4.3 — all OFF unless enabled in SHARING_POLICY.md
+connectors_default: off         # per SHIROE_OS §4.3 — all OFF unless enabled in SHARING_POLICY.md
 external_transmission: off      # never transmit wiki content externally without explicit per-action approval
 ---
 
@@ -30,10 +30,10 @@ Set the active mode in the frontmatter above.
 
 1. Is this project personal, client, employer, or public?
 2. What categories of data are sensitive? (see `REDACT.md` for concrete classes)
-3. Should Zeref OS store exact facts, abstractions only, or both?
+3. Should Shiroe store exact facts, abstractions only, or both?
 4. Can any connected MCP tool read this project context, or must this wiki remain local-only? (see `SHARING_POLICY.md`)
 
-If user cancels the interview: Zeref OS boots in READ-ONLY mode until the schema is complete.
+If user cancels the interview: Shiroe boots in READ-ONLY mode until the schema is complete.
 
 ## What never gets written (regardless of mode)
 
@@ -50,7 +50,7 @@ If user cancels the interview: Zeref OS boots in READ-ONLY mode until the schema
 
 ## External Transmission
 
-- Zeref OS NEVER transmits wiki content to any external service unless user explicitly approves per action.
+- Shiroe NEVER transmits wiki content to any external service unless user explicitly approves per action.
 - Connector access is governed by `SHARING_POLICY.md`. Default: OFF.
 - See `REDACT.md` for what must be stripped before any external output.
 

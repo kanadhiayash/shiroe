@@ -17,7 +17,7 @@ def _env(repo_root: Path) -> dict:
 
 def _run(repo_root: Path, cwd: Path, args: list[str]) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, "-m", "zeref", *args],
+        [sys.executable, "-m", "shiroe", *args],
         cwd=str(cwd),
         capture_output=True,
         text=True,
@@ -69,7 +69,9 @@ def test_memory_propose_and_guarded_write(repo_root: Path, tmp_path: Path) -> No
     written = _run(repo_root, tmp_path, ["memory", "write", "--from", "proposal.json", "--json"])
     assert written.returncode == 0, written.stderr
     card = json.loads(written.stdout)
-    assert card["id"].startswith("mem_")
+    # Guarded writes now land in the canonical atom store, whose ids are
+    # `<type>_<digest>` rather than the old card `mem_` prefix.
+    assert card["id"].startswith("preference_")
     assert card["type"] == "preference"
 
     listed = _run(repo_root, tmp_path, ["memory", "list", "--type", "preference", "--json"])
@@ -88,7 +90,7 @@ def test_memory_write_rejects_missing_evidence_grade(repo_root: Path, tmp_path: 
     proposal = {
         "type": "fact",
         "title": "missing evidence",
-        "claim": "Zeref has guarded writes.",
+        "claim": "Shiroe has guarded writes.",
         "privacy_class": "internal",
         "source_refs": ["README.md"],
     }
@@ -106,7 +108,7 @@ def test_memory_write_rejects_missing_privacy_class(repo_root: Path, tmp_path: P
     proposal = {
         "type": "fact",
         "title": "missing privacy",
-        "claim": "Zeref has guarded writes.",
+        "claim": "Shiroe has guarded writes.",
         "evidence_grade": "B",
         "source_refs": ["README.md"],
     }
@@ -122,7 +124,7 @@ def test_memory_write_rejects_missing_source_refs(repo_root: Path, tmp_path: Pat
     proposal = {
         "type": "fact",
         "title": "missing source",
-        "claim": "Zeref has guarded writes.",
+        "claim": "Shiroe has guarded writes.",
         "privacy_class": "internal",
         "evidence_grade": "B",
     }
@@ -201,14 +203,14 @@ def test_write_gate_rejects_every_factguard_blocked_phrase(tmp_path: Path) -> No
 
     The gate used to restate a four-phrase subset of BLOCKED_PATTERNS inline.
     Phrases added to FactGuard afterwards ("production-ready", "all gates
-    pass", "fully verified", ...) were refused by `zeref fact check` but still
+    pass", "fully verified", ...) were refused by `shiroe fact check` but still
     accepted into memory. This pins the two to one shared table.
     """
-    from zeref.core.errors import GuardRejection
-    from zeref.guards.fact_guard import BLOCKED_PATTERNS
-    from zeref.guards.write_gate import _validate_gate
-    from zeref.memory.core import scaffold_project
-    from zeref.memory_state import MemoryStore
+    from shiroe.core.errors import GuardRejection
+    from shiroe.guards.fact_guard import BLOCKED_PATTERNS
+    from shiroe.guards.write_gate import _validate_gate
+    from shiroe.memory.core import scaffold_project
+    from shiroe.memory_state import MemoryStore
 
     (tmp_path / "AGENTS.md").write_text("# AGENTS.md\n", encoding="utf-8")
     scaffold_project(tmp_path, name="factguard-parity", privacy="abstract",
@@ -222,7 +224,7 @@ def test_write_gate_rejects_every_factguard_blocked_phrase(tmp_path: Path) -> No
         proposal = {
             "type": "fact",
             "title": f"claim {phrase}",
-            "claim": f"Zeref {phrase} today.",
+            "claim": f"Shiroe {phrase} today.",
             "privacy_class": "internal",
             "evidence_grade": "B",
             "source_refs": ["README.md"],
@@ -243,7 +245,7 @@ def test_memory_write_cli_rejects_previously_missed_phrase(repo_root: Path, tmp_
     proposal = {
         "type": "fact",
         "title": "readiness",
-        "claim": "Zeref is production-ready for all workloads.",
+        "claim": "Shiroe is production-ready for all workloads.",
         "privacy_class": "internal",
         "evidence_grade": "B",
         "source_refs": ["README.md"],

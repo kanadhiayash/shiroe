@@ -11,8 +11,8 @@ import tempfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from zeref.memory import scaffold_project
-from zeref.memory_state import MemoryStore
+from shiroe.memory import scaffold_project
+from shiroe.memory_state import MemoryStore
 
 REPO = Path(__file__).resolve().parent.parent
 FIXTURES = REPO / "benchmarks" / "fixtures" / "adapter_cases.json"
@@ -87,7 +87,7 @@ def _run_one(key: str, label: str, fixture: dict | None) -> AdapterResult:
 
 
 def _store(name: str) -> MemoryStore:
-    root = Path(tempfile.mkdtemp(prefix=f"zeref-{name}-adapter-"))
+    root = Path(tempfile.mkdtemp(prefix=f"shiroe-{name}-adapter-"))
     (root / "AGENTS.md").write_text("# AGENTS.md\n", encoding="utf-8")
     scaffold_project(root, name=f"{name}-adapter", privacy="abstract", tier="auto", parent="")
     return MemoryStore.from_root(root)

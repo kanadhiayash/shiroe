@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from zeref.policy import (
+from shiroe.policy import (
     ALWAYS_REQUIRE_APPROVAL,
     Action,
     ActionKind,
@@ -19,8 +19,8 @@ from zeref.policy import (
     evaluate,
     load_policy_stack,
 )
-from zeref.policy.precedence import LAYER_ORDER, resolve
-from zeref.policy.schema import PolicyLayer
+from shiroe.policy.precedence import LAYER_ORDER, resolve
+from shiroe.policy.schema import PolicyLayer
 
 
 def _stack(**layers: dict) -> list[PolicyLayer]:
@@ -178,8 +178,8 @@ def test_loader_reads_existing_permissions_md(tmp_path: Path) -> None:
 
 
 def test_loader_project_deny_json(tmp_path: Path) -> None:
-    (tmp_path / ".zeref" / "policy").mkdir(parents=True)
-    (tmp_path / ".zeref" / "policy" / "deny.json").write_text(
+    (tmp_path / ".shiroe" / "policy").mkdir(parents=True)
+    (tmp_path / ".shiroe" / "policy" / "deny.json").write_text(
         json.dumps({"deny": ["fs.delete"]}), encoding="utf-8",
     )
     stack = load_policy_stack(tmp_path, global_root=tmp_path / "no-such")

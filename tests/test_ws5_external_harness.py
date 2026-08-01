@@ -51,11 +51,43 @@ def test_loader_parses_fixture_to_common_schema(name: str) -> None:
 
 
 @pytest.mark.parametrize("name", LOADER_NAMES)
-def test_loader_check_passes_on_fixture_dir(name: str) -> None:
-    result = get_loader(name).check(FIXTURES / name)
-    assert result.ok, result.errors
+def test_loader_check_parses_fixture_dir(name: str) -> None:
+    """The fixture must parse, and a hash must be reported.
+
+    A loader with a PINNED_SHA256 will additionally report a checksum
+    mismatch here, and that is correct: the pin identifies the real release,
+    while the committed fixture is a small synthetic stand-in that must never
+    equal it. So the mismatch is tolerated, but any OTHER error is a failure,
+    and parsing must still succeed.
+    """
+    loader = get_loader(name)
+    result = loader.check(FIXTURES / name)
     assert result.task_count > 0
-    assert result.sha256_actual  # hash reported so it can be pinned
+    assert result.sha256_actual or getattr(loader, "PINNED_SHA256", None) is None
+    non_checksum = [e for e in result.errors if "checksum mismatch" not in e]
+    assert not non_checksum, non_checksum
+    if getattr(loader, "PINNED_SHA256", None) is None:
+        assert result.ok, result.errors
+
+
+def test_pin_rejects_data_that_is_not_the_pinned_release(tmp_path: Path) -> None:
+    """A pin that never fails is decoration.
+
+    Point a pinned loader at a well-formed file whose bytes differ from the
+    pinned release and the check must refuse it — that is the whole purpose
+    of recording the hash before a scored run.
+    """
+    from benchmarks.external.loaders import locomo
+
+    assert locomo.PINNED_SHA256, "locomo should be pinned"
+    target = tmp_path / locomo.DATA_FILENAME
+    target.write_text(
+        (FIXTURES / "locomo" / locomo.DATA_FILENAME).read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    result = locomo.check(tmp_path)
+    assert not result.ok
+    assert any("checksum mismatch" in e for e in result.errors)
 
 
 @pytest.mark.parametrize("name", LOADER_NAMES)
@@ -127,9 +159,37 @@ def test_anthropic_provider_dry_run_estimates_without_key(monkeypatch) -> None:
     assert usage.cost_usd > 0
     completion = provider.complete("hello")
     assert completion.text == ""
+
+
+def test_live_provider_without_a_key_refuses_before_any_request(monkeypatch) -> None:
+    """dry_run=False with no key must fail on the key check, not the network.
+
+    The env var is cleared explicitly so this means the same thing on a
+    machine that happens to have a key configured.
+    """
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     live = AnthropicProvider(dry_run=False)
-    with pytest.raises(RuntimeError, match="Phase A"):
+    with pytest.raises(RuntimeError, match="ANTHROPIC_API_KEY"):
         live.complete("hello")
+
+
+def test_provider_never_puts_the_key_in_a_url() -> None:
+    """urllib embeds the request URL in every error string, so a key in the
+    query string would leak into tracebacks and CI logs.
+    """
+    from benchmarks.external.providers import anthropic as provider_mod
+
+    source = Path(provider_mod.__file__).read_text(encoding="utf-8")
+    assert "?key=" not in source
+    assert "x-api-key" in source
+
+
+def test_provider_unknown_model_prices_expensive_not_free() -> None:
+    """An unpriced model must over-estimate so the budget ceiling trips early."""
+    from benchmarks.external.providers.anthropic import _rates_for
+
+    unknown_in, unknown_out = _rates_for("claude-does-not-exist-9")
+    assert unknown_in > 0 and unknown_out > 0
 
 
 def test_sqlite_baseline_ingest_recall() -> None:
@@ -160,7 +220,7 @@ def test_lineage_axes_skip_visibly_without_intake_csv(monkeypatch, tmp_path: Pat
     """Clean-clone honesty: lineage axes SKIP with a reason, never crash or pass."""
     from benchmarks import lineage_import_coverage
 
-    monkeypatch.setenv("ZEREF_LINEAGE_INTAKE_CSV", str(tmp_path / "absent.csv"))
+    monkeypatch.setenv("SHIROE_LINEAGE_INTAKE_CSV", str(tmp_path / "absent.csv"))
     result = lineage_import_coverage.run()
     assert result["skipped"] is True
     assert result["score"] is None
@@ -170,7 +230,7 @@ def test_lineage_axes_skip_visibly_without_intake_csv(monkeypatch, tmp_path: Pat
 def test_run_all_completes_on_clean_clone_env(monkeypatch, tmp_path: Path) -> None:
     """python3 benchmarks/run-all.py must complete without FileNotFoundError
     even when the lineage intake CSV is absent (clean clone)."""
-    env = {"ZEREF_LINEAGE_INTAKE_CSV": str(tmp_path / "absent.csv")}
+    env = {"SHIROE_LINEAGE_INTAKE_CSV": str(tmp_path / "absent.csv")}
     completed = subprocess.run(
         [sys.executable, str(REPO / "benchmarks" / "run-all.py"),
          "--out-report", str(tmp_path / "report.md"),

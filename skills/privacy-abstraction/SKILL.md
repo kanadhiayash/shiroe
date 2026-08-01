@@ -14,7 +14,7 @@ max_turns: 10
 
 Rewrite content so it preserves meaning while removing identifying or sensitive details. Used in `abstract` privacy mode.
 
-## Source files (per ZEREF_OS §4)
+## Source files (per SHIROE_OS §4)
 
 - `PRIVACY.md` (root) — modes
 - `REDACT.md` (root) — concrete classes (the authoritative list of what to strip)

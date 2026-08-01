@@ -7,7 +7,7 @@ license: unknown-verify-with-owner
 outbound_write: forbidden
 foreign_code_containment: pass
 imported_at: 2026-07-10
-imported_by: audit(zeref-consistency-audit)
+imported_by: audit(shiroe-consistency-audit)
 ---
 
 # ecc — reference-only import
@@ -25,12 +25,12 @@ ecc is a global-scope Claude Code plugin exposing multi-language reviewers, buil
 
 ## Boundary
 
-No source vendored. Zeref invokes ecc skills and MCP tools only through the host harness. ecc surfaces may **not** write to `memory/` or `zeref/` canonical paths.
+No source vendored. Shiroe invokes ecc skills and MCP tools only through the host harness. ecc surfaces may **not** write to `memory/` or `shiroe/` canonical paths.
 
-## Allowed use inside Zeref sessions
+## Allowed use inside Shiroe sessions
 
 - Slash-command invocation of `ecc:*` skills for language-specific review inside audit workstreams.
-- `mcp__plugin_ecc_github__*` for **read-only** GitHub calls plus issue creation on `kanadhiayash/zeref-memory-engine` (per user's Phase 0.4 authorization).
+- `mcp__plugin_ecc_github__*` for **read-only** GitHub calls plus issue creation on `kanadhiayash/shiroe` (per user's Phase 0.4 authorization).
 - `agent-skills:security-auditor` as WS-D subagent.
 
 ## Forbidden

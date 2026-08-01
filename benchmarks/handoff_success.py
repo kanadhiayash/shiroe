@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 from benchmarks.helpers import add_atom, axis_result, print_json_result, temp_memory_root
-from zeref.handoff.compiler import compile_handoff
+from shiroe.handoff.compiler import compile_handoff
 
 
 def run() -> dict:

@@ -6,11 +6,11 @@ from pathlib import Path
 from typing import Any
 
 from benchmarks.helpers import axis_result
-from zeref.lineage.critical import audit_critical
-from zeref.lineage.high import audit_high
-from zeref.lineage.importer import import_lineage
-from zeref.lineage.intake import audit_csv
-from zeref.lineage.reference import audit_reference_only
+from shiroe.lineage.critical import audit_critical
+from shiroe.lineage.high import audit_high
+from shiroe.lineage.importer import import_lineage
+from shiroe.lineage.intake import audit_csv
+from shiroe.lineage.reference import audit_reference_only
 
 
 def lineage_reports() -> dict[str, Any]:
@@ -32,8 +32,16 @@ def intake_skip(axis: str) -> dict[str, Any] | None:
     the hard-coded expectations (64 rows, 10 critical, 21 high, 19
     reference-only) would let these axes report perfect scores against
     fabricated data. Skipping with an explicit reason is the honest
-    behavior (ZRF-AUDIT-012): skipped axes are reported in the output and
+    behavior (SHR-AUDIT-012): skipped axes are reported in the output and
     never count as passing evidence.
+
+    The reason names the CSV by FILENAME, never by resolved absolute path.
+    `run-all.py` writes this string into docs/BENCHMARK_REPORT.md and
+    benchmarks/results.json, both tracked in a public repo, so an absolute
+    path here commits the operator's home directory (handoff prohibition on
+    private absolute paths; REDACT.md `internal_paths`). A filename is also
+    machine-independent, which keeps the generated artifacts reproducible
+    instead of dirtying the worktree on every developer's machine.
     """
     path = Path(_csv_path())
     if path.exists():
@@ -43,11 +51,11 @@ def intake_skip(axis: str) -> dict[str, Any] | None:
         "score": None,
         "skipped": True,
         "reason": (
-            f"lineage intake CSV not found at {path}. The 64-row intake "
+            f"lineage intake CSV {path.name} not found. The 64-row intake "
             "dataset is local-only and intentionally not committed. Set "
-            "ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to "
+            "SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to "
             "run this axis. Skipped axes are reported explicitly and do not "
-            "count as passing (ZRF-AUDIT-012)."
+            "count as passing (SHR-AUDIT-012)."
         ),
         "sub": {},
     }
@@ -61,7 +69,7 @@ def lineage_axis(axis: str, subs: dict[str, tuple[bool, str]]) -> dict[str, Any]
 
 
 def _csv_path():
-    from zeref.lineage.importer import default_csv_path
+    from shiroe.lineage.importer import default_csv_path
 
     return default_csv_path()
 
@@ -69,8 +77,8 @@ def _csv_path():
 def _stub_resolver(row):
     """Stub resolver — returns synthesized fixture identities for lineage schema-conformance
     axes. NOT a real GitHub resolver. Every axis backed by this stub reports
-    'lineage-schema-conformance' semantics, not empirical GitHub state (see ZRF-AUDIT-014)."""
-    from zeref.lineage.importer import SourceIdentity
+    'lineage-schema-conformance' semantics, not empirical GitHub state (see SHR-AUDIT-014)."""
+    from shiroe.lineage.importer import SourceIdentity
 
     if row.source_kind != "github":
         return SourceIdentity(

@@ -1,4 +1,4 @@
-"""Scan-scope regression tests for `zeref.privacy.audit`.
+"""Scan-scope regression tests for `shiroe.privacy.audit`.
 
 The release gate treats any credentials-class hit as a hard failure, so the
 set of files the scan walks is security-relevant in both directions:
@@ -17,7 +17,7 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-from zeref.privacy import _tracked_files, audit
+from shiroe.privacy import _tracked_files, audit
 
 
 # Assembled at runtime so the literal never exists in the source file and

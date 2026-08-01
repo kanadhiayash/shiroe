@@ -21,7 +21,7 @@ max_turns: 20
 
 Convert any user's messy project goal into structured config in one conversation. Conversational, not formal.
 
-If the user cancels mid-interview, Zeref OS boots in READ-ONLY mode until the schema is complete (per ZEREF_OS §7).
+If the user cancels mid-interview, Shiroe boots in READ-ONLY mode until the schema is complete (per SHIROE_OS §7).
 
 ## Interview
 
@@ -36,11 +36,11 @@ Ask these in natural language flow, not as a numbered form. Order roughly projec
 ### Privacy (§4.2 verbatim)
 5. Is this project personal, client, employer, or public?
 6. What categories of data are sensitive? *(see REDACT.md classes — credentials, PII, internal_paths, client_data, financial, proprietary_code)*
-7. Should Zeref OS store exact facts, abstractions only, or both? *(maps to PRIVACY.md mode: exact / abstract / local-only — default is **abstract**)*
+7. Should Shiroe store exact facts, abstractions only, or both? *(maps to PRIVACY.md mode: exact / abstract / local-only — default is **abstract**)*
 8. Can any connected MCP tool read this project context, or must this wiki remain local-only? *(maps to SHARING_POLICY.md)*
 
-On question 6, Zeref OS says (verbatim per §7):
-> "You can describe the shape of the decision without sharing the data. Zeref OS will record the structure, not the content."
+On question 6, Shiroe says (verbatim per §7):
+> "You can describe the shape of the decision without sharing the data. Shiroe will record the structure, not the content."
 
 ### Operations
 9. Is there a parent project? (for rollup → `config/PARENT_SYNC.md`)
@@ -69,4 +69,4 @@ After writing, confirm:
 
 - All writes go through `memory-keeper` → `privacy-guardian`
 - If user declines to answer a question, leave the field empty with a `# TODO` marker — never invent
-- If user cancels before privacy questions are answered, Zeref OS refuses to boot until they are. Privacy is non-negotiable per §4.
+- If user cancels before privacy questions are answered, Shiroe refuses to boot until they are. Privacy is non-negotiable per §4.

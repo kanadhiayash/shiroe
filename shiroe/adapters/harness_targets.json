@@ -1,0 +1,11 @@
+{
+  "schema": "shiroe.harness-targets/v1",
+  "_comment": "Default target-model profile per handoff/prompt wrapper target. Harness- and provider-specific ids live here (adapter layer), never in core modules. null = not a model target.",
+  "targets": {
+    "claude": "claude-opus-4-8",
+    "codex": "codex-gpt-5-5",
+    "cursor": "cursor",
+    "github": null,
+    "human": null
+  }
+}

@@ -1,10 +1,10 @@
 # Public-Safe Copy
 
-Use bounded, source-backed language for public Zeref surfaces.
+Use bounded, source-backed language for public Shiroe surfaces.
 
 Preferred positioning:
 
-> Zeref is a local-first memory hardening layer for AI agents.
+> Shiroe is a local-first memory hardening layer for AI agents.
 
 Avoid:
 

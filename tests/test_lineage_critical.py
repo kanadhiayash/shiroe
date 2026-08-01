@@ -5,11 +5,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-from zeref.lineage.critical import audit_critical
-from zeref.lineage.intake import REQUIRED_COLUMNS
-from zeref.memory.atom_store import AtomStore
-from zeref.memory.graph import build_derived_graph
-from zeref.memory.schemas import create_atom
+from shiroe.lineage.critical import audit_critical
+from shiroe.lineage.intake import REQUIRED_COLUMNS
+from shiroe.memory.atom_store import AtomStore
+from shiroe.memory.graph import build_derived_graph
+from shiroe.memory.schemas import create_atom
 
 
 CRITICAL_IDS = {1, 3, 11, 12, 14, 15, 22, 39, 40, 47}
@@ -48,7 +48,7 @@ def test_build_derived_graph_is_rebuildable_from_atoms(tmp_path: Path) -> None:
         source="tests/lineage",
         evidence="A",
         confidence="high",
-        entities=["Zeref"],
+        entities=["Shiroe"],
         provenance="test",
     )
     AtomStore(tmp_path).append(atom)
@@ -78,7 +78,7 @@ def test_lineage_critical_cli_reports_json(tmp_path: Path) -> None:
     _write_csv(path)
 
     result = subprocess.run(
-        [sys.executable, "-m", "zeref.cli", "lineage", "critical", "--strict", "--csv", str(path)],
+        [sys.executable, "-m", "shiroe.cli", "lineage", "critical", "--strict", "--csv", str(path)],
         text=True,
         capture_output=True,
         check=False,

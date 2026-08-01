@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from zeref.capabilities import (
+from shiroe.capabilities import (
     CAPABILITY_SCHEMA,
     CapabilityGateError,
     CapabilityStore,
@@ -25,8 +25,8 @@ from zeref.capabilities import (
     revoke,
     validate_manifest,
 )
-from zeref.capabilities.discovery import DiscoveryLimits
-from zeref.capabilities.lifecycle import InvalidTransition
+from shiroe.capabilities.discovery import DiscoveryLimits
+from shiroe.capabilities.lifecycle import InvalidTransition
 
 
 # ---------------------------------------------------------------------------
@@ -108,7 +108,7 @@ def test_discover_respects_config_and_limits(tmp_path: Path) -> None:
     (tmp_path / "config").mkdir()
     skills_root = _seed_skills_root(tmp_path)
     (tmp_path / "config" / "capability-roots.json").write_text(
-        '{"schema":"zeref.capability-roots/v1","roots":['
+        '{"schema":"shiroe.capability-roots/v1","roots":['
         f'{{"adapter":"generic","path":"{skills_root}"}}]}}',
         encoding="utf-8",
     )
@@ -119,13 +119,13 @@ def test_discover_respects_config_and_limits(tmp_path: Path) -> None:
 
 def test_discovery_alias_hides_home_path(tmp_path: Path, monkeypatch) -> None:
     fake_home = tmp_path / "home"
-    (fake_home / ".zeref" / "capabilities" / "one").mkdir(parents=True)
-    (fake_home / ".zeref" / "capabilities" / "one" / "SKILL.md").write_text("x")
+    (fake_home / ".shiroe" / "capabilities" / "one").mkdir(parents=True)
+    (fake_home / ".shiroe" / "capabilities" / "one" / "SKILL.md").write_text("x")
     monkeypatch.setenv("HOME", str(fake_home))
     (tmp_path / "config").mkdir(exist_ok=True)
     (tmp_path / "config" / "capability-roots.json").write_text(
-        '{"schema":"zeref.capability-roots/v1","roots":['
-        '{"adapter":"generic","path":"~/.zeref/capabilities"}]}',
+        '{"schema":"shiroe.capability-roots/v1","roots":['
+        '{"adapter":"generic","path":"~/.shiroe/capabilities"}]}',
         encoding="utf-8",
     )
     found = discover(tmp_path)
@@ -142,7 +142,7 @@ def _register(tmp_path: Path, name: str) -> tuple[str, Path]:
     src = tmp_path / "source" / name
     src.mkdir(parents=True)
     (src / "SKILL.md").write_text(f"# {name}\n", encoding="utf-8")
-    from zeref.capabilities.discovery import DiscoveredCapability
+    from shiroe.capabilities.discovery import DiscoveredCapability
     d = DiscoveredCapability(adapter="generic", root="<home>/skills",
                              path=src, kind="skill")
     trust = inspect_source(src)

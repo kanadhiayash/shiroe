@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from zeref.memory.schemas import AtomValidationError, create_atom, make_atom_id, validate_atom
+from shiroe.memory.schemas import AtomValidationError, create_atom, make_atom_id, validate_atom
 
 
 def test_create_atom_returns_valid_complete_atom() -> None:
@@ -33,7 +33,7 @@ def test_create_atom_returns_valid_complete_atom() -> None:
 def test_validate_atom_rejects_missing_required_fields() -> None:
     atom = create_atom(
         atom_type="fact",
-        claim="Zeref stores memory locally.",
+        claim="Shiroe stores memory locally.",
         summary="Local-first memory claim.",
         source="manual:test",
     )
@@ -52,17 +52,17 @@ def test_validate_atom_rejects_invalid_enums_and_list_shapes() -> None:
         summary="Fact guard should flag unsupported claims.",
         source="manual:test",
     )
-    atom["type"] = "unknown"
+    atom["type"] = "not_a_real_atom_type"
     atom["evidence"] = "Z"
     atom["confidence"] = "certain"
     atom["status"] = "new"
-    atom["entities"] = "Zeref"
+    atom["entities"] = "Shiroe"
 
     with pytest.raises(AtomValidationError) as exc:
         validate_atom(atom)
 
     message = str(exc.value)
-    assert "invalid type: unknown" in message
+    assert "invalid type: not_a_real_atom_type" in message
     assert "invalid evidence: Z" in message
     assert "invalid confidence: certain" in message
     assert "invalid status: new" in message

@@ -13,11 +13,11 @@ Evidence grades:
 Commands:
 
 ```bash
-zeref evidence grade memory/hot.md
-zeref evidence check memory/
-zeref evidence list --grade D
-zeref evidence upgrade mem_2026_07_09_0001 --source docs/ARCHITECTURE.md
-zeref evidence report
+shiroe evidence grade memory/hot.md
+shiroe evidence check memory/
+shiroe evidence list --grade D
+shiroe evidence upgrade mem_2026_07_09_0001 --source docs/ARCHITECTURE.md
+shiroe evidence report
 ```
 
 Release blockers include grade `D` or `F` claims in public docs, missing source

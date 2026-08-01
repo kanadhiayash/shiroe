@@ -5,8 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-from zeref.lineage.intake import REQUIRED_COLUMNS
-from zeref.lineage.reference import REFERENCE_IMPLEMENTATIONS, audit_reference_only
+from shiroe.lineage.intake import REQUIRED_COLUMNS
+from shiroe.lineage.reference import REFERENCE_IMPLEMENTATIONS, audit_reference_only
 
 
 def _write_csv(path: Path) -> None:
@@ -52,7 +52,7 @@ def test_lineage_reference_cli_reports_json(tmp_path: Path) -> None:
     _write_csv(path)
 
     result = subprocess.run(
-        [sys.executable, "-m", "zeref.cli", "lineage", "reference", "--strict", "--csv", str(path)],
+        [sys.executable, "-m", "shiroe.cli", "lineage", "reference", "--strict", "--csv", str(path)],
         text=True,
         capture_output=True,
         check=False,

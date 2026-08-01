@@ -1,18 +1,18 @@
-# CLAUDE.md — Claude harness shim (Zeref OS)
+# CLAUDE.md — Claude harness shim (Shiroe)
 
 **Canonical spec: `AGENTS.md`** — read it first. This file only adds Claude-specific notes.
 
 ## Claude-specific
 
-- Use Claude Code's Skill tool to invoke skills as `zeref-os:<skill-name>` (post-install).
-- Slash commands resolve under `/zeref-os:<command>` namespace.
-- Sub-agents (Task tool) are not required — Zeref OS uses lightweight markdown agents.
+- Use Claude Code's Skill tool to invoke skills as `shiroe:<skill-name>` (post-install).
+- Slash commands resolve under `/shiroe:<command>` namespace.
+- Sub-agents (Task tool) are not required — Shiroe uses lightweight markdown agents.
 - Prefer Haiku for `memory-keeper` writes; Sonnet for `project-setup` interview; Opus only for `pattern-to-skill` draft generation.
 - Per-harness quirks live in `config/claude-overrides.md`.
 
 ## First action every session
 
-Identical to AGENTS.md §"First action every session" (reading order per ZEREF_OS §0):
+Identical to AGENTS.md §"First action every session" (reading order per SHIROE_OS §0):
 1. Read `config/PROJECT.md`
 2. Read `memory/hot.md` (≤500 words)
 3. Read `memory/index.md` if hot insufficient
@@ -23,4 +23,4 @@ Identical to AGENTS.md §"First action every session" (reading order per ZEREF_O
 
 ## Safety
 
-See `references/zeref-safety-principles.md`. Irreversible actions always require explicit user confirmation.
+See `references/shiroe-safety-principles.md`. Irreversible actions always require explicit user confirmation.

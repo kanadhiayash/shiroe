@@ -1,0 +1,13 @@
+{
+  "_comment_privacy_audit": "privacy-audit: allow-file \u2014 canonical identity metadata (product/module/repo naming). No user data.",
+  "product": "Shiroe AI Tactician",
+  "product_short": "Shiroe",
+  "distribution": "shiroe",
+  "module": "shiroe",
+  "cli": "shiroe",
+  "repo": "kanadhiayash/shiroe",
+  "repo_url": "https://github.com/kanadhiayash/shiroe",
+  "registry_manifest": "shiroe-registry.json",
+  "workspace_dir": ".shiroe",
+  "work_item_prefix": "SHR"
+}

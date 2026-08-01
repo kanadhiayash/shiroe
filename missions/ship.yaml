@@ -1,4 +1,4 @@
-schema: zeref.mission/v1
+schema: shiroe.mission/v1
 id: ship
 version: 1
 

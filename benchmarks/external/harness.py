@@ -49,7 +49,7 @@ _TOKEN_RE = re.compile(r"[a-z0-9]+")
 
 
 class MemoryBackend(Protocol):
-    """Ingest/recall interface shared by zeref and the honest baselines."""
+    """Ingest/recall interface shared by shiroe and the honest baselines."""
 
     name: str
 
@@ -130,9 +130,66 @@ def git_sha() -> str:
         return "unknown"
 
 
-def build_provenance(loader, data_dir: Path, model_id: str, prompts_hash: str,
-                     usage_total: dict[str, Any], mode: str) -> dict[str, Any]:
+def _model_family(model_id: str | None) -> str | None:
+    """Coarse vendor family for a model id, for the independence check."""
+    if not model_id:
+        return None
+    lowered = model_id.lower()
+    for family in ("gemini", "claude", "gpt", "llama", "mistral"):
+        if family in lowered:
+            return family
+    return None
+
+
+def _judge_independence(model_id: str | None, judge_model: str | None) -> dict[str, Any]:
+    """Whether the generator and judge come from the same model family.
+
+    Not a pass/fail gate — a statement of fact attached to every run so the
+    caveat travels with the number instead of living only in a PR comment.
+    """
+    gen_family = _model_family(model_id)
+    judge_family = _model_family(judge_model)
+    same_family = bool(gen_family and judge_family and gen_family == judge_family)
+    return {
+        "generator_family": gen_family,
+        "judge_family": judge_family,
+        "same_family": same_family,
+        "same_model": bool(model_id and judge_model and model_id == judge_model),
+        "caveat": (
+            "Generator and judge share a model family; LLM judges favour their "
+            "own family, so absolute scores may be inflated. All arms share one "
+            "generator and one judge, so the relative ranking between arms is "
+            "unaffected. Do not publish this as an absolute leaderboard score."
+            if same_family else
+            "Generator and judge are from different model families."
+        ),
+    }
+
+
+def _dataset_digest(loader, data_dir: Path) -> str | None:
+    """Digest the dataset, whether it is one file or a directory tree.
+
+    ConvoMem ships ~2,500 files, so the single-file assumption here used to
+    raise IsADirectoryError. A loader that knows how to fingerprint itself
+    (tree_sha256) wins; otherwise fall back to hashing the named file.
+    """
+    tree_digest = getattr(loader, "tree_sha256", None)
+    if callable(tree_digest):
+        return tree_digest(data_dir)
     data_file = data_dir / loader.DATA_FILENAME
+    return sha256_file(data_file) if data_file.is_file() else None
+
+
+def build_provenance(
+    loader, data_dir: Path, model_id: str, prompts_hash: str,
+    usage_total: dict[str, Any], mode: str,
+    *,
+    judge_model: str | None = None,
+    seed: int | None = None,
+    avg_latency_ms: float | None = None,
+    failures: list[dict[str, Any]] | None = None,
+    exclusions: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     return {
         "git_sha": git_sha(),
         "harness_version": HARNESS_VERSION,
@@ -141,24 +198,110 @@ def build_provenance(loader, data_dir: Path, model_id: str, prompts_hash: str,
             "official_url": loader.OFFICIAL_URL,
             "pinned_version": loader.PINNED_VERSION,
             "sha256_pinned": loader.PINNED_SHA256,
-            "sha256_actual": sha256_file(data_file) if data_file.exists() else None,
+            "sha256_actual": _dataset_digest(loader, data_dir),
+            "license": getattr(loader, "LICENSE", None),
+            "license_note": getattr(loader, "LICENSE_NOTE", None),
             "path": str(data_dir),
         },
         "model_id": model_id,
+        # Retrieval granularity decides what every arm can retrieve, so it is
+        # part of the run's identity: a result produced at a different chunk
+        # size is not comparable to this one.
+        "chunk_target_chars": CHUNK_TARGET_CHARS,
+        "judge_model": judge_model,
+        # Generator and judge sharing one model family biases absolute scores
+        # (LLM judges prefer their own family) but not the RELATIVE ranking
+        # between arms, because every arm shares the same generator and judge.
+        # Recorded per run so a published number carries the caveat with it.
+        "judge_independence": _judge_independence(model_id, judge_model),
+        "seed": seed,
         "prompts_hash": prompts_hash,
         "cost": usage_total,
+        "avg_latency_ms": avg_latency_ms,
+        "failures": failures if failures is not None else [],
+        "exclusions": exclusions if exclusions is not None else [],
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "mode": mode,
     }
 
 
+# --- chunking ------------------------------------------------------------------
+
+# Retrieval granularity, in characters (~2k tokens at the 4-chars-per-token
+# heuristic used for cost estimates). This is a FROZEN benchmark parameter:
+# it decides what a "retrieved chunk" is for every arm, so changing it changes
+# every score and starts a new run series. It is recorded in provenance.
+CHUNK_TARGET_CHARS = 8000
+
+
+def _split_oversized(line: str, limit: int) -> list[str]:
+    """Break one over-long line, preferring a newline then a space boundary.
+
+    Needed because RULER and HELMET carry their entire haystack as a single
+    turn — at long context lengths that is one multi-megabyte line, and
+    without splitting it there is nothing for a retriever to choose between.
+    """
+    pieces: list[str] = []
+    remaining = line
+    while len(remaining) > limit:
+        window = remaining[:limit]
+        cut = window.rfind("\n")
+        if cut < limit // 2:
+            cut = window.rfind(" ")
+        if cut < limit // 2:  # no usable boundary: hard cut rather than loop
+            cut = limit
+        pieces.append(remaining[:cut])
+        remaining = remaining[cut:].lstrip()
+    if remaining:
+        pieces.append(remaining)
+    return pieces
+
+
+def iter_chunks(task: Task, limit: int = CHUNK_TARGET_CHARS):
+    """Yield ``(chunk_id, text)`` for one task, in original order.
+
+    Chunking is deliberately NOT the same thing as session splitting. Session
+    boundaries alone produce exactly one chunk for any benchmark whose loader
+    emits a single session — ConvoMem, PersonaMem, RULER and HELMET all do —
+    and a single chunk makes `recall(k)` a no-op: every arm receives the whole
+    haystack and the three-arm comparison silently degrades into three
+    identical prompts and three identical scores.
+
+    So sessions are the primary unit (they carry conversational meaning for
+    LoCoMo and LongMemEval), and any session over ``limit`` is packed into
+    sub-chunks at turn boundaries, never mid-turn, so speaker attribution and
+    temporal order survive. Order is preserved throughout, which is what lets
+    the full_context arm reconstruct the original haystack.
+    """
+    for session_idx, session in enumerate(task.sessions):
+        lines: list[str] = []
+        for turn in session:
+            rendered = f"{turn.role}: {turn.content}"
+            if len(rendered) > limit:
+                lines.extend(_split_oversized(rendered, limit))
+            else:
+                lines.append(rendered)
+
+        buffer: list[str] = []
+        size = 0
+        chunk_idx = 0
+        for line in lines:
+            if buffer and size + len(line) + 1 > limit:
+                yield f"{task.task_id}:s{session_idx}:c{chunk_idx}", "\n".join(buffer)
+                chunk_idx += 1
+                buffer, size = [], 0
+            buffer.append(line)
+            size += len(line) + 1
+        if buffer:
+            yield f"{task.task_id}:s{session_idx}:c{chunk_idx}", "\n".join(buffer)
+
+
 # --- runner --------------------------------------------------------------------
 
-def ingest_task(backend: MemoryBackend, task: Task) -> None:
+def ingest_task(backend: MemoryBackend, task: Task, chunk_chars: int = CHUNK_TARGET_CHARS) -> None:
     backend.reset()
-    for session_idx, session in enumerate(task.sessions):
-        text = "\n".join(f"{turn.role}: {turn.content}" for turn in session)
-        backend.ingest(f"{task.task_id}:s{session_idx}", text)
+    for chunk_id, text in iter_chunks(task, chunk_chars):
+        backend.ingest(chunk_id, text)
 
 
 def build_prompt(task: Task, retrieved: list[str]) -> str:
@@ -253,15 +396,32 @@ def write_results(path: str | Path, payload: dict[str, Any]) -> Path:
     return out
 
 
+_BACKEND_FACTORIES = {
+    "plain_files": lambda: __import__(
+        "benchmarks.external.baselines.plain_files", fromlist=["PlainFilesBackend"]
+    ).PlainFilesBackend(),
+    "sqlite_fts": lambda: __import__(
+        "benchmarks.external.baselines.sqlite_store", fromlist=["SqliteFtsBackend"]
+    ).SqliteFtsBackend(),
+    "shiroe": lambda: __import__(
+        "benchmarks.external.baselines.shiroe_backend", fromlist=["ShiroeBackend"]
+    ).ShiroeBackend(),
+    "full_context": lambda: __import__(
+        "benchmarks.external.baselines.full_context", fromlist=["FullContextBackend"]
+    ).FullContextBackend(),
+    "bm25": lambda: __import__(
+        "benchmarks.external.baselines.bm25", fromlist=["Bm25Backend"]
+    ).Bm25Backend(),
+}
+
+
 def _make_backend(name: str):
-    if name == "plain_files":
-        from benchmarks.external.baselines.plain_files import PlainFilesBackend
-        return PlainFilesBackend()
-    if name == "sqlite_fts":
-        from benchmarks.external.baselines.sqlite_store import SqliteFtsBackend
-        return SqliteFtsBackend()
-    raise KeyError(f"unknown backend {name!r}; supported: plain_files, sqlite_fts "
-                   "(the zeref backend adapter lands in Phase B)")
+    try:
+        return _BACKEND_FACTORIES[name]()
+    except KeyError:
+        raise KeyError(
+            f"unknown backend {name!r}; supported: {sorted(_BACKEND_FACTORIES)}"
+        ) from None
 
 
 def main() -> int:

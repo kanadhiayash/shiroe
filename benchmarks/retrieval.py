@@ -9,8 +9,8 @@ import json
 import tempfile
 from pathlib import Path
 
-from zeref.memory import scaffold_project
-from zeref.memory_state import MemoryStore
+from shiroe.memory import scaffold_project
+from shiroe.memory_state import MemoryStore
 from benchmarks.adapters import adapter_summary, run_fixture_adapters
 
 REPO = Path(__file__).resolve().parent.parent
@@ -22,7 +22,7 @@ def _fixture_ids() -> set[str]:
 
 
 def _store() -> MemoryStore:
-    root = Path(tempfile.mkdtemp(prefix="zeref-retrieval-"))
+    root = Path(tempfile.mkdtemp(prefix="shiroe-retrieval-"))
     (root / "AGENTS.md").write_text("# AGENTS.md\n", encoding="utf-8")
     scaffold_project(root, name="retrieval-benchmark", privacy="abstract", tier="auto", parent="")
     return MemoryStore.from_root(root)
@@ -34,13 +34,13 @@ def _continuity() -> tuple[float, str]:
         kind="decision",
         title="recall decision",
         body="Use explainable recall for project continuity.",
-        entity="Zeref",
+        entity="Shiroe",
         layer="L1",
         source_ref="benchmarks/fixtures/retrieval_cases.json#continuity",
         confidence="high",
         authority="canonical",
     )
-    results = store.search("continuity recall", entity="Zeref", limit=3)
+    results = store.search("continuity recall", entity="Shiroe", limit=3)
     ok = (
         len(results) == 1
         and results[0].id == item.id

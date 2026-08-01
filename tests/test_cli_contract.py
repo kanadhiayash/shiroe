@@ -1,6 +1,6 @@
 """
 CLI contract tests — every subcommand exits cleanly with predictable shape.
-Run against the real checkout's CLI via `python3 -m zeref`.
+Run against the real checkout's CLI via `python3 -m shiroe`.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ from pathlib import Path
 
 def _run(args: list[str], cwd: Path) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, "-m", "zeref", *args],
+        [sys.executable, "-m", "shiroe", *args],
         capture_output=True, text=True, cwd=str(cwd),
     )
 
@@ -20,7 +20,7 @@ def _run(args: list[str], cwd: Path) -> subprocess.CompletedProcess:
 def test_version_flag(repo_root: Path) -> None:
     r = _run(["--version"], repo_root)
     assert r.returncode == 0
-    expected = (repo_root / "zeref" / "VERSION").read_text(encoding="utf-8").strip()
+    expected = (repo_root / "shiroe" / "VERSION").read_text(encoding="utf-8").strip()
     assert expected in r.stdout
 
 

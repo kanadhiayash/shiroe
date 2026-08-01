@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 harness-probe.py — Detect the host AI harness and validate the surface
-Zeref OS expects to find.
+Shiroe expects to find.
 
 Detection heuristics:
     Claude Code   → CLAUDE.md present + claude binary on PATH
@@ -43,7 +43,7 @@ def _root() -> Path:
 HARNESSES: list[dict] = [
     {"name": "claude-code", "stub": "CLAUDE.md",                 "bin": "claude"},
     {"name": "codex",       "stub": "CODEX.md",                  "bin": "codex"},
-    {"name": "cursor",      "stub": ".cursor/rules/zeref.mdc",   "bin": "cursor"},
+    {"name": "cursor",      "stub": ".cursor/rules/shiroe.mdc",   "bin": "cursor"},
     {"name": "windsurf",    "stub": ".windsurfrules",            "bin": "windsurf"},
     {"name": "aider",       "stub": ".aider.conf.yml.example",   "bin": "aider"},
     {"name": "gemini",      "stub": "GEMINI.md",                 "bin": "gemini"},

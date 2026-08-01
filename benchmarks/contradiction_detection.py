@@ -5,8 +5,8 @@ from __future__ import annotations
 import sys
 
 from benchmarks.helpers import add_atom, axis_result, print_json_result, temp_memory_root
-from zeref.memory.atom_store import AtomStore
-from zeref.memory.contradictions import propose_resolution, resolve_contradiction, scan_contradictions
+from shiroe.memory.atom_store import AtomStore
+from shiroe.memory.contradictions import propose_resolution, resolve_contradiction, scan_contradictions
 
 
 def run() -> dict:

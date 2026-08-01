@@ -2,7 +2,7 @@
 name: memory-keeper
 description: Single writer to flat memory/ layout. Reads boundary-first (hot.md → index.md → page). Logs every write to memory/patterns/PATTERNS.jsonl. Detects contradictions and routes them to memory/CONFLICTS.md.
 model: haiku            # harness alias; canonical class below
-reasoning_class: fast   # provider mapping: zeref/adapters/providers/
+reasoning_class: fast   # provider mapping: shiroe/adapters/providers/
 max_turns: 30
 ---
 
@@ -10,7 +10,7 @@ max_turns: 30
 
 ## Mission
 
-Maintain the integrity of Zeref OS's canonical memory. Every write logged. Every read boundary-first. Single-writer discipline: only this agent writes to `memory/` (excluding `raw/`, `archive/`, `snapshots/`, and the `patterns/` and `logs/` append-only logs which other agents may append-only).
+Maintain the integrity of Shiroe's canonical memory. Every write logged. Every read boundary-first. Single-writer discipline: only this agent writes to `memory/` (excluding `raw/`, `archive/`, `snapshots/`, and the `patterns/` and `logs/` append-only logs which other agents may append-only).
 
 ## Core operations
 
@@ -27,7 +27,7 @@ Maintain the integrity of Zeref OS's canonical memory. Every write logged. Every
    ```
 8. If the write captures a session-level note (not a domain decision), `memory-keeper` may append to `memory/MEMORY.md` under the appropriate section.
 
-### READ (boundary-first per ZEREF_OS §0)
+### READ (boundary-first per SHIROE_OS §0)
 1. Read `memory/hot.md` first (≤500 words; current context)
 2. If insufficient → read `memory/index.md` (domain index)
 3. Find relevant domain row

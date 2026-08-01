@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from zeref.codecs import (
+from shiroe.codecs import (
     CODECS,
     DataShape,
     infer_shape,
@@ -15,14 +15,14 @@ from zeref.codecs import (
     resolve_codec,
     select_codec,
 )
-from zeref.codecs.csv_codec import CSVCodec
-from zeref.codecs.json_codec import CompactJSONCodec, JSONCodec
-from zeref.codecs.jsonl import JSONLCodec
-from zeref.codecs.markdown import MarkdownCodec
-from zeref.codecs.selector import render
-from zeref.codecs.toon import TOONCodec
-from zeref.context import build_packet
-from zeref.storage import StateDB
+from shiroe.codecs.csv_codec import CSVCodec
+from shiroe.codecs.json_codec import CompactJSONCodec, JSONCodec
+from shiroe.codecs.jsonl import JSONLCodec
+from shiroe.codecs.markdown import MarkdownCodec
+from shiroe.codecs.selector import render
+from shiroe.codecs.toon import TOONCodec
+from shiroe.context import build_packet
+from shiroe.storage import StateDB
 
 
 # ---------------------------------------------------------------------------
