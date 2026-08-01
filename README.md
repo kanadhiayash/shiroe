@@ -1,8 +1,8 @@
 <!-- privacy-audit: allow-file "Public hero doc. Documents install commands with example env-var names. No user memory." -->
 
-# Shiroe
-
-> One governed project state across every human, agent, model, harness, and device.
+<p align="center">
+  <img src="./assets/shiroe-banner-motion.svg" alt="Shiroe — Strategy over noise. One governed project state across humans, agents, models, harnesses, and devices." width="100%">
+</p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license"></a>
@@ -25,19 +25,27 @@
 
 ## The problem
 
-Session four, Tuesday morning. You open Cursor:
+Tuesday morning. You open **Claude Code**:
 
 > **You:** Add rate limiting to the upload endpoint.
 >
-> **Agent:** I'll add a Redis-backed limiter —
+> **Claude:** I'll add a Redis-backed limiter —
 >
-> **You:** No. We ruled out Redis in March, we're single-node, you suggested this on Thursday too.
+> **You:** No. We ruled out Redis in March. Single-node.
 
-The agent is not stupid. It has no memory. Every decision you made, every approach you already rejected and why, every constraint that is obvious to you — gone at the start of every session, in every tool, forever.
+Afternoon, you switch to **Codex** for a refactor:
 
-The usual fixes do not hold. A long `CLAUDE.md` grows until it eats your context budget and gets skimmed. A vector database puts your project's decisions in a vendor's account and returns fuzzy matches with no provenance. Neither survives switching from Claude Code to Codex.
+> **Codex:** For rate limiting here, I'd suggest Redis —
 
-Shiroe puts that memory in your repo, as files you can read, diff, and review in a pull request.
+Thursday, **Cursor**, different file, same endpoint:
+
+> **Cursor:** Consider adding a Redis-backed rate limiter.
+
+None of them is stupid. None of them has memory, and none of them can see what you told the other two. You are the only shared state in the system, and you are re-typing the same decision until you stop trusting the tools with anything that took real thought.
+
+The usual fixes do not hold. A long `CLAUDE.md` grows until it eats your context budget and gets skimmed — and Codex and Cursor never read it anyway. A vector database puts your project's decisions in a vendor's account and returns fuzzy matches with no provenance. Neither survives the switch between tools, which is exactly where the memory is lost.
+
+Shiroe puts that memory in your repo, as files you can read, diff, and review in a pull request. Every tool reads the same ones.
 
 Current release **v3.0.0-alpha.1**. Alpha software — interfaces may change. See [Limitations](#limitations).
 
@@ -67,6 +75,10 @@ below ~2k req/s. Re-open if we go multi-node.
 ```
 
 The next session, in any harness, reads that before it writes a line.
+
+<p align="center">
+  <img src="./assets/shiroe-character-snapshot-motion.svg" alt="Shiroe — the tactician: a coordinating intelligence over a bounded work graph" width="72%">
+</p>
 
 ---
 
