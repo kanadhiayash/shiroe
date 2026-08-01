@@ -1,0 +1,76 @@
+<svg id="svg42" width="960" height="540" aria-labelledby="title desc" role="img" version="1.1" viewBox="0 0 1672 941" xmlns="http://www.w3.org/2000/svg"><title id="title">Shiroe character snapshot</title><desc id="desc">The Anonymous Tactician, rendered as a minimal graphite, frost, cyan, amber, and violet repository snapshot.</desc><defs id="defs4"><linearGradient id="violetEdge" y2="1"><stop id="stop1" stop-color="#C026D3" offset="0"/><stop id="stop2" stop-color="#6B21A8" offset="1"/></linearGradient><linearGradient id="cyanEdge" y2="1"><stop id="stop3" stop-color="#A8F5FF" offset="0"/><stop id="stop4" stop-color="#55C7D9" offset="1"/></linearGradient><style id="style4"><![CDATA[
+      .frost { stroke:#EEF3F7; }
+      .cyan { stroke:#55C7D9; }
+      .violet { stroke:#C026D3; }
+      .amber { stroke:#E7B75A; }
+      .round { stroke-linecap:round; stroke-linejoin:round; }
+
+      .orbit-a {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: orbitA 28s linear infinite;
+      }
+      .orbit-b {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: orbitB 36s linear infinite;
+      }
+      .lens-glow {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: lensBreath 5.8s ease-in-out infinite;
+      }
+      .gate-live {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: gateBreath 4.9s ease-in-out infinite;
+      }
+      .route-flow {
+        animation: routeFlow 12s linear infinite;
+      }
+      .signal-live {
+        animation: signalBreath 6.6s ease-in-out infinite;
+      }
+      .particle-one { animation: driftOne 13s ease-in-out infinite; }
+      .particle-two { animation: driftTwo 17s ease-in-out infinite; }
+
+      @keyframes orbitA {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes orbitB {
+        from { transform: rotate(360deg); }
+        to { transform: rotate(0deg); }
+      }
+      @keyframes lensBreath {
+        0%, 100% { opacity: .04; transform: scale(.985); }
+        50% { opacity: .13; transform: scale(1.025); }
+      }
+      @keyframes gateBreath {
+        0%, 100% { opacity: .84; transform: scale(.99); }
+        50% { opacity: 1; transform: scale(1.018); }
+      }
+      @keyframes routeFlow {
+        from { stroke-dashoffset: 0; }
+        to { stroke-dashoffset: -180; }
+      }
+      @keyframes signalBreath {
+        0%, 100% { opacity: .58; }
+        50% { opacity: .96; }
+      }
+      @keyframes driftOne {
+        0%, 100% { transform: translate(0,0); opacity: .16; }
+        50% { transform: translate(18px,-7px); opacity: .42; }
+      }
+      @keyframes driftTwo {
+        0%, 100% { transform: translate(0,0); opacity: .13; }
+        50% { transform: translate(-14px,8px); opacity: .36; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .orbit-a, .orbit-b, .lens-glow, .gate-live,
+        .route-flow, .signal-live, .particle-one, .particle-two {
+          animation: none !important;
+        }
+      }
+
+    ]]></style></defs><rect id="rect4" width="1672" height="941" fill="#0C1017"/><rect id="rect5" x="24" y="24" width="1624" height="893" rx="24" fill="none" stroke="#95A2B3" stroke-opacity=".08"/><!-- Quiet background field --><g id="g7" opacity=".2"><circle id="circle5" class="orbit-a" cx="836" cy="370" r="315" fill="none" stroke="#6B21A8" stroke-dasharray="2 16" stroke-width="1.4"/><circle id="circle6" class="orbit-b" cx="836" cy="370" r="272" fill="none" stroke="#55C7D9" stroke-dasharray="26 72" stroke-width="1.2"/><path id="path6" class="route-flow" d="m206 465h272" stroke="#C026D3" stroke-dasharray="52 14 8 24" stroke-width="1.5"/><path id="path7" class="route-flow" d="m1194 465h272" stroke="#55C7D9" stroke-dasharray="52 14 8 24" stroke-width="1.5"/></g><!-- Character bust --><g id="tactician" transform="translate(0,-45)"><!-- shoulders --><path id="path8" class="round" d="m496 676c69-48 126-68 188-80h304c62 12 119 32 188 80l67 53c-91 20-196 35-300 41h-214c-104-6-209-21-300-41z" fill="#080B10" stroke="#EEF3F7" stroke-width="4"/><path id="path9" class="round" d="m460 716c100-32 178-47 255-52" fill="none" opacity=".85" stroke="url(#violetEdge)" stroke-width="5"/><path id="path10" class="round" d="m1212 716c-100-32-178-47-255-52" fill="none" opacity=".75" stroke="url(#cyanEdge)" stroke-width="5"/><!-- neck shadow --><path id="path11" d="m742 514h188l33 147h-254z" fill="#06080D"/><!-- high collar left --><path id="path12" class="round" d="m538 501c35-30 81-55 145-70l69 43 27 193-77-22-94-48z" fill="#0A0E15" stroke="#EEF3F7" stroke-width="7"/><path id="path13" class="round" d="m548 509 137-66 59 39 11 138" fill="none" opacity=".54" stroke="#95A2B3" stroke-width="2.4"/><path id="path14" class="round" d="m550 507 65-31" fill="none" opacity=".9" stroke="#C026D3" stroke-width="5"/><!-- high collar right --><path id="path15" class="round" d="m1134 501c-35-30-81-55-145-70l-69 43-27 193 77-22 94-48z" fill="#0A0E15" stroke="#EEF3F7" stroke-width="7"/><path id="path16" class="round" d="m1124 509-137-66-59 39-11 138" fill="none" opacity=".54" stroke="#95A2B3" stroke-width="2.4"/><path id="path17" class="round" d="m1122 507-65-31" fill="none" opacity=".86" stroke="#55C7D9" stroke-width="5"/><!-- collar center clasp --><path id="path18" class="round" d="m793 569h86l12 98-55 30-55-30z" fill="#101722" stroke="#EEF3F7" stroke-width="4"/><path id="path19" class="round" d="m810 591h52l6 62-32 19-32-19z" fill="#080B10" stroke="#95A2B3" stroke-width="2"/><path id="path20" class="round" d="m836 616 14 26h-28z" fill="none" stroke="#C026D3" stroke-width="4"/><!-- face --><path id="path21" class="round" d="m688 242c26-61 84-98 148-98s122 37 148 98c17 40 20 116 7 184-12 65-61 115-155 128-94-13-143-63-155-128-13-68-10-144 7-184z" fill="#05070B" stroke="#EEF3F7" stroke-width="4"/><!-- hair mass --><path id="path22" class="round" d="m667 323c-25-37-16-76 17-101-34-5-48-24-36-48 26 20 50 10 68-18 17-26 49-45 82-44-16-24-2-43 25-56-1 27 22 35 45 14 16-14 36-23 59-19-19 15-17 34 11 43 31 9 62 30 79 59 23 38 15 69-9 93 17 21 19 49 4 80l-37-26c-12 37-38 60-62 71 3-33-9-63-31-84-10 40-31 63-57 76 5-36-7-69-33-93-10 40-39 67-75 80 7-32-3-64-26-84-1 24-9 43-24 57z" fill="#070A10" stroke="#EEF3F7" stroke-width="5"/><!-- hair edge accents --><path id="path23" class="round" d="m653 195c29 12 55-5 76-44 18-32 52-48 83-42" fill="none" opacity=".86" stroke="#C026D3" stroke-width="6"/><path id="path24" class="round" d="m842 75c30 25 64 19 88 1" fill="none" opacity=".88" stroke="#EEF3F7" stroke-width="5"/><path id="path25" class="round" d="m968 120c34 24 48 52 47 82" fill="none" opacity=".52" stroke="#55C7D9" stroke-width="3.5"/><path id="path26" class="round" d="m705 242c46-19 81-17 116 2" fill="none" opacity=".32" stroke="#95A2B3" stroke-width="2"/><!-- face shadow mask --><path id="path27" d="m699 319c37-33 78-49 137-49s100 16 137 49l-8 123c-17 56-58 84-129 96-71-12-112-40-129-96z" fill="#030509"/><!-- lenses --><g id="g31"><circle id="circle27" class="lens-glow" cx="776" cy="377" r="62" fill="#55C7D9" opacity=".055"/><circle id="circle28" class="lens-glow" cx="896" cy="377" r="62" fill="#55C7D9" opacity=".055"/><circle id="circle29" cx="776" cy="377" r="54" fill="#EEF3F7" stroke="#55C7D9" stroke-width="4"/><circle id="circle30" cx="896" cy="377" r="54" fill="#EEF3F7" stroke="#55C7D9" stroke-width="4"/><path id="path30" class="round" d="m830 377c6-7 12-7 18 0" fill="none" stroke="#EEF3F7" stroke-width="5"/><path id="path31" class="round" d="m720 377h-20m252 0h20" fill="none" stroke="#EEF3F7" stroke-width="4"/></g><!-- subtle face contour --><path id="path32" class="round" d="m836 424-12 31 18 5" fill="none" opacity=".2" stroke="#95A2B3" stroke-width="2"/></g><!-- Tactician Gate cue --><g id="gateCue" class="gate-live" transform="translate(1124 356)"><circle id="circle32" r="70" fill="#55C7D9" opacity=".035"/><g id="g37" fill="none" stroke-linecap="round" stroke-linejoin="round"><path id="path33" d="m-24 32h-23c-8 0-13-9-9-16l43-74c5-9 21-9 26 0l43 74c4 7-1 16-9 16h-23" stroke="#55C7D9" stroke-width="5"/><circle id="circle33" cy="-60" r="8" fill="#0C1017" stroke="#55C7D9" stroke-width="5"/><circle id="circle34" cx="-50" cy="28" r="8" fill="#0C1017" stroke="#55C7D9" stroke-width="5"/><circle id="circle35" cx="50" cy="28" r="8" fill="#0C1017" stroke="#55C7D9" stroke-width="5"/><path id="path35" d="m0-52v18m-42 57 18-11m66 11-18-11" stroke="#55C7D9" stroke-width="4"/><circle id="circle36" r="18" stroke="#E7B75A" stroke-width="5"/><circle id="circle37" cy="-5" r="4" fill="#E7B75A"/><path id="path37" d="m-8 9c3-8 13-8 16 0" stroke="#E7B75A" stroke-width="4"/></g><path id="path38" d="m-78-26h-12v12m168-12h12v12m-168 62h-12v-12m168 12h12v-12" fill="none" opacity=".7" stroke="#C026D3" stroke-width="3"/></g><g id="g41" pointer-events="none"><g id="g39" class="particle-one" fill="#55C7D9"><circle id="circle38" cx="493" cy="267" r="2.4"/><rect id="rect38" x="1268" y="293" width="5" height="5" rx="1"/><circle id="circle39" cx="1203" cy="610" r="2"/></g><g id="g40" class="particle-two" fill="#C026D3"><rect id="rect39" x="347" y="548" width="5" height="5" rx="1"/><circle id="circle40" cx="1337" cy="514" r="2.2"/><rect id="rect40" x="1022" y="142" width="4" height="4" rx="1"/></g></g><!-- Wordmark --><path id="wordmark" d="m692.39 830.2c19.797 0 31.445-9.5703 31.445-24.391 0-13.672-10.609-20.672-24.336-23.844l-7.3828-1.8047c-6.8906-1.6406-13.016-4.2109-13.016-10.281 0-5.4688 4.8125-9.4062 13.344-9.4062 8.3672 0 13.562 3.7734 14.164 10.281h16.133c-0.27343-14.328-12.086-24.336-30.133-24.336-17.719 0-30.625 9.8438-30.625 24.555 0 11.867 8.2578 18.812 22.039 22.148l8.9688 2.2422c8.8594 2.1875 14.055 4.7578 14.055 10.336 0 6.1797-5.9062 10.391-14.82 10.391-9.0234 0-15.641-4.1016-16.188-12.359h-16.242c0.49219 17.336 13.016 26.469 32.594 26.469zm61.5-36.586c0-8.0938 4.8672-12.797 11.867-12.797 6.8906 0 11.047 4.5391 11.047 12.141v36.039h16.461v-38.883c0-14.328-8.3672-23.023-21.055-23.023-9.0781 0-15.094 4.4844-18.648 12.469v-32.047h-16.078v81.484h16.406zm55.32 35.383h16.406v-61.141h-16.406zm8.2031-69.125c4.9219 0 9.0234-3.7188 9.0234-8.4219 0-4.6484-4.1016-8.4219-9.0234-8.4219-4.9766 0-9.0234 3.7734-9.0234 8.4219 0 4.7031 4.0469 8.4219 9.0234 8.4219zm24.148 69.125h16.406v-34.781c0-7.6016 5.5234-12.797 13.07-12.797 2.4062 0 5.6328 0.38282 7.1094 0.82032v-14.656c-1.4766-0.32813-3.6094-0.54688-5.3047-0.54688-6.8906 0-12.523 3.9375-14.766 11.484h-0.65625v-10.664h-15.859zm72.219 1.2031c18.375 0 29.914-12.688 29.914-31.5 0-18.922-11.539-31.609-29.914-31.609-18.43 0-29.914 12.688-29.914 31.609 0 18.812 11.484 31.5 29.914 31.5zm0-12.906c-8.75 0-13.18-7.9844-13.18-18.648 0-10.828 4.4297-18.648 13.18-18.648s13.234 7.875 13.234 18.648c0 10.664-4.4844 18.648-13.234 18.648zm70.961 12.906c14.219 0 23.953-6.6172 26.961-16.789l-14.875-2.7891c-1.75 4.7031-6.0703 7.2188-11.812 7.2188-8.2578 0-13.836-5.1406-14.219-15.148h41.836v-4.5938c0-20.891-12.742-31.008-28.711-31.008-17.883 0-29.367 12.797-29.367 31.664 0 19.305 11.484 31.445 30.188 31.445zm-13.836-37.789c0.65625-7.5469 5.3594-12.961 13.18-12.961 7.6016 0 11.922 4.9766 12.742 12.961z" fill="#eef3f7" aria-label="Shiroe"/><g id="g42" class="signal-live" fill="#C026D3" opacity=".9"><rect id="rect41" x="708" y="872" width="93" height="2" rx="1"/><path id="path41" d="m824 866 12 16 12-16z"/><rect id="rect42" x="871" y="872" width="93" height="2" rx="1"/></g></svg>
