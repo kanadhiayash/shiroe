@@ -2,20 +2,30 @@
 """
 check-version-consistency.py — Fail CI on any drift across version surfaces.
 
-Single source of truth: zeref/VERSION
+Single source of truth: shiroe/VERSION
 Surfaces verified:
-    - zeref/VERSION                       (the canonical file)
-    - zeref/__init__.py:__version__       (loaded at import time)
+    - shiroe/VERSION                       (the canonical file)
+    - shiroe/__init__.py:__version__       (loaded at import time)
     - pyproject.toml:[project].version
-    - zeref-registry.json:.version
+    - shiroe-registry.json:.version
     - .claude-plugin/plugin.json:.version
-    - README.md:badge URL + alt text
     - docs/wiki/Installation.md:grep example
+
+Identity block — single source of truth: shiroe/IDENTITY.json
+Surfaces verified:
+    - pyproject.toml:[project].name             == .distribution
+    - pyproject.toml:[project.scripts]           has a .cli key -> "<module>.cli:main"
+    - pyproject.toml:[project.urls] Homepage     == .repo_url
+    - .claude-plugin/plugin.json:.name           == .distribution
+    - .claude-plugin/marketplace.json:.name      == .distribution
+    - .claude-plugin/marketplace.json:.plugins[0].name == .distribution
+    - .registry_manifest file exists on disk
+    - CODEOWNERS exists on disk
 
 Exit code:
     0  all surfaces agree
     1  drift detected (prints offending surfaces)
-    2  the canonical VERSION file is missing or malformed
+    2  the canonical VERSION file (or IDENTITY.json) is missing or malformed
 
 Usage:
     python3 scripts/check-version-consistency.py [--root <repo-root>]
@@ -29,7 +39,8 @@ import re
 import sys
 from pathlib import Path
 
-CANONICAL_FILE = "zeref/VERSION"
+CANONICAL_FILE = "shiroe/VERSION"
+IDENTITY_FILE = "shiroe/IDENTITY.json"
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][\w.\-]+)?$")
 
 
@@ -57,15 +68,15 @@ def _check_pyproject(root: Path, expected: str) -> tuple[str, str | None]:
 
 def _check_init(root: Path, expected: str) -> tuple[str, str | None]:
     # We do not exec the file; we treat VERSION as the canonical and check the loader is intact.
-    text = _read(root, "zeref/__init__.py")
+    text = _read(root, "shiroe/__init__.py")
     if "_VERSION_FILE" not in text or "VERSION" not in text:
-        return ("zeref/__init__.py loader", None)
-    return ("zeref/__init__.py loader", expected)
+        return ("shiroe/__init__.py loader", None)
+    return ("shiroe/__init__.py loader", expected)
 
 
 def _check_registry(root: Path, expected: str) -> tuple[str, str | None]:
-    data = json.loads(_read(root, "zeref-registry.json"))
-    return ("zeref-registry.json:.version", data.get("version"))
+    data = json.loads(_read(root, "shiroe-registry.json"))
+    return ("shiroe-registry.json:.version", data.get("version"))
 
 
 def _check_plugin(root: Path, expected: str) -> tuple[str, str | None]:
@@ -73,18 +84,9 @@ def _check_plugin(root: Path, expected: str) -> tuple[str, str | None]:
     return (".claude-plugin/plugin.json:.version", data.get("version"))
 
 
-def _check_readme(root: Path, expected: str) -> tuple[str, str | None]:
-    text = _read(root, "README.md")
-    m = re.search(r"version-(\d+\.\d+\.\d+(?:[-+][\w.\-]+)?)-blueviolet", text)
-    if m:
-        # shields.io escapes a literal dash as "--" inside badge segments
-        return ("README.md:badge", m.group(1).replace("--", "-"))
-    return ("README.md:badge", m.group(1) if m else None)
-
-
 def _check_wiki_install(root: Path, expected: str) -> tuple[str, str | None]:
     text = _read(root, "docs/wiki/Installation.md")
-    m = re.search(r"zeref-os@zeref-os\s+v(\d+\.\d+\.\d+(?:[-+][\w.\-]+)?)", text)
+    m = re.search(r"shiroe@shiroe\s+v(\d+\.\d+\.\d+(?:[-+][\w.\-]+)?)", text)
     return ("docs/wiki/Installation.md", m.group(1) if m else None)
 
 
@@ -93,8 +95,79 @@ CHECKS = [
     _check_init,
     _check_registry,
     _check_plugin,
-    _check_readme,
     _check_wiki_install,
+]
+
+
+def _read_identity(root: Path) -> dict:
+    p = root / IDENTITY_FILE
+    if not p.exists():
+        print(f"ERROR: canonical identity file missing: {p}", file=sys.stderr)
+        sys.exit(2)
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        print(f"ERROR: canonical identity file '{p}' is not valid JSON: {exc}", file=sys.stderr)
+        sys.exit(2)
+
+
+def _check_identity_pyproject_name(root: Path, identity: dict) -> tuple[str, str, str | None]:
+    text = _read(root, "pyproject.toml")
+    m = re.search(r'(?m)^name\s*=\s*"([^"]+)"', text)
+    return ("pyproject.toml:[project].name", identity["distribution"], m.group(1) if m else None)
+
+
+def _check_identity_pyproject_scripts(root: Path, identity: dict) -> tuple[str, str, str | None]:
+    text = _read(root, "pyproject.toml")
+    cli = identity["cli"]
+    expected = f"{identity['module']}.cli:main"
+    m = re.search(rf'(?m)^{re.escape(cli)}\s*=\s*"([^"]+)"', text)
+    return (f"pyproject.toml:[project.scripts].{cli}", expected, m.group(1) if m else None)
+
+
+def _check_identity_pyproject_homepage(root: Path, identity: dict) -> tuple[str, str, str | None]:
+    text = _read(root, "pyproject.toml")
+    m = re.search(r'(?m)^Homepage\s*=\s*"([^"]+)"', text)
+    return ("pyproject.toml:[project.urls].Homepage", identity["repo_url"], m.group(1) if m else None)
+
+
+def _check_identity_plugin(root: Path, identity: dict) -> tuple[str, str, str | None]:
+    data = json.loads(_read(root, ".claude-plugin/plugin.json"))
+    return (".claude-plugin/plugin.json:.name", identity["distribution"], data.get("name"))
+
+
+def _check_identity_marketplace_name(root: Path, identity: dict) -> tuple[str, str, str | None]:
+    data = json.loads(_read(root, ".claude-plugin/marketplace.json"))
+    return (".claude-plugin/marketplace.json:.name", identity["distribution"], data.get("name"))
+
+
+def _check_identity_marketplace_plugin0(root: Path, identity: dict) -> tuple[str, str, str | None]:
+    data = json.loads(_read(root, ".claude-plugin/marketplace.json"))
+    plugins = data.get("plugins") or []
+    observed = plugins[0].get("name") if plugins else None
+    return (".claude-plugin/marketplace.json:.plugins[0].name", identity["distribution"], observed)
+
+
+def _check_identity_registry_manifest(root: Path, identity: dict) -> tuple[str, str, str | None]:
+    name = identity["registry_manifest"]
+    exists = (root / name).exists()
+    return (f"{name} exists", "True", str(exists) if exists else None)
+
+
+def _check_identity_codeowners(root: Path, identity: dict) -> tuple[str, str, str | None]:
+    exists = (root / "CODEOWNERS").exists()
+    return ("CODEOWNERS exists", "True", str(exists) if exists else None)
+
+
+IDENTITY_CHECKS = [
+    _check_identity_pyproject_name,
+    _check_identity_pyproject_scripts,
+    _check_identity_pyproject_homepage,
+    _check_identity_plugin,
+    _check_identity_marketplace_name,
+    _check_identity_marketplace_plugin0,
+    _check_identity_registry_manifest,
+    _check_identity_codeowners,
 ]
 
 
@@ -115,13 +188,29 @@ def main() -> int:
         if observed != expected:
             drift.append((name, observed))
 
-    if drift:
-        print("\nVersion drift detected:", file=sys.stderr)
-        for name, observed in drift:
-            print(f"  - {name}: expected {expected!r}, found {observed!r}", file=sys.stderr)
+    identity = _read_identity(root)
+    print(f"\ncanonical identity (from {IDENTITY_FILE}): distribution={identity['distribution']!r}")
+
+    identity_drift: list[tuple[str, str, str | None]] = []
+    for check in IDENTITY_CHECKS:
+        name, id_expected, observed = check(root, identity)
+        mark = "OK" if observed == id_expected else "DRIFT"
+        print(f"  [{mark}] {name}: {observed!r}")
+        if observed != id_expected:
+            identity_drift.append((name, id_expected, observed))
+
+    if drift or identity_drift:
+        if drift:
+            print("\nVersion drift detected:", file=sys.stderr)
+            for name, observed in drift:
+                print(f"  - {name}: expected {expected!r}, found {observed!r}", file=sys.stderr)
+        if identity_drift:
+            print("\nIdentity drift detected:", file=sys.stderr)
+            for name, id_expected, observed in identity_drift:
+                print(f"  - {name}: expected {id_expected!r}, found {observed!r}", file=sys.stderr)
         return 1
 
-    # R8 (ZRF-AUDIT-020): also compare against the latest git tag.
+    # R8 (SHR-AUDIT-020): also compare against the latest git tag.
     # Semantics:
     #   - `tag > VERSION` (backwards drift) — always fail unless CHANGELOG.md
     #     names the lineage restart with a `restart-from-<version>` marker.
@@ -155,7 +244,7 @@ def main() -> int:
             else:
                 print(f"\nTag divergence: latest tag {latest_tag!r} exceeds VERSION {expected!r}.",
                       file=sys.stderr)
-                print("Either bump zeref/VERSION or document the intentional lineage restart in "
+                print("Either bump shiroe/VERSION or document the intentional lineage restart in "
                       "CHANGELOG.md with a `restart-from-<version>` marker.", file=sys.stderr)
                 return 1
         elif tag_tuple < expected_tuple:

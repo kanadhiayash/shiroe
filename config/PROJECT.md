@@ -1,6 +1,6 @@
 <!-- privacy-audit: allow-file "Bootstrap project config; project_name is public metadata." -->
 ---
-project_name: "Zeref Memory Engine"
+project_name: "Shiroe"
 # project_root is discovered at runtime from config/PROJECT.md's own location.
 # Absolute paths must never land in tracked config — see PRIVACY.md + REDACT.md internal_paths.
 project_root: "<discovered-at-runtime>"
@@ -18,6 +18,6 @@ model_tier: standard
 budget_warn_at: 50000
 ---
 
-# Zeref OS
+# Shiroe
 
-Project initialised via `zeref init` on 2026-06-05.
+Project initialised via `shiroe init` on 2026-06-05.

@@ -8,9 +8,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-from zeref.guards.evidence_guard import check_card, check_public_docs, grade_text
-from zeref.memory import scaffold_project
-from zeref.memory_state import MemoryStore
+from shiroe.guards.evidence_guard import check_card, check_public_docs, grade_text
+from shiroe.memory import scaffold_project
+from shiroe.memory_state import MemoryStore
 
 
 def _env(repo_root: Path) -> dict:
@@ -21,7 +21,7 @@ def _env(repo_root: Path) -> dict:
 
 def _run(repo_root: Path, cwd: Path, args: list[str]) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, "-m", "zeref", *args],
+        [sys.executable, "-m", "shiroe", *args],
         cwd=str(cwd),
         capture_output=True,
         text=True,
@@ -59,11 +59,11 @@ def test_evidence_upgrade_command(repo_root: Path, tmp_path: Path) -> None:
         evidence_grade="C",
     )
 
-    upgraded = _run(repo_root, tmp_path, ["evidence", "upgrade", card.id, "--source", "docs/plans/ZEREF_HARDENING_RECON.md"])
+    upgraded = _run(repo_root, tmp_path, ["evidence", "upgrade", card.id, "--source", "docs/plans/SHIROE_HARDENING_RECON.md"])
     assert upgraded.returncode == 0, upgraded.stderr
     data = json.loads(upgraded.stdout)
     assert data["evidence_grade"] == "B"
-    assert "docs/plans/ZEREF_HARDENING_RECON.md" in data["source_refs"]
+    assert "docs/plans/SHIROE_HARDENING_RECON.md" in data["source_refs"]
 
 
 def test_evidence_list_and_report(repo_root: Path, tmp_path: Path) -> None:
@@ -86,7 +86,7 @@ def test_evidence_list_and_report(repo_root: Path, tmp_path: Path) -> None:
 
 def test_public_docs_with_grade_f_and_claims(tmp_path: Path) -> None:
     doc = tmp_path / "PUBLIC.md"
-    doc.write_text("Zeref is best-in-class.\n\nEvidence grade: F\n", encoding="utf-8")
+    doc.write_text("Shiroe is best-in-class.\n\nEvidence grade: F\n", encoding="utf-8")
     issues = check_public_docs(doc)
     assert len(issues) == 2
 

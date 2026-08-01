@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from zeref.adapters.providers.xai import GrokContextAdapter
+from shiroe.adapters.providers.xai import GrokContextAdapter
 
 
 def test_grok_context_only_without_api_key(monkeypatch) -> None:

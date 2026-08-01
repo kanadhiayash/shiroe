@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from zeref.privacy import scrub
+from shiroe.privacy import scrub
 
 
 # ---------------------------------------------------------------------------

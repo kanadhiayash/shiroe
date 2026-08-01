@@ -1,7 +1,7 @@
 """WS4 gate tests — release-gate integrity + init/doctor parity (issue #122).
 
 Covers:
-- fresh `zeref init` scaffolds every file `zeref doctor` requires;
+- fresh `shiroe init` scaffolds every file `shiroe doctor` requires;
 - release check requires real commit provenance (fails without .git);
 - release check never trusts a stored benchmarks/results.json PASS;
 - file-based network permissions are consistent with the env lane and
@@ -17,11 +17,11 @@ from pathlib import Path
 
 import pytest
 
-from zeref.memory import scaffold_project
-from zeref.release import checks as release_checks
-from zeref.release.checks import release_passed, run_release_check
-from zeref.release.doctor import doctor_passed, run_doctor
-from zeref.security.policy import (
+from shiroe.memory import scaffold_project
+from shiroe.release import checks as release_checks
+from shiroe.release.checks import release_passed, run_release_check
+from shiroe.release.doctor import doctor_passed, run_doctor
+from shiroe.security.policy import (
     NetworkDeniedError,
     load_policy,
     require_network,
@@ -107,7 +107,7 @@ def test_benchmarks_stored_json_alone_never_passes(tmp_path: Path) -> None:
 
 
 def test_benchmarks_skip_is_loud_and_not_pass(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("ZEREF_LINEAGE_INTAKE_CSV", raising=False)
+    monkeypatch.delenv("SHIROE_LINEAGE_INTAKE_CSV", raising=False)
     bench = tmp_path / "benchmarks"
     bench.mkdir()
     (bench / "run-all.py").write_text("import sys; sys.exit(0)\n", encoding="utf-8")
@@ -122,7 +122,7 @@ def test_benchmarks_skip_is_loud_and_not_pass(tmp_path: Path, monkeypatch: pytes
 def test_benchmarks_executes_runner_live(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     csv = tmp_path / "intake.csv"
     csv.write_text("id\n", encoding="utf-8")
-    monkeypatch.setenv("ZEREF_LINEAGE_INTAKE_CSV", str(csv))
+    monkeypatch.setenv("SHIROE_LINEAGE_INTAKE_CSV", str(csv))
     bench = tmp_path / "benchmarks"
     bench.mkdir()
     runner = bench / "run-all.py"
@@ -168,7 +168,7 @@ def _write_privacy(root: Path, *, external: bool) -> None:
 
 
 def test_network_denied_by_default(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("ZEREF_ALLOW_NETWORK", raising=False)
+    monkeypatch.delenv("SHIROE_ALLOW_NETWORK", raising=False)
     policy = load_policy(tmp_path)
     assert policy.network_denied is True
     with pytest.raises(NetworkDeniedError):
@@ -176,14 +176,14 @@ def test_network_denied_by_default(tmp_path: Path, monkeypatch: pytest.MonkeyPat
 
 
 def test_scaffolded_permissions_deny_network(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("ZEREF_ALLOW_NETWORK", raising=False)
+    monkeypatch.delenv("SHIROE_ALLOW_NETWORK", raising=False)
     scaffold_project(tmp_path, name="ws4", privacy="abstract", tier="auto", parent="")
     policy = load_policy(tmp_path)
     assert policy.network_denied is True
 
 
 def test_file_lane_can_enable_network(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("ZEREF_ALLOW_NETWORK", raising=False)
+    monkeypatch.delenv("SHIROE_ALLOW_NETWORK", raising=False)
     (tmp_path / "config").mkdir()
     (tmp_path / "config" / "PERMISSIONS.md").write_text(
         "---\ndefaults:\n  network:\n    - allowed\n---\n", encoding="utf-8",
@@ -195,7 +195,7 @@ def test_file_lane_can_enable_network(tmp_path: Path, monkeypatch: pytest.Monkey
 
 
 def test_file_lane_requires_privacy_consent_too(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("ZEREF_ALLOW_NETWORK", raising=False)
+    monkeypatch.delenv("SHIROE_ALLOW_NETWORK", raising=False)
     (tmp_path / "config").mkdir()
     (tmp_path / "config" / "PERMISSIONS.md").write_text(
         "---\ndefaults:\n  network:\n    - allowed\n---\n", encoding="utf-8",
@@ -207,7 +207,7 @@ def test_file_lane_requires_privacy_consent_too(tmp_path: Path, monkeypatch: pyt
 
 
 def test_file_lane_explicit_denied_wins(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("ZEREF_ALLOW_NETWORK", raising=False)
+    monkeypatch.delenv("SHIROE_ALLOW_NETWORK", raising=False)
     (tmp_path / "config").mkdir()
     (tmp_path / "config" / "PERMISSIONS.md").write_text(
         "---\ndefaults:\n  network:\n    - denied\n    - allowed\n---\n",
@@ -218,6 +218,6 @@ def test_file_lane_explicit_denied_wins(tmp_path: Path, monkeypatch: pytest.Monk
 
 
 def test_env_lane_still_overrides(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("ZEREF_ALLOW_NETWORK", "1")
+    monkeypatch.setenv("SHIROE_ALLOW_NETWORK", "1")
     policy = load_policy(tmp_path)
     require_network(policy, purpose="ws4-test")  # env lane authorizes

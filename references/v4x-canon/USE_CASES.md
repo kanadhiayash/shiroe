@@ -1,6 +1,6 @@
-# USE_CASES.md — Zeref at 110% Strength
+# USE_CASES.md — Shiroe at 110% Strength
 
-> Six use cases demonstrating Zeref's full capability: memory engine + privacy layer + team packs + pattern detection + skill generation + harness portability + God Mode.
+> Six use cases demonstrating Shiroe's full capability: Shiroe AI Tactician + privacy layer + team packs + pattern detection + skill generation + harness portability + God Mode.
 
 ---
 
@@ -12,7 +12,7 @@ A developer builds a SaaS product over 4 months, switching between Claude Code, 
 - /start in Claude Code. Schema interview creates WIKI.md. Sensitive classes: no client names, no revenue figures.
 - Architecture decisions written to wiki. Dependency map maintained across all sessions.
 - Developer switches to Cursor for UI sprint. AGENTS.md loads identically. memory/hot.md provides last 3 sessions. Zero re-onboarding.
-- After week 2, Zeref detects Stripe webhook handling pasted manually 4 times in 72 hours. Surfaces skill recommendation.
+- After week 2, Shiroe detects Stripe webhook handling pasted manually 4 times in 72 hours. Surfaces skill recommendation.
 - Developer approves. skills/drafts/stripe-webhooks.md created. Reviewed and activated.
 - 4 months later: Claude Opus used. God Mode activates. Full parent-child wiki sync, deep conflict analysis, pattern retrospective shows 8 skills extracted from natural work patterns.
 
@@ -42,7 +42,7 @@ Powers used: Parent wiki · Decision log · Contradiction flagging · Research t
 A maintainer manages a popular library with multiple contributors.
 - Library repo is parent wiki. Each contributor's branch has a child wiki.
 - Contributor proposes a breaking change. Child wiki records it.
-- /sync-parent: Zeref detects the child decision contradicts a parent decision from 8 months ago. FLAGS to maintainer.
+- /sync-parent: Shiroe detects the child decision contradicts a parent decision from 8 months ago. FLAGS to maintainer.
 - /compile: Old decision has medium confidence (90-day decay). New decision has high confidence. Maintainer confirms. Old archived.
 - Research team: /team research. Investigator + Synthesizer + Fact-checker review architectural question.
 - Result published to DECISION_LOG.md in parent wiki. All contributors load this in subsequent sessions.
@@ -95,4 +95,4 @@ Developer uses Claude Code for deep coding, Gemini CLI for long-context analysis
 - Skill approved in Claude Code. SKILL.md portable: Cursor and Codex read it in subsequent sessions.
 - Developer switches from Claude Opus to Gemini 3.5 Pro for a long-context task. God Mode stays active.
 
-Result: True harness portability. One memory engine across four tools. Skills work everywhere.
+Result: True harness portability. One Shiroe AI Tactician across four tools. Skills work everywhere.

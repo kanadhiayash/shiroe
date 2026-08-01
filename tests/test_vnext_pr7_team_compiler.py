@@ -10,15 +10,15 @@ from pathlib import Path
 
 import pytest
 
-from zeref.capabilities import (
+from shiroe.capabilities import (
     approve,
     inspect_source,
     register_discovery,
 )
-from zeref.capabilities.discovery import DiscoveredCapability
-from zeref.capabilities.store import CapabilityStore
-from zeref.storage import StateDB
-from zeref.teams import (
+from shiroe.capabilities.discovery import DiscoveredCapability
+from shiroe.capabilities.store import CapabilityStore
+from shiroe.storage import StateDB
+from shiroe.teams import (
     CompiledTeamPlan,
     NoEligibleCapabilityError,
     SelfReviewError,
@@ -26,7 +26,7 @@ from zeref.teams import (
     resolve_seat,
     score_capability,
 )
-from zeref.teams.resolver import CandidateCapability
+from shiroe.teams.resolver import CandidateCapability
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -229,7 +229,7 @@ def test_compile_team_build_mission_persists_plan(tmp_path: Path) -> None:
     assert seat_to_name["verifier"] == "reviewer"
 
     # SQLite side: rows persisted
-    conn = sqlite3.connect(tmp_path / "memory" / "state" / "zeref2.sqlite")
+    conn = sqlite3.connect(tmp_path / "memory" / "state" / "shiroe.sqlite")
     try:
         (state,) = conn.execute(
             "SELECT state FROM team_runs WHERE id=?", (plan.run_id,),
@@ -261,7 +261,7 @@ def test_compiled_plan_stores_rationale(tmp_path: Path) -> None:
     plan = compile_team(
         tmp_path, task_id="task_r", mission_id="build",
     )
-    conn = sqlite3.connect(tmp_path / "memory" / "state" / "zeref2.sqlite")
+    conn = sqlite3.connect(tmp_path / "memory" / "state" / "shiroe.sqlite")
     try:
         rows = conn.execute(
             "SELECT seat_id, rationale FROM team_assignments WHERE run_id=?",

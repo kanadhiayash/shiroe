@@ -1,5 +1,5 @@
 """
-`zeref init` scaffolds the expected layout.
+`shiroe init` scaffolds the expected layout.
 """
 
 from __future__ import annotations
@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from zeref.memory import MEMORY_DIRS, MEMORY_FILES, PROJECT_DIRS
+from shiroe.memory import MEMORY_DIRS, MEMORY_FILES, PROJECT_DIRS
 
 
 REQUIRED_DIRS = [
@@ -26,7 +26,7 @@ REQUIRED_FILES = [
 
 def test_init_scaffolds_full_layout(repo_root: Path, tmp_path: Path) -> None:
     r = subprocess.run(
-        [sys.executable, "-m", "zeref", "init",
+        [sys.executable, "-m", "shiroe", "init",
          "--directory", str(tmp_path),
          "--name", "scaffold-test",
          "--privacy", "abstract",

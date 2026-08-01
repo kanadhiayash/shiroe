@@ -4,8 +4,8 @@ harness: claude-code
 # Claude-specific behavior overrides that diverge from AGENTS.md defaults.
 # Keep this file short. Anything universal belongs in AGENTS.md.
 overrides:
-  skill_invocation: native        # use Claude Code's Skill tool with `zeref:<name>`
-  command_namespace: /zeref       # slash commands resolve under /zeref:<command>
+  skill_invocation: native        # use Claude Code's Skill tool with `shiroe:<name>`
+  command_namespace: /shiroe       # slash commands resolve under /shiroe:<command>
   subagent_model_pref:
     memory-keeper: haiku
     project-setup: sonnet
@@ -15,9 +15,9 @@ overrides:
 
 # Claude Overrides
 
-> Per ZEREF_OS §12 file structure. Claude-Code-specific quirks live here so AGENTS.md stays harness-agnostic.
+> Per SHIROE_OS §12 file structure. Claude-Code-specific quirks live here so AGENTS.md stays harness-agnostic.
 
-**Model resolution:** Concrete model ids resolve via `zeref/adapters/providers/anthropic.json` (reasoning classes: fast/balanced/deep/frontier).
+**Model resolution:** Concrete model ids resolve via `shiroe/adapters/providers/anthropic.json` (reasoning classes: fast/balanced/deep/frontier).
 
 ## Model selection
 
@@ -27,13 +27,13 @@ overrides:
 
 ## Skill / command surface
 
-- All Zeref OS skills surface as `zeref:<skill-name>` via Claude Code's Skill tool.
-- All Zeref OS commands surface as `/zeref:<command>` in the slash command namespace.
+- All Shiroe skills surface as `shiroe:<skill-name>` via Claude Code's Skill tool.
+- All Shiroe commands surface as `/shiroe:<command>` in the slash command namespace.
 - The `.claude-plugin/plugin.json` manifest binds these.
 
 ## Hooks
 
-Zeref OS relies on Claude Code's native SessionStart and UserPromptSubmit hooks (not custom watchers) to trigger:
+Shiroe relies on Claude Code's native SessionStart and UserPromptSubmit hooks (not custom watchers) to trigger:
 - `/start` boot sequence on session start
 - `privacy-guardian` pre-write checks
 - `pattern-observer` background scan on every prompt submit

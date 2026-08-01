@@ -16,7 +16,7 @@ max_turns: 8
 
 ## Mission
 
-Auto-gate #2 of the v2.6 four-gate chain. Choose the smallest set of Zeref skills + extended tools that can deliver the task. Block fan-out across all 10 skills (anti-pattern). Declare the stack inline so the user can redirect before tokens are spent.
+Auto-gate #2 of the v2.6 four-gate chain. Choose the smallest set of Shiroe skills + extended tools that can deliver the task. Block fan-out across all 10 skills (anti-pattern). Declare the stack inline so the user can redirect before tokens are spent.
 
 ## Domain → smallest-useful-stack matrix
 
@@ -30,9 +30,9 @@ Auto-gate #2 of the v2.6 four-gate chain. Choose the smallest set of Zeref skill
 | Cross-harness / model-switch handoff | `handoff-compiler` | `privacy-abstraction`, `evidence-grader` | `privacy-guardian` | caveman-handoff (if v2.6+ Session C shipped) |
 | First-run project setup / config missing | `project-setup` | `memory-keeper` | `privacy-guardian` | — |
 | Parent sync / import / export | `parent-sync` or `memory-import-export` | `privacy-abstraction`, `evidence-grader` | `privacy-guardian` | — |
-| Code-heavy / multi-file refactor / build | (no Zeref lead) | `memory-keeper` for decisions | `evidence-grader` | ECC (`/ecc:*`), gstack (`/review`, `/ship`) |
-| Browser / web QA / scraping | (no Zeref lead) | `memory-keeper` for findings | `evidence-grader` | gstack `/browse`, `/qa`; browser-harness MCP |
-| Knowledge-graph / claim mapping / deep research | (no Zeref lead) | `memory-keeper` | `evidence-grader` | `/graphify`, `/deep-research`, notebooklm |
+| Code-heavy / multi-file refactor / build | (no Shiroe lead) | `memory-keeper` for decisions | `evidence-grader` | ECC (`/ecc:*`), gstack (`/review`, `/ship`) |
+| Browser / web QA / scraping | (no Shiroe lead) | `memory-keeper` for findings | `evidence-grader` | gstack `/browse`, `/qa`; browser-harness MCP |
+| Knowledge-graph / claim mapping / deep research | (no Shiroe lead) | `memory-keeper` | `evidence-grader` | `/graphify`, `/deep-research`, notebooklm |
 
 If the domain is not covered above, default lead = `memory-keeper`, support = `[evidence-grader, wiki-maintenance]`, QA = `privacy-guardian`. State "default stack — domain unmatched."
 

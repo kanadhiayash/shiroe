@@ -1,13 +1,13 @@
 <!-- privacy-audit: allow-file "Public security contact page. Contains one maintainer email by design — the whole point of the file is to publish the disclosure channel." -->
 
-# Security Contacts — Zeref OS
+# Security Contacts — Shiroe
 
 Used by [`SECURITY.md`](SECURITY.md) as the fallback channel when GitHub
 Private Vulnerability Reporting is not available.
 
 ## Encrypted email
 
-- **Address:** `security+zeref-os@kanadhiayash.dev`
+- **Address:** `security+shiroe@kanadhiayash.dev`
   *(maintainer email — replace with the address you actually monitor)*
 - **PGP fingerprint:** *to be published — see below.*
 
@@ -21,7 +21,7 @@ recorded here, plus a copy uploaded to <https://keys.openpgp.org>. Steps:
 
 1. Generate the key:
    ```bash
-   gpg --quick-generate-key 'Zeref OS Security <security+zeref-os@kanadhiayash.dev>' \
+   gpg --quick-generate-key 'Shiroe Security <security+shiroe@kanadhiayash.dev>' \
        ed25519 cert,sign 2y
    gpg --quick-add-key <KEY-ID> cv25519 encr 2y
    ```

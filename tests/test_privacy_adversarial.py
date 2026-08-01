@@ -26,7 +26,7 @@ from pathlib import Path
 
 import pytest
 
-from zeref.privacy import scrub
+from shiroe.privacy import scrub
 
 
 # ---------------------------------------------------------------------------
@@ -144,9 +144,9 @@ def test_labelled_secret_with_digits_still_caught() -> None:
 # Handoff privacy filtering — private/local-only/unknown atoms stay home.
 # ---------------------------------------------------------------------------
 def _handoff_root(tmp_path: Path) -> tuple[Path, dict[str, dict]]:
-    from zeref.memory import scaffold_project
-    from zeref.memory.atom_store import AtomStore
-    from zeref.memory.schemas import create_atom
+    from shiroe.memory import scaffold_project
+    from shiroe.memory.atom_store import AtomStore
+    from shiroe.memory.schemas import create_atom
 
     (tmp_path / "AGENTS.md").write_text("# AGENTS.md\n", encoding="utf-8")
     scaffold_project(tmp_path, name="adversarial", privacy="abstract", tier="auto", parent="")
@@ -173,7 +173,7 @@ def _handoff_payload_json(result: dict) -> dict:
 
 
 def test_handoff_excludes_private_atoms_by_default(tmp_path: Path) -> None:
-    from zeref.handoff.compiler import compile_handoff
+    from shiroe.handoff.compiler import compile_handoff
 
     root, atoms = _handoff_root(tmp_path)
     result = compile_handoff(root, target="codex")
@@ -197,7 +197,7 @@ def test_handoff_excludes_private_atoms_by_default(tmp_path: Path) -> None:
 
 
 def test_handoff_include_private_flag_exports_private_not_local_only(tmp_path: Path) -> None:
-    from zeref.handoff.compiler import compile_handoff
+    from shiroe.handoff.compiler import compile_handoff
 
     root, atoms = _handoff_root(tmp_path)
     result = compile_handoff(root, target="codex", include_private=True)
@@ -215,7 +215,7 @@ def test_handoff_include_private_flag_exports_private_not_local_only(tmp_path: P
 
 
 def test_handoff_include_private_emits_audit_event(tmp_path: Path) -> None:
-    from zeref.handoff.compiler import compile_handoff
+    from shiroe.handoff.compiler import compile_handoff
 
     root, atoms = _handoff_root(tmp_path)
     audit_log = root / "memory" / "audit" / "redactions.jsonl"
@@ -252,7 +252,7 @@ def test_handoff_include_private_emits_audit_event(tmp_path: Path) -> None:
 def test_handoff_wrappers_thread_include_private(tmp_path: Path) -> None:
     import inspect
 
-    from zeref.handoff import claude, codex, cursor, github, human
+    from shiroe.handoff import claude, codex, cursor, github, human
 
     for module in (claude, codex, cursor, github, human):
         signature = inspect.signature(module.build)

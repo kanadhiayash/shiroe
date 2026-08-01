@@ -1,15 +1,15 @@
 <!-- privacy-audit: allow-file "Install doc. Documents env-var-shaped tokens (OPENAI_API_KEY, GITHUB_TOKEN) as example config strings. No real credentials." -->
 
-# Install Zeref Memory Engine
+# Install Shiroe
 
 ## Claude Code (CLI)
 
 ```bash
-claude plugin marketplace add kanadhiayash/zeref-os
-claude plugin install zeref-os@zeref-os
+claude plugin marketplace add kanadhiayash/shiroe
+claude plugin install shiroe@shiroe
 ```
 
-Restart Claude Code. Skills surface as `zeref-os:<skill-name>` via the Skill tool. Commands as `/zeref-os:<command>`.
+Restart Claude Code. Skills surface as `shiroe:<skill-name>` via the Skill tool. Commands as `/shiroe:<command>`.
 
 ## Codex / Gemini CLI / Antigravity / Hermes / Amp / Zed / Perplexity Computer
 
@@ -17,28 +17,28 @@ These harnesses read `AGENTS.md` natively.
 
 1. Clone the repo into your project:
    ```bash
-   git clone https://github.com/kanadhiayash/zeref-memory-engine.git .zeref
+   git clone https://github.com/kanadhiayash/shiroe.git .shiroe
    ```
-2. Point your harness at `.zeref/AGENTS.md` as the canonical agent spec.
+2. Point your harness at `.shiroe/AGENTS.md` as the canonical agent spec.
 3. (Optional) Symlink the relevant harness stub to your project root:
-   - Gemini → `.zeref/GEMINI.md`
-   - Claude → `.zeref/CLAUDE.md`
+   - Gemini → `.shiroe/GEMINI.md`
+   - Claude → `.shiroe/CLAUDE.md`
 
 ## Cursor
 
 ```bash
-git clone https://github.com/kanadhiayash/zeref-memory-engine.git .zeref
+git clone https://github.com/kanadhiayash/shiroe.git .shiroe
 mkdir -p .cursor/rules
-cp .zeref/.cursor/rules/zeref.mdc .cursor/rules/
+cp .shiroe/.cursor/rules/shiroe.mdc .cursor/rules/
 ```
 
-Cursor auto-loads `.cursor/rules/zeref.mdc` which points to `.zeref/AGENTS.md`.
+Cursor auto-loads `.cursor/rules/shiroe.mdc` which points to `.shiroe/AGENTS.md`.
 
 ## Windsurf
 
 ```bash
-git clone https://github.com/kanadhiayash/zeref-memory-engine.git .zeref
-cp .zeref/.windsurfrules .
+git clone https://github.com/kanadhiayash/shiroe.git .shiroe
+cp .shiroe/.windsurfrules .
 ```
 
 Windsurf auto-loads `.windsurfrules` at project root.
@@ -46,8 +46,8 @@ Windsurf auto-loads `.windsurfrules` at project root.
 ## Aider
 
 ```bash
-git clone https://github.com/kanadhiayash/zeref-memory-engine.git .zeref
-cp .zeref/.aider.conf.yml.example .aider.conf.yml
+git clone https://github.com/kanadhiayash/shiroe.git .shiroe
+cp .shiroe/.aider.conf.yml.example .aider.conf.yml
 # Edit .aider.conf.yml as needed
 ```
 
@@ -57,7 +57,7 @@ Aider reads `AGENTS.md` natively and `.aider.conf.yml` for harness-specific beha
 
 In any new project:
 ```
-/zeref-os:start
+/shiroe:start
 ```
 (or just `/start` if your harness namespaces slash commands automatically).
 
@@ -70,19 +70,19 @@ This triggers the `project-setup` interview. ~5 min. Writes:
 - `config/PARENT_SYNC.md`
 - `config/BUDGET.md`
 
-Re-run `/zeref-os:start` after to boot the session. Default privacy mode is **abstract**; default connectors are **all OFF**.
+Re-run `/shiroe:start` after to boot the session. Default privacy mode is **abstract**; default connectors are **all OFF**.
 
 ## Verify
 
 ```bash
-python3 .zeref/scripts/zeref-validate.py
+python3 .shiroe/scripts/shiroe-validate.py
 ```
 
 Expect output like the following (counts are derived from the tree and
-`zeref-registry.json` at run time, so exact numbers track the current release):
+`shiroe-registry.json` at run time, so exact numbers track the current release):
 ```
-Zeref validator — /path/to/your/project
-Skills:           15/15 (from zeref-registry.json)
+Shiroe validator — /path/to/your/project
+Skills:           15/15 (from shiroe-registry.json)
 Agents:           6/6 (filesystem vs registry)
 Commands:         8/8 (filesystem vs registry)
 Team packs:       9/9 (filesystem vs registry)
@@ -94,11 +94,24 @@ Memory layout:    flat
 ✔ Validation passed
 ```
 
+## Checking install freshness
+
+If commands or skills seem out of date after an update, confirm what's
+actually installed:
+
+```bash
+shiroe doctor --installation   # or: shiroe version --verbose
+```
+
+This reports the installed product identity, version, git SHA, and content
+digests. If the version/SHA don't match the latest tag on the source repo,
+your harness is serving a cached copy — reinstall the plugin to refresh it.
+
 ## Uninstall
 
 ```bash
-claude plugin uninstall zeref-os@zeref-os
-claude plugin marketplace remove zeref-os
+claude plugin uninstall shiroe@shiroe
+claude plugin marketplace remove shiroe
 ```
 
 Your `memory/` directory is local data — preserved unless you delete it.

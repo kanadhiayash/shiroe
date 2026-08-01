@@ -10,11 +10,11 @@ from pathlib import Path
 
 import pytest
 
-from zeref.core.errors import GuardRejection
-from zeref.guards.contradiction_guard import detect_incoming_conflicts, scan_store
-from zeref.guards.write_gate import write_from_proposal
-from zeref.memory import scaffold_project
-from zeref.memory_state import MemoryStore
+from shiroe.core.errors import GuardRejection
+from shiroe.guards.contradiction_guard import detect_incoming_conflicts, scan_store
+from shiroe.guards.write_gate import write_from_proposal
+from shiroe.memory import scaffold_project
+from shiroe.memory_state import MemoryStore
 
 
 def _env(repo_root: Path) -> dict:
@@ -25,7 +25,7 @@ def _env(repo_root: Path) -> dict:
 
 def _run(repo_root: Path, cwd: Path, args: list[str]) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, "-m", "zeref", *args],
+        [sys.executable, "-m", "shiroe", *args],
         cwd=str(cwd),
         capture_output=True,
         text=True,
@@ -47,7 +47,7 @@ def test_scan_store_detects_same_title_conflict(tmp_path: Path) -> None:
         claim="Linear is the delivery source of truth.",
         privacy_class="internal",
         evidence_grade="B",
-        source_refs=["docs/plans/ZEREF_HARDENING_RECON.md"],
+        source_refs=["docs/plans/SHIROE_HARDENING_RECON.md"],
     )
     second = store.add_card(
         type="decision",
@@ -55,7 +55,7 @@ def test_scan_store_detects_same_title_conflict(tmp_path: Path) -> None:
         claim="GitHub Issues are the delivery source of truth.",
         privacy_class="internal",
         evidence_grade="B",
-        source_refs=["docs/plans/ZEREF_HARDENING_RECON.md"],
+        source_refs=["docs/plans/SHIROE_HARDENING_RECON.md"],
     )
 
     conflicts = scan_store(store)
@@ -66,14 +66,24 @@ def test_scan_store_detects_same_title_conflict(tmp_path: Path) -> None:
 
 def test_write_gate_blocks_and_records_conflict(tmp_path: Path) -> None:
     store = _store(tmp_path)
-    store.add_card(
-        type="preference",
-        title="Public copy default",
-        claim="Use public-safe copy by default.",
-        privacy_class="internal",
-        evidence_grade="C",
-        source_refs=["user-input"],
+    # Seed through the guarded path so the existing claim lands in the
+    # canonical atom store — the same store the gate reads when checking an
+    # incoming write.
+    seed = tmp_path / "seed.json"
+    seed.write_text(
+        json.dumps(
+            {
+                "type": "preference",
+                "title": "Public copy default",
+                "claim": "Use public-safe copy by default.",
+                "privacy_class": "internal",
+                "evidence_grade": "C",
+                "source_refs": ["user-input"],
+            }
+        ),
+        encoding="utf-8",
     )
+    write_from_proposal(seed, store)
     proposal = tmp_path / "proposal.json"
     proposal.write_text(
         json.dumps(
@@ -103,7 +113,7 @@ def test_contradictions_cli_scan_and_resolve(repo_root: Path, tmp_path: Path) ->
         claim="Use Linear as delivery source of truth.",
         privacy_class="internal",
         evidence_grade="B",
-        source_refs=["docs/plans/ZEREF_HARDENING_RECON.md"],
+        source_refs=["docs/plans/SHIROE_HARDENING_RECON.md"],
     )
     store.add_card(
         type="decision",
@@ -111,7 +121,7 @@ def test_contradictions_cli_scan_and_resolve(repo_root: Path, tmp_path: Path) ->
         claim="Use GitHub as delivery source of truth.",
         privacy_class="internal",
         evidence_grade="B",
-        source_refs=["docs/plans/ZEREF_HARDENING_RECON.md"],
+        source_refs=["docs/plans/SHIROE_HARDENING_RECON.md"],
     )
 
     scan = _run(repo_root, tmp_path, ["contradictions", "scan", "memory/"])

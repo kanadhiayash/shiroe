@@ -133,7 +133,7 @@ R6 diff (Step 4 Validate) is upgraded: byte-equal check PLUS NFKC-equal check. A
 
 When the target model has a profile in `references/target-model-profiles/`, the compressor consults its `already_knows` field and drops content the target already carries in its system prompt.
 
-- Loader: `zeref.prompt.target_profile.load_profile(target_id)` returns a `TargetProfile`; `caveman_skip_categories(profile)` returns the skip iterable.
+- Loader: `shiroe.prompt.target_profile.load_profile(target_id)` returns a `TargetProfile`; `caveman_skip_categories(profile)` returns the skip iterable.
 - Categories the skip list covers: `available_tools_and_signatures`, `todays_date`, `user_platform_generic`, `safety_rules_baseline`, `tool_use_semantics`, `memory_system_semantics`, `artifact_system_semantics`, `copyright_compliance_baseline`, `refusal_style`, `list_vs_prose_defaults`, plus any target-specific additions.
 - Wrapper emits a compact preamble line — `_target-profile:<id> — skip: <csv>_` — that downstream compressors can trust as ground truth.
 - Fail-open: no profile = pre-v1.2 behavior unchanged.

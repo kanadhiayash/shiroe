@@ -4,13 +4,13 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "zeref-os"
-version = "2.0.0-alpha.2"
-description = "Zeref OS — local-first context and memory engine for AI harnesses"
+name = "shiroe"
+version = "3.0.0-alpha.1"
+description = "Shiroe AI Tactician — local-first AI work control plane for governed execution, model routing, project memory, evidence, handoffs, and team synchronization."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
-keywords = ["ai", "memory", "context", "llm", "agent", "zeref"]
+keywords = ["ai", "memory", "context", "llm", "agent", "shiroe"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -27,21 +27,29 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
-llm    = ["litellm>=1.0"]    # zeref grade (LLM-enhanced)
-duckdb = ["duckdb>=0.10"]    # zeref db snapshot --parquet
-yaml   = ["pyyaml>=6.0"]     # richer REDACT.md YAML parsing
-all    = ["litellm>=1.0", "duckdb>=0.10", "pyyaml>=6.0"]
+llm       = ["litellm>=1.0"]    # shiroe grade (LLM-enhanced)
+duckdb    = ["duckdb>=0.10"]    # shiroe db snapshot --parquet
+yaml      = ["pyyaml>=6.0"]     # richer REDACT.md YAML parsing
+tokenizer = ["tiktoken>=0.5"]   # cost_router token estimate (model-family tokenizer)
+# benchmarks/external: dataset loaders, judge clients, scoring — dev/test
+# only, never a runtime dependency of `pip install shiroe-os`. `benchmarks/`
+# itself isn't packaged (see [tool.setuptools.packages.find] below); this
+# extra exists so any future third-party dep (e.g. a Gemini SDK) lands here,
+# never in core. Empty today — stdlib covers everything built so far (BM25,
+# cost estimator, fake/estimate-only judge clients).
+benchmark = []
+all       = ["litellm>=1.0", "duckdb>=0.10", "pyyaml>=6.0", "tiktoken>=0.5"]
 
 [project.scripts]
-zeref = "zeref.cli:main"
+shiroe = "shiroe.cli:main"
 
 [project.urls]
-Homepage  = "https://github.com/kanadhiayash/zeref-memory-engine"
-Changelog = "https://github.com/kanadhiayash/zeref-memory-engine/blob/main/CHANGELOG.md"
+Homepage  = "https://github.com/kanadhiayash/shiroe"
+Changelog = "https://github.com/kanadhiayash/shiroe/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where   = ["."]
-include = ["zeref*"]
+include = ["shiroe*"]
 
 [tool.setuptools.package-data]
-zeref = ["VERSION", "adapters/*.json", "adapters/providers/*.json"]
+shiroe = ["VERSION", "IDENTITY.json", "adapters/*.json", "adapters/providers/*.json"]

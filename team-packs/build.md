@@ -9,7 +9,7 @@ output_dir: team/
 
 # build team pack
 
-> Sourced from ZEREF_OS §8.
+> Sourced from SHIROE_OS §8.
 
 ## Roster
 
@@ -17,7 +17,7 @@ output_dir: team/
 |---|---|
 | **Planner** | Decomposes the feature into module boundaries, contracts, sequencing. Writes `team/build-plan.md`. |
 | **Implementer** | Executes the plan one module at a time. Writes code; updates `team/build-progress.md` per module. |
-| **Reviewer** | Reviews each Implementer hand-off against the plan and against `references/zeref-qa-gate.md`. Writes `team/build-review.md`. |
+| **Reviewer** | Reviews each Implementer hand-off against the plan and against `references/shiroe-qa-gate.md`. Writes `team/build-review.md`. |
 
 ## When to use
 

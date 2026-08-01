@@ -1,6 +1,6 @@
 # Public Surface Policy
 
-The public surface is everything a visitor can read before cloning or installing Zeref.
+The public surface is everything a visitor can read before cloning or installing Shiroe.
 
 ## Primary surfaces
 

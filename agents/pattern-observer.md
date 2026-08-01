@@ -2,7 +2,7 @@
 name: pattern-observer
 description: Background agent. Scans memory/patterns/PATTERNS.jsonl over rolling 48-80h window. Detects ≥3 semantically similar events (n-gram similarity ≥0.8). Surfaces candidate skills via pattern-to-skill (drafts land in skills/drafts/).
 model: haiku            # harness alias; canonical class below
-reasoning_class: fast   # provider mapping: zeref/adapters/providers/
+reasoning_class: fast   # provider mapping: shiroe/adapters/providers/
 max_turns: 20
 ---
 <!-- privacy-audit: allow-file "Agent spec documents PATTERNS.jsonl schema fields + example triggers; no user data." -->
@@ -21,7 +21,7 @@ Watch for repeated work patterns. When a task signature repeats ≥3× in 48-80h
 
 ## Source log
 
-- `memory/patterns/PATTERNS.jsonl` (per ZEREF_OS §3.5)
+- `memory/patterns/PATTERNS.jsonl` (per SHIROE_OS §3.5)
 - Append-only. Every tool invocation sequence captured here by the active agent.
 - Harness-agnostic: any harness writes to the same file.
 - Historical predecessor (pre-v4.3): `memory/archive/session-events-v4.2.jsonl`. Skip unless user requests an extended historical scan.

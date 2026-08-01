@@ -5,13 +5,13 @@ argument-hint: "[solo|build|research|red|audit|ship] [--write] [--scope=PATH] [-
 
 # /team
 
-Activate an on-demand team pack per ZEREF_OS §8. Max 4 agents. Outputs land in `team/` (never inline-only).
+Activate an on-demand team pack per SHIROE_OS §8. Max 4 agents. Outputs land in `team/` (never inline-only).
 
 ## Usage
 
 ```
 /team               # show available packs and current active pack
-/team solo          # revert to default 1-primary + memory engine
+/team solo          # revert to default 1-primary + Shiroe AI Tactician
 /team build         # Planner + Implementer + Reviewer
 /team research      # Investigator + Synthesizer + Fact-checker
 /team red           # Attacker + Security reviewer + Constraint checker + Evidence recorder (read-only)
@@ -44,13 +44,13 @@ Pack-specific args:
 
 ## Safety
 
-- **red** team is read-only by default. Per ZEREF_OS §8 anti-pattern: "Do NOT activate a team without user trigger or explicit recommendation."
+- **red** team is read-only by default. Per SHIROE_OS §8 anti-pattern: "Do NOT activate a team without user trigger or explicit recommendation."
 - **ship** Deploy verifier blocks on failed checklist. User can override; override is recorded.
 - All team writes still pass through `privacy-guardian` per `PRIVACY.md`.
 
 ## Related
 
 - `team-packs/` — pack definitions
-- `references/v4x-canon/ZEREF_OS.md` §8
-- `references/zeref-qa-gate.md` — used by audit and build Reviewer
-- `references/zeref-safety-principles.md` — used by red team
+- `references/v4x-canon/SHIROE_OS.md` §8
+- `references/shiroe-qa-gate.md` — used by audit and build Reviewer
+- `references/shiroe-safety-principles.md` — used by red team

@@ -1,16 +1,16 @@
 # Shared Token Discipline Rules
-**Zeref OS Skills Fleet V2 — Canonical Reference**
+**Shiroe Skills Fleet V2 — Canonical Reference**
 Version: 1.0.0 | Owner: Yash Kanadhia
 Last Updated: 2026-06-19
 
-> All Zeref OS skill files reference this document instead of duplicating these rules.
+> All Shiroe skill files reference this document instead of duplicating these rules.
 > Do not modify this file without updating the version number and changelog.
 
 ---
 
 ## Purpose
 
-These rules govern how every Zeref OS skill manages output length, format selection, and information density. The goal is maximum signal per token: precise, structured, actionable outputs that respect context window limits and avoid padding.
+These rules govern how every Shiroe skill manages output length, format selection, and information density. The goal is maximum signal per token: precise, structured, actionable outputs that respect context window limits and avoid padding.
 
 ---
 
@@ -106,7 +106,7 @@ Maximum list item length: 2 lines. If a bullet item requires more than 2 lines o
 
 ## Rule 6 — Never Pad with Filler
 
-These phrases are banned from Zeref OS outputs:
+These phrases are banned from Shiroe outputs:
 
 - "Great question!"
 - "Certainly!"

@@ -14,7 +14,7 @@ from pathlib import Path
 
 def test_db_status_reports_every_backend(repo_root: Path) -> None:
     r = subprocess.run(
-        [sys.executable, "-m", "zeref", "db-status"],
+        [sys.executable, "-m", "shiroe", "db-status"],
         capture_output=True, text=True, cwd=str(repo_root),
     )
     assert r.returncode == 0, r.stderr
@@ -29,7 +29,7 @@ def test_db_status_reports_every_backend(repo_root: Path) -> None:
 def test_db_status_marks_sqlite_available(repo_root: Path) -> None:
     """sqlite3 ships with Python; it must always be marked available."""
     r = subprocess.run(
-        [sys.executable, "-m", "zeref", "db-status"],
+        [sys.executable, "-m", "shiroe", "db-status"],
         capture_output=True, text=True, cwd=str(repo_root),
     )
     assert "✔ sqlite3" in r.stdout, r.stdout

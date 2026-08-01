@@ -5,8 +5,10 @@ family: claude
 variant: opus-4-8
 source_url: https://github.com/asgeirtj/system_prompts_leaks/blob/main/Anthropic/claude-opus-4.8.md
 source_updated_at: 2026-06-09
+# community mirror repo, not the vendor — see issue #175
+source_authority: third_party
 last_verified_catalog_sha: 5d3c7696339b4d8add91808e20e3fe3e29a12957
-extracted_by: zeref v1.2 profile-extractor (main-thread Opus 4.7)
+extracted_by: shiroe v1.2 profile-extractor (main-thread Opus 4.7)
 extracted_at: 2026-07-11
 
 # Cost-router inputs (measured from source; 1 token ~ 4 bytes)
@@ -16,7 +18,7 @@ tool_declaration_tokens: 25000
 bare_prompt_tokens: 20000
 prompt_cache_ttl_min: 5
 
-# Output-shape defaults (target already enforces — Zeref should NOT re-instruct)
+# Output-shape defaults (target already enforces — Shiroe should NOT re-instruct)
 output_style: prose-first-terse-then-elaborate
 markdown_default: minimal
 emoji_default: no
@@ -26,13 +28,13 @@ lists_default: no
 questions_per_response_max: 1
 avoids_words: [genuinely, honestly, actually]
 
-# Tool-use format the target expects — Zeref should MATCH
+# Tool-use format the target expects — Shiroe should MATCH
 tool_use_format: xml-function-calls
 tool_dispatch: parallel-when-independent
 tool_result_frame: tool_result-tagged
 tool_reference_convention: '<function_calls>/<invoke>'
 
-# Constraint signature — Zeref should PRE-SHAPE to match
+# Constraint signature — Shiroe should PRE-SHAPE to match
 refusal_signature: constitutional
 persona_lock: neutral-warm
 identity_reference_ok: [claude, anthropic]
@@ -83,8 +85,8 @@ cache_hit_multiplier: 0.1
 # Diff hints
 notes: |
   Largest Anthropic system prompt in the catalog. Full-tool prompt ~45k
-  input tokens BEFORE Zeref's wrapper — prompt caching is non-optional.
-  Zeref's caveman-handoff should treat this as the target with the
+  input tokens BEFORE Shiroe's wrapper — prompt caching is non-optional.
+  Shiroe's caveman-handoff should treat this as the target with the
   broadest already_knows set: safety, tools, memory, artifacts, format
   are all pre-declared. Aggressive skip list expected to yield ~30-40%
   reduction on typical handoffs.
@@ -94,18 +96,18 @@ notes: |
   for `claude-fable-5.md` with a persona-override note.
 ---
 
-# claude-opus-4-8 — Zeref target profile
+# claude-opus-4-8 — Shiroe target profile
 
 Derived-summary schema — no source text vendored. See
 [skills/imported/system-prompts-leaks/README.md](../../skills/imported/system-prompts-leaks/README.md)
 for policy.
 
 Consumers:
-- `zeref/prompt/inject.py` — target-aware wrapper
-- `zeref/memory/cost_router.py` — length-aware cost
+- `shiroe/prompt/inject.py` — target-aware wrapper
+- `shiroe/memory/cost_router.py` — length-aware cost
 - `skills/caveman-handoff/SKILL.md` — target-aware skip list
 - `skills/prompt-context-engine/SKILL.md` — profile-aware classification
 - `_shared/model-resolver.md` — cross-linked row
 
 Freshness: profile refuses at load if `source_updated_at` is >60 days
-stale relative to `zeref release check` invocation date.
+stale relative to `shiroe release check` invocation date.

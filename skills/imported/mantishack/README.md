@@ -7,7 +7,7 @@ license: unknown-verify-with-owner
 outbound_write: forbidden
 foreign_code_containment: pass
 imported_at: 2026-07-10
-imported_by: audit(zeref-consistency-audit)
+imported_by: audit(shiroe-consistency-audit)
 scope: offensive-security-research
 ---
 
@@ -23,7 +23,7 @@ Per user's global `CLAUDE.md`: "All security work follows the same GitHub_OS rul
 
 Restricted means:
 
-- No mantishack artifact, output, or configuration is written to Zeref memory in `exact` privacy mode. `abstract` mode required.
+- No mantishack artifact, output, or configuration is written to Shiroe memory in `exact` privacy mode. `abstract` mode required.
 - No mantishack output crosses into the tracked repo tree.
 - Any mantishack invocation is logged to a **local-only** journal, never `memory/sync/outbound/`.
 
@@ -38,8 +38,8 @@ No source vendored. mantishack is invoked out-of-band from its own local checkou
 ## Forbidden
 
 - Executing mantishack from within this repo's worktree.
-- Passing Zeref memory into mantishack.
-- Committing mantishack output into `zeref-memory-engine`.
+- Passing Shiroe memory into mantishack.
+- Committing mantishack output into `shiroe`.
 - Any offensive test against third-party infrastructure without prior written authorization.
 
 ## Pack membership

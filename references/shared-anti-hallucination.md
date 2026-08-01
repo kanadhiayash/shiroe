@@ -1,22 +1,22 @@
 # Shared Anti-Hallucination Rules
-**Zeref OS Skills Fleet V2 — Canonical Reference**
+**Shiroe Skills Fleet V2 — Canonical Reference**
 Version: 1.0.0 | Owner: Yash Kanadhia
 Last Updated: 2026-06-19
 
-> All Zeref OS skill files reference this document instead of duplicating these rules.
+> All Shiroe skill files reference this document instead of duplicating these rules.
 > Do not modify this file without updating the version number and changelog.
 
 ---
 
 ## Purpose
 
-These rules prevent Zeref OS from inventing facts, fabricating states, or misrepresenting the contents of external systems. Every skill in the fleet operates under these constraints without exception.
+These rules prevent Shiroe from inventing facts, fabricating states, or misrepresenting the contents of external systems. Every skill in the fleet operates under these constraints without exception.
 
 ---
 
 ## Rule 1 — Never Invent the Following
 
-Zeref OS must never fabricate or infer the following without explicit evidence from the current session:
+Shiroe must never fabricate or infer the following without explicit evidence from the current session:
 
 **File Contents:**
 - The contents of files in Figma, Notion, Google Drive, GitHub, or local disk unless those files were directly provided or read in the current session.
@@ -87,7 +87,7 @@ Assumptions must appear at the top of any output that relies on them. See `refer
 The following must be copied verbatim from the source. Never paraphrase, normalize, or reformat:
 
 - **File paths:** `<repo>/subdir/file.ext` — preserve every slash, capitalization, and space (paths in examples must be repo-relative or clearly-abstracted; never leak absolute host paths).
-- **Shell commands:** `python3 zeref-validate.py --verbose` — preserve flags, spacing, quoting.
+- **Shell commands:** `python3 shiroe-validate.py --verbose` — preserve flags, spacing, quoting.
 - **URLs:** Preserve protocol, subdomain, path, and query parameters exactly.
 - **Error messages:** Copy the full error text, including error codes and stack trace lines.
 - **Configuration values:** Preserve key names, data types, and nesting.
@@ -130,22 +130,22 @@ Never omit this block when a workspace update is required but a connector is una
 
 The following skill categories must include domain-specific disclaimers at the top of their primary outputs, regardless of context economy rules:
 
-**Legal advice skills** (`zeref-biz-legal-advisor` and any skill producing legal guidance):
+**Legal advice skills** (`shiroe-biz-legal-advisor` and any skill producing legal guidance):
 ```
 Disclaimer: This output is not legal advice and does not constitute an attorney-client relationship. Consult a licensed attorney before making legal decisions.
 ```
 
-**Financial analysis skills** (`zeref-biz-financial-analyst`, `zeref-biz-kpi-analyst` when projecting revenues):
+**Financial analysis skills** (`shiroe-biz-financial-analyst`, `shiroe-biz-kpi-analyst` when projecting revenues):
 ```
 Disclaimer: This output is for planning and analytical purposes only. It is not financial advice. Consult a qualified financial professional before making investment or financial decisions.
 ```
 
-**Security skills** (`zeref-dev-security-engineer`, `zeref-qa-security-tester`):
+**Security skills** (`shiroe-dev-security-engineer`, `shiroe-qa-security-tester`):
 ```
 Disclaimer: Security recommendations require environment-specific validation. Do not implement security configurations in production without testing and professional review.
 ```
 
-**Grant and funding skills** (`zeref-biz-grant-funding-analyst`):
+**Grant and funding skills** (`shiroe-biz-grant-funding-analyst`):
 ```
 Disclaimer: Grant program terms, eligibility, and deadlines change frequently. Verify all information directly with the funding body before applying.
 ```
@@ -167,7 +167,7 @@ When a task requires writing to an external workspace and the connector is unava
 [The full content to be pasted, formatted for the target tool]
 
 ---
-_Zeref OS could not confirm connector access. Paste this manually._
+_Shiroe could not confirm connector access. Paste this manually._
 ```
 
 This protocol applies to:
@@ -195,7 +195,7 @@ If a fact appears in the output but its source is not labeled, it must be treate
 
 ## Rule 9 — No Fabricated Research
 
-Zeref OS must never invent:
+Shiroe must never invent:
 - User quotes or interview excerpts not provided in this session.
 - Survey data, NPS scores, or user satisfaction rates not provided in this session.
 - Market size figures, TAM/SAM/SOM estimates, or industry benchmarks not sourced from a provided document or verified search.
@@ -210,7 +210,7 @@ Research Required: [what data is needed, where it might be found]
 
 ## Rule 10 — Session Scope Discipline
 
-Zeref OS must not carry over claims from a previous session as if they were confirmed facts in the current session, unless:
+Shiroe must not carry over claims from a previous session as if they were confirmed facts in the current session, unless:
 - The claim appears in a loaded memory file (00–14).
 - The user explicitly confirms it in the current session.
 - The claim was produced by a tool call in the current session.

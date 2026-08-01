@@ -1,23 +1,23 @@
 <!-- privacy-audit: allow-file "Governance spec cites credential-shaped tokens in never-commit list." -->
 
-# Zeref OS — Repo Doctrine (per-repo GITHUB_OS)
+# Shiroe — Repo Doctrine (per-repo GITHUB_OS)
 
 Git and release conventions for this repository.
 
 ## Source of truth
 
-- **Canonical spec**: `AGENTS.md` (root of this repo) — Zeref OS behavioral constitution
+- **Canonical spec**: `AGENTS.md` (root of this repo) — Shiroe behavioral constitution
 - **This file**: git, release, and classification conventions for the repo
 
 ## Conventions
 
 ### Branch naming
 
-`<type>/zeref__<short-description>`.
+`<type>/shiroe__<short-description>`.
 
 Examples:
-- `feat/zeref__skill-router-v2`
-- `fix/zeref__validator-skills-count`
+- `feat/shiroe__skill-router-v2`
+- `fix/shiroe__validator-skills-count`
 - `release/v<major>.<minor>` — frozen-baseline snapshot (never receives further commits after creation)
 
 ### Tags
@@ -26,17 +26,17 @@ SemVer `v<major>.<minor>.<patch>` on `main` only.
 
 ### Commits
 
-Conventional Commits with scope `(zeref)`. Examples:
-- `chore(zeref): release v1.0.0`
-- `feat(zeref): add prompt-context-engine Gate #3`
-- `fix(zeref): validator dynamic skill count from registry`
-- `docs(zeref): add R6 Zero Context Loss to _shared/rules.md`
-- `ci(zeref): add zeref-validate workflow`
+Conventional Commits with scope `(shiroe)`. Examples:
+- `chore(shiroe): release v1.0.0`
+- `feat(shiroe): add prompt-context-engine Gate #3`
+- `fix(shiroe): validator dynamic skill count from registry`
+- `docs(shiroe): add R6 Zero Context Loss to _shared/rules.md`
+- `ci(shiroe): add shiroe-validate workflow`
 
 ### Required gates before push
 
-1. `python3 scripts/zeref-validate.py` — passes (Skills count matches registry; PATTERNS lint 0)
-2. Zeref-scope sweep: every staged file matches allowlist (`AGENTS.md|CHANGELOG|...|scripts/|skills/|team-packs/|tests/|zeref/`); no non-zeref bleed
+1. `python3 scripts/shiroe-validate.py` — passes (Skills count matches registry; PATTERNS lint 0)
+2. Shiroe-scope sweep: every staged file matches allowlist (`AGENTS.md|CHANGELOG|...|scripts/|skills/|team-packs/|tests/|shiroe/`); no non-shiroe bleed
 3. No `--force` to main; no `--no-verify`; no skipping hooks
 4. R6 (Zero Context Loss) — `_shared/rules.md#R6` honored across all skill writes
 5. Privacy gate — `PRIVACY.md` mode + `REDACT.md` classes enforced before any external transmission
@@ -56,19 +56,19 @@ Per AGENTS.md §0 reading order:
 
 `[scope]_[subject]_[type]_[state]_[owner]_[yyyy-mm-dd]_v[major.minor]`.
 
-Existing repo files (SKILL.md, AGENTS.md, CHANGELOG.md, etc.) keep their established Zeref-OS conventions.
+Existing repo files (SKILL.md, AGENTS.md, CHANGELOG.md, etc.) keep their established Shiroe-OS conventions.
 
 ### Classification
 
 - `public`: README.md, CHANGELOG*.md, GitHub Releases, AGENTS.md, SKILL.md, PRIVACY.md/REDACT.md/SHARING_POLICY.md
-- `internal`: memory/*, agents/, scripts/, tests/, zeref/, _shared/
+- `internal`: memory/*, agents/, scripts/, tests/, shiroe/, _shared/
 - `restricted`: never committed (no credentials / PII / client data)
 
 ## Repo-specific paths
 
 - Plugin manifest: `.claude-plugin/plugin.json`
-- Harness stubs: `CLAUDE.md` / `GEMINI.md` / `.cursor/rules/zeref.mdc` / `.windsurfrules` / `.aider.conf.yml.example`
+- Harness stubs: `CLAUDE.md` / `GEMINI.md` / `.cursor/rules/shiroe.mdc` / `.windsurfrules` / `.aider.conf.yml.example`
 
 ## Command center
 
-Notion: https://copper-tv-288.notion.site/Zeref-Agent-OS-Command-Center-358d695d836a81af9f6adf30770217c3
+Notion: https://copper-tv-288.notion.site/Shiroe-Agent-OS-Command-Center-358d695d836a81af9f6adf30770217c3

@@ -1,10 +1,10 @@
 # Inspirations
 
-Naming the influences makes the design legible and situates the project honestly. None of the ideas below are original to Zeref; the contribution is the combination and the enforcement.
+Naming the influences makes the design legible and situates the project honestly. None of the ideas below are original to Shiroe; the contribution is the combination and the enforcement.
 
 ## The name
 
-Zeref is named after a fictional scholar whose accumulated knowledge outlasted any single era — someone who never started from zero.
+Shiroe is named after a fictional scholar whose accumulated knowledge outlasted any single era — someone who never started from zero.
 
 That is the design target. AI sessions today start from zero every time: you re-explain the project, lose decisions to context resets, and abandon accumulated memory when you switch tools. Long-horizon memory that stays faithful to a user's decisions and travels across harnesses is the thing worth building.
 
@@ -36,11 +36,11 @@ Influenced by [secure-by-design](https://www.cisa.gov/securebydesign) principles
 
 Automated conflict resolution is where memory systems quietly become unreliable. Picking the newer claim, or the better-graded one, looks like a policy but is really a guess with a rule attached.
 
-Zeref surfaces both sides and waits. The design bet is that a human deciding occasionally beats a machine deciding invisibly every time.
+Shiroe surfaces both sides and waits. The design bet is that a human deciding occasionally beats a machine deciding invisibly every time.
 
 ## The Two-Strikes Rule
 
-Original to Zeref in this form, inspired by retrospective practice: do not codify a rule on the first occurrence of an error. One occurrence is noise; two is a pattern. Codifying on the first produces brittle rules that encode a coincidence.
+Original to Shiroe in this form, inspired by retrospective practice: do not codify a rule on the first occurrence of an error. One occurrence is noise; two is a pattern. Codifying on the first produces brittle rules that encode a coincidence.
 
 ## Prompt compression for handoff
 
@@ -53,5 +53,5 @@ Branch naming, Conventional Commits with scope, trunk-based development with a p
 ## Related
 
 - [[Architecture]] — how these ideas are implemented
-- [[Stack]] — projects Zeref sits alongside
+- [[Stack]] — projects Shiroe sits alongside
 - [[Home]]

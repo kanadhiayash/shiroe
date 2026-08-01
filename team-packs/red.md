@@ -2,14 +2,14 @@
 name: red
 agents: 4
 max_agents: 4
-read_only: true                # default per ZEREF_OS §8: red team read-only by default
+read_only: true                # default per SHIROE_OS §8: red team read-only by default
 description: Attacker + Security reviewer + Constraint checker + Evidence recorder. Adversarial stress test.
 output_dir: team/
 ---
 
 # red team pack
 
-> Sourced from ZEREF_OS §8. **Read-only by default.**
+> Sourced from SHIROE_OS §8. **Read-only by default.**
 
 ## Roster
 
@@ -52,4 +52,4 @@ User may pass `--write` to grant write access (NOT recommended; defeats the read
 
 - No live destructive actions (DROP, DELETE, irreversible API calls).
 - No third-party probing outside the scope agreed with user.
-- All findings cross-referenced to `references/zeref-safety-principles.md`.
+- All findings cross-referenced to `references/shiroe-safety-principles.md`.

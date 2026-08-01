@@ -1,15 +1,15 @@
 # Routing
 
-Zeref includes a local routing policy for classifying work before execution.
+Shiroe includes a local routing policy for classifying work before execution.
 
 Commands:
 
 ```bash
-zeref route classify "redact credentials before release"
-zeref route explain "scan benchmark claims"
-zeref route policy show
-zeref route policy validate
-zeref route report
+shiroe route classify "redact credentials before release"
+shiroe route explain "scan benchmark claims"
+shiroe route policy show
+shiroe route policy validate
+shiroe route report
 ```
 
 The policy is deterministic and local. It does not call hosted services or

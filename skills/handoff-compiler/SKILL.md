@@ -14,7 +14,7 @@ max_turns: 15
 
 ## Mission
 
-Compress current project state into a package that any harness/model can pick up. Cross-harness portability per ZEREF_OS §10 + D7.
+Compress current project state into a package that any harness/model can pick up. Cross-harness portability per SHIROE_OS §10 + D7.
 
 ## Output package
 

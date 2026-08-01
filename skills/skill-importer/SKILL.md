@@ -1,6 +1,6 @@
 ---
 name: skill-importer
-description: Pull a skill from the user's broader skill directory into this Zeref project. Provenance-tracked, review-first — imports never auto-activate. Compatible with sandbox reference-only mode (see skills/imported/*/README.md).
+description: Pull a skill from the user's broader skill directory into this Shiroe project. Provenance-tracked, review-first — imports never auto-activate. Compatible with sandbox reference-only mode (see skills/imported/*/README.md).
 skill: skill-importer
 version: "1.1.0"
 model: sonnet
@@ -15,7 +15,7 @@ triggers:
 deliverables:
   - skills/<name>/SKILL.md copied with provenance frontmatter
   - skills/<name>/PROVENANCE.md created (source path, source repo, import date, checksum)
-  - skill registered in zeref-registry.json with model + risk_level
+  - skill registered in shiroe-registry.json with model + risk_level
   - skill NOT auto-activated — awaits /review-skill
 ---
 
@@ -23,7 +23,7 @@ deliverables:
 
 **Purpose.** Pull a skill from the user's broader skill directory (e.g.
 `~/.claude/skills/`, `~/.codex/skills/`, a sibling project, or a public
-skill repo) into this Zeref OS project. The import is provenance-tracked
+skill repo) into this Shiroe project. The import is provenance-tracked
 and does **not** auto-activate the skill — the user reviews it via
 `/review-skill` first.
 
@@ -57,7 +57,7 @@ This skill is the destination side of "adaptivity". When the user says
    ```
 6. **Write `skills/<name>/PROVENANCE.md`** with: source path, source
    project, original author (if known), import date, source SHA-256.
-7. **Append to `zeref-registry.json`** with `risk_level: medium` and the
+7. **Append to `shiroe-registry.json`** with `risk_level: medium` and the
    declared trigger phrases — but with an `activation: false` flag so
    `skill-router` does **not** pick it up.
 8. **Notify the user**: "Imported `<name>` to `skills/<name>/`. Run
@@ -79,4 +79,4 @@ This skill is the destination side of "adaptivity". When the user says
   pipeline first).
 - Source has no `SKILL.md` (not a valid skill).
 - Privacy filter flags credentials in the source.
-- Import target name collides with a built-in Zeref OS skill.
+- Import target name collides with a built-in Shiroe skill.

@@ -9,10 +9,10 @@ making external calls. Product commands remain local-first.
 Commands:
 
 ```bash
-zeref privacy scan docs/
-zeref privacy classify "public-safe copy"
-zeref privacy redact docs/example.md --suggest
-zeref privacy report --format json
+shiroe privacy scan docs/
+shiroe privacy classify "public-safe copy"
+shiroe privacy redact docs/example.md --suggest
+shiroe privacy report --format json
 ```
 
 Credential-shaped material is classified as `secret` and blocks guarded memory

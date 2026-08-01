@@ -25,7 +25,7 @@ Auto-gate #1 of the v2.6 four-gate execution chain. No major task proceeds witho
 
 ## Tier table (2026 Anthropic pricing — authoritative)
 
-| Tier | Reasoning Class | $/1M input | $/1M output | Zeref OS behavior | Per-skill cap | Legacy alias |
+| Tier | Reasoning Class | $/1M input | $/1M output | Shiroe behavior | Per-skill cap | Legacy alias |
 |---|---|---|---|---|---|---|
 | **HAIKU** | `fast` (haiku alias) | $1 | $5 | Aggressive compaction, minimal wiki writes, short `/status` outputs | 4 000 tok | Free |
 | **SONNET** | `balanced` (sonnet alias) | $3 | $15 | Normal operation, full wiki writes, standard conflict scans | 8 000 tok | Standard |
@@ -122,7 +122,7 @@ User may attempt to override a hard-block (e.g. CRITICAL on Haiku). Single-key o
    `event: budget-gate, payload: {weight: CRITICAL, tier: HAIKU, match: OVERRIDE, override_reason: "<text>"}`
 4. **pattern-observer** surveils for repeat overrides in 48-80h window — ≥3 same-class overrides triggers `pattern-to-skill` candidate "user routinely overrides X on Y tier — consider reclassifying."
 
-Override events count toward `budget-warn_at_tokens` but bypass the hard-block. Validator (`scripts/zeref-validate.py`) recognizes `match=OVERRIDE` per the `budget-gate` event schema allowlist.
+Override events count toward `budget-warn_at_tokens` but bypass the hard-block. Validator (`scripts/shiroe-validate.py`) recognizes `match=OVERRIDE` per the `budget-gate` event schema allowlist.
 
 Single-key shortcuts (user just says "override") are rejected with a re-prompt requiring full directive + brief acknowledgement.
 

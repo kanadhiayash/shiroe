@@ -1,18 +1,18 @@
 # Harness Translation Map
 
-> Sourced from ZEREF_OS §10 + DECISION_LOG D7. `AGENTS.md` is the source of truth. Per-harness loader files defer to it.
+> Sourced from SHIROE_OS §10 + DECISION_LOG D7. `AGENTS.md` is the source of truth. Per-harness loader files defer to it.
 
 ## The principle
 
-Zeref OS is harness-agnostic. The canonical spec lives in `AGENTS.md` (Linux Foundation hosted open standard, 60k+ repos, 20+ tools natively support it). Every harness-specific config file is a thin pointer to `AGENTS.md`.
+Shiroe is harness-agnostic. The canonical spec lives in `AGENTS.md` (Linux Foundation hosted open standard, 60k+ repos, 20+ tools natively support it). Every harness-specific config file is a thin pointer to `AGENTS.md`.
 
 ## Per-harness load instructions
 
 | Harness | Config File | Load Method | Stub Location |
 |---|---|---|---|
-| **Claude Code** | `CLAUDE.md` | One-line: `See @AGENTS.md`. Skills surface as `zeref:<name>`. Commands as `/zeref:<command>`. | `CLAUDE.md` |
+| **Claude Code** | `CLAUDE.md` | One-line: `See @AGENTS.md`. Skills surface as `shiroe:<name>`. Commands as `/shiroe:<command>`. | `CLAUDE.md` |
 | **Codex** | `AGENTS.md` | Native AGENTS.md support | — |
-| **Cursor** | `.cursor/rules/zeref.mdc` | Cursor rules format pointing to AGENTS.md | `.cursor/rules/zeref.mdc` |
+| **Cursor** | `.cursor/rules/shiroe.mdc` | Cursor rules format pointing to AGENTS.md | `.cursor/rules/shiroe.mdc` |
 | **Gemini CLI / Antigravity** | `GEMINI.md` → AGENTS.md | Native AGENTS.md support; thin GEMINI.md stub | `GEMINI.md` |
 | **Windsurf** | `.windsurfrules` | Windsurf rules format pointing to AGENTS.md | `.windsurfrules` |
 | **Aider** | `.aider.conf.yml` + AGENTS.md | Convention-based, opt-in copy from `.aider.conf.yml.example` | `.aider.conf.yml.example` |
@@ -56,5 +56,5 @@ Per-harness quirks: config/<harness>-overrides.md
 ## Related
 
 - `AGENTS.md` — canonical spec
-- `references/v4x-canon/ZEREF_OS.md` §10
+- `references/v4x-canon/SHIROE_OS.md` §10
 - `INSTALL.md` — per-harness install commands

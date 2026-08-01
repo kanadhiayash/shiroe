@@ -1,6 +1,6 @@
 # Memory Model
 
-Zeref stores project memory locally. Human-readable Markdown remains visible in
+Shiroe stores project memory locally. Human-readable Markdown remains visible in
 `memory/`, while structured memory cards live in `memory/state/zeref.sqlite`.
 
 ## Memory Cards

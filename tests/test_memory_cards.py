@@ -6,10 +6,10 @@ from datetime import datetime, timezone
 
 import pytest
 
-from zeref.core.errors import ValidationError
-from zeref.core.schema import MemoryCard, create_memory_card
-from zeref.memory import scaffold_project
-from zeref.memory_state import MemoryStore
+from shiroe.core.errors import ValidationError
+from shiroe.core.schema import MemoryCard, create_memory_card
+from shiroe.memory import scaffold_project
+from shiroe.memory_state import MemoryStore
 
 
 def test_valid_memory_card_creation() -> None:
@@ -27,7 +27,7 @@ def test_valid_memory_card_creation() -> None:
 
     assert card.id == "mem_2026_07_09_0001"
     assert card.status == "active"
-    assert card.owner == "zeref"
+    assert card.owner == "shiroe"
 
 
 def test_invalid_memory_type_rejected() -> None:

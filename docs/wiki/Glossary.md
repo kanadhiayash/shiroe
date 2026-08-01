@@ -1,6 +1,6 @@
 # Glossary
 
-Canonical terms used across Zeref documentation. Where a term names a code construct, the module is cited.
+Canonical terms used across Shiroe documentation. Where a term names a code construct, the module is cited.
 
 ## Memory and reads
 
@@ -16,13 +16,13 @@ Canonical terms used across Zeref documentation. Where a term names a code const
 
 ## Writes and guards
 
-**Guarded write path** — The fixed sequence every write passes: `fact_guard` → `evidence_guard` → `privacy_guard` → `contradiction_guard` → `write_gate`. A claim failing any guard does not reach the store. Modules in `zeref/guards/`.
+**Guarded write path** — The fixed sequence every write passes: `fact_guard` → `evidence_guard` → `privacy_guard` → `contradiction_guard` → `write_gate`. A claim failing any guard does not reach the store. Modules in `shiroe/guards/`.
 
 **Write gate** — The final admission check. Nothing enters the store without clearing it.
 
-**Single-writer** — Only one writer may modify a memory resource at a time, enforced by an advisory lock in `zeref/lock.py`. A second concurrent writer aborts with a clear error.
+**Single-writer** — Only one writer may modify a memory resource at a time, enforced by an advisory lock in `shiroe/lock.py`. A second concurrent writer aborts with a clear error.
 
-**Human arbitration** — The requirement that a detected contradiction be resolved by a person. Zeref surfaces both sides with provenance and waits.
+**Human arbitration** — The requirement that a detected contradiction be resolved by a person. Shiroe surfaces both sides with provenance and waits.
 
 **Refused resolutions** — The four shortcuts contradiction handling will not take: recency-wins, grade-wins, silent-drop, indefinite-snooze. Each decides the question while appearing not to.
 
@@ -42,7 +42,7 @@ Canonical terms used across Zeref documentation. Where a term names a code const
 
 ## Routing
 
-**Reasoning class** — The provider-neutral cost and capability tier a task is entitled to. Core code and schemas name only the class, never a vendor model ID. Defined in `zeref/core/reasoning.py`.
+**Reasoning class** — The provider-neutral cost and capability tier a task is entitled to. Core code and schemas name only the class, never a vendor model ID. Defined in `shiroe/core/reasoning.py`.
 
 - `fast` — cheapest class; the entitlement for LOW-criticality tasks.
 - `balanced` — default working tier for MEDIUM criticality.
@@ -53,17 +53,17 @@ Canonical terms used across Zeref documentation. Where a term names a code const
 
 **Criticality** — A task's declared weight: LOW, MEDIUM, HIGH, or CRITICAL. Resolves to the reasoning class the task is entitled to. A request may downgrade to a cheaper class but never upgrade.
 
-**Provider adapter** — The only place a concrete vendor model ID may appear: a declarative `<provider>.json` file in `zeref/adapters/providers/` mapping each reasoning class to a model ID and optional effort. Loaded by `JsonProviderAdapter`. Descriptors ship for `anthropic` and `openai`. Adding a provider is a config file, not a code change. Zeref does not itself call model APIs.
+**Provider adapter** — The only place a concrete vendor model ID may appear: a declarative `<provider>.json` file in `shiroe/adapters/providers/` mapping each reasoning class to a model ID and optional effort. Loaded by `JsonProviderAdapter`. Descriptors ship for `anthropic` and `openai`. Adding a provider is a config file, not a code change. Shiroe does not itself call model APIs.
 
-**Harness** — The external AI CLI or IDE surface Zeref plugs into. Zeref is not a harness; it is the memory and governance layer a harness reads and writes through.
+**Harness** — The external AI CLI or IDE surface Shiroe plugs into. Shiroe is not a harness; it is the memory and governance layer a harness reads and writes through.
 
 **Harness adapter** — A module implementing detect, health, and context-export for one harness. Registered adapters: `claude-code`, `codex`, `gemini-cli`, `hermes`, `kimi-code`, `odysseus`, `grok`.
 
-**Enforcement level** — The honesty label on how strongly Zeref can govern an integration, never claimed beyond what the execution path supports.
+**Enforcement level** — The honesty label on how strongly Shiroe can govern an integration, never claimed beyond what the execution path supports.
 
-- **Embedded** — Zeref authorizes operations through native hooks, plugins, lifecycle callbacks, or controlled subprocesses.
-- **Sidecar / proxy** — Zeref enforces only work routed through its own CLI, MCP server, API, or proxy.
-- **Context-only** — Zeref supplies context and instructions but cannot guarantee enforcement.
+- **Embedded** — Shiroe authorizes operations through native hooks, plugins, lifecycle callbacks, or controlled subprocesses.
+- **Sidecar / proxy** — Shiroe enforces only work routed through its own CLI, MCP server, API, or proxy.
+- **Context-only** — Shiroe supplies context and instructions but cannot guarantee enforcement.
 
 ## Handoff
 

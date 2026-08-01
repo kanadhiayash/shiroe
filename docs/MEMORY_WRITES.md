@@ -3,8 +3,8 @@
 Guarded memory writes use a proposal file before a card is stored.
 
 ```bash
-zeref memory propose "User prefers public-safe copy by default."
-zeref memory write --from proposal.json
+shiroe memory propose "User prefers public-safe copy by default."
+shiroe memory write --from proposal.json
 ```
 
 The write gate checks:
@@ -20,9 +20,9 @@ Dedicated audit logs are added by the audit subsystem.
 Useful card commands:
 
 ```bash
-zeref memory list
-zeref memory list --type decision
-zeref memory show mem_2026_07_09_0001
-zeref memory archive mem_2026_07_09_0001
-zeref memory supersede mem_2026_07_09_0001 --with mem_2026_07_09_0002
+shiroe memory list
+shiroe memory list --type decision
+shiroe memory show mem_2026_07_09_0001
+shiroe memory archive mem_2026_07_09_0001
+shiroe memory supersede mem_2026_07_09_0001 --with mem_2026_07_09_0002
 ```

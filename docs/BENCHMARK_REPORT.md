@@ -1,4 +1,4 @@
-# Internal Quality Axes Report - Zeref Memory Engine
+# Internal Quality Axes Report - Shiroe
 
 > **Internal quality axes — fixture-based self-checks. NOT external benchmark results.**
 > These axes verify local invariants against committed fixtures. They do not measure
@@ -6,7 +6,7 @@
 > External-dataset benchmarking lives in [`benchmarks/external/`](../benchmarks/external/README.md);
 > no external scores are claimed until full-dataset runs are published.
 
-_Generated: 2026-07-20. Rubric: [`benchmarks/RUBRIC.md`](benchmarks/RUBRIC.md)._
+_Generated: 2026-08-01. Rubric: [`benchmarks/RUBRIC.md`](benchmarks/RUBRIC.md)._
 
 ## Verdict
 
@@ -35,36 +35,36 @@ Lineage axes validate local intake metadata, implementation registries, and guar
 | handoff_success | 10.00 | pass |  |
 | loop_control | 10.00 | pass |  |
 | memory_refinement | 10.00 | pass |  |
-| lineage_import_coverage | — | SKIPPED | lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012). |
-| foreign_code_containment | — | SKIPPED | lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012). |
-| critical_adoption_coverage | — | SKIPPED | lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012). |
-| high_adoption_coverage | — | SKIPPED | lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012). |
-| reference_only_guardrails | — | SKIPPED | lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012). |
-| adapter_value | — | SKIPPED | lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012). |
-| minimality_pressure | — | SKIPPED | lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012). |
-| security_containment | — | SKIPPED | lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012). |
-| license_boundary | — | SKIPPED | lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012). |
+| lineage_import_coverage | — | SKIPPED | lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012). |
+| foreign_code_containment | — | SKIPPED | lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012). |
+| critical_adoption_coverage | — | SKIPPED | lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012). |
+| high_adoption_coverage | — | SKIPPED | lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012). |
+| reference_only_guardrails | — | SKIPPED | lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012). |
+| adapter_value | — | SKIPPED | lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012). |
+| minimality_pressure | — | SKIPPED | lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012). |
+| security_containment | — | SKIPPED | lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012). |
+| license_boundary | — | SKIPPED | lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012). |
 
 ## Skipped axes
 
 Skipped axes are reported explicitly and never count as passing evidence.
 
-- `lineage_import_coverage`: lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).
-- `foreign_code_containment`: lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).
-- `critical_adoption_coverage`: lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).
-- `high_adoption_coverage`: lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).
-- `reference_only_guardrails`: lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).
-- `adapter_value`: lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).
-- `minimality_pressure`: lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).
-- `security_containment`: lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).
-- `license_boundary`: lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012).
+- `lineage_import_coverage`: lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012).
+- `foreign_code_containment`: lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012).
+- `critical_adoption_coverage`: lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012).
+- `high_adoption_coverage`: lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012).
+- `reference_only_guardrails`: lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012).
+- `adapter_value`: lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012).
+- `minimality_pressure`: lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012).
+- `security_containment`: lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012).
+- `license_boundary`: lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012).
 
 ## Portability - 10.00 / 10
 
 | Sub-criterion | Score | Evidence |
 |---|---:|---|
 | `canonical_agents_md` | 10.00 | AGENTS.md present; 7/7 stubs cite it |
-| `per_harness_stubs` | 10.00 | 7/7 harness stubs present: ['CLAUDE.md', 'CODEX.md', 'GEMINI.md', 'LLAMA.md', '.windsurfrules', '.aider.conf.yml.example', '.cursor/rules/zeref.mdc'] |
+| `per_harness_stubs` | 10.00 | 7/7 harness stubs present: ['CLAUDE.md', 'CODEX.md', 'GEMINI.md', 'LLAMA.md', '.windsurfrules', '.aider.conf.yml.example', '.cursor/rules/shiroe.mdc'] |
 | `harness_probe` | 10.00 | probe ran clean; 7/7 stubs present |
 | `harness_matrix` | 10.00 | HARNESS_MATRIX.md has ~8 harness rows |
 | `cli_works` | 10.00 | CLI --version and status both clean |
@@ -109,10 +109,10 @@ Skipped axes are reported explicitly and never count as passing evidence.
 | Sub-criterion | Score | Evidence |
 |---|---:|---|
 | `version_consistency` | 10.00 | checker clean; ci_enforced=True |
-| `test_suite` | 10.00 | 53 test files; pytest.ini=True; ci=True |
+| `test_suite` | 10.00 | 82 test files; pytest.ini=True; ci=True |
 | `privacy_patterns` | 10.00 | 9 provider-shaped credential patterns wired |
 | `security_md` | 10.00 | no_public_route=True, pvr=True, pgp=True, window=True |
-| `ci_hardening` | 10.00 | 9/9 action refs SHA-pinned (100%); dependabot=True |
+| `ci_hardening` | 10.00 | 17/17 action refs SHA-pinned (100%); dependabot=True |
 
 > _Deterministic trust scorer. Use an independent high-effort security review before making any public final trust verdict._
 
@@ -124,15 +124,15 @@ Skipped axes are reported explicitly and never count as passing evidence.
 | `markdown_guard` | 10.00 | markdown rewrite executor=blocked |
 | `minimalism_ladder` | 10.00 | duplicate=link-existing, append=atom-append, patch=atom-patch |
 | `flagship_gate` | 10.00 | public claim executor=flagship |
-| `deterministic_estimator` | 10.00 | estimate=4 deterministic=True |
+| `deterministic_estimator` | 10.00 | estimate=6 deterministic=True |
 | `target_aware_reduction` | 10.00 | aggregate=75% across 2 profile(s); claude-opus-4-8=83%, gpt-5-5-instant=67% |
 
 ## Retrieval Accuracy - 10.00 / 10
 
 | Sub-criterion | Score | Evidence |
 |---|---:|---|
-| `sqlite_indexed_recall` | 10.00 | top=decision_b87d4b26c96d2a34 |
-| `jsonl_fallback_recall` | 10.00 | top=decision_b87d4b26c96d2a34 |
+| `sqlite_indexed_recall` | 10.00 | top=expected-decision |
+| `jsonl_fallback_recall` | 10.00 | top=expected-decision |
 | `explain_search` | 10.00 | candidates=1 |
 
 ## Contradiction Detection - 10.00 / 10
@@ -140,7 +140,7 @@ Skipped axes are reported explicitly and never count as passing evidence.
 | Sub-criterion | Score | Evidence |
 |---|---:|---|
 | `case_creation` | 10.00 | created=1 |
-| `arbitration_required` | 10.00 | User arbitration required. Pick a winner with resolve --winner and provide --reason. |
+| `arbitration_required` | 10.00 | User arbitration required. Pick a winner with resolve --winner and provide --reason. Evidence grades are equal; no auto-suggestion. |
 | `no_silent_resolution` | 10.00 | before_status=active |
 | `explicit_resolution` | 10.00 | after_status=superseded |
 
@@ -178,7 +178,7 @@ Skipped axes are reported explicitly and never count as passing evidence.
 |---|---:|---|
 | `bounded_contract` | 10.00 | max=2 |
 | `run_stops` | 10.00 | iterations=1 |
-| `no_direct_memory_write` | 10.00 | proposal={'direct_memory_write': False, 'loop_id': 'loop_ce2728c3edc0', 'note': 'Loop runtime emits proposals only; durable memory writes require separate commands.', 'proposed_atoms': []} |
+| `no_direct_memory_write` | 10.00 | direct_memory_write=False proposed_atoms=0 |
 | `status_available` | 10.00 | latest status read |
 | `report_available` | 10.00 | report read |
 
@@ -194,39 +194,39 @@ Skipped axes are reported explicitly and never count as passing evidence.
 
 ## Lineage Import Coverage - SKIPPED
 
-> _lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012)._
+> _lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012)._
 
 ## Foreign Code Containment - SKIPPED
 
-> _lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012)._
+> _lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012)._
 
 ## Critical Adoption Coverage - SKIPPED
 
-> _lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012)._
+> _lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012)._
 
 ## High Adoption Coverage - SKIPPED
 
-> _lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012)._
+> _lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012)._
 
 ## Reference Only Guardrails - SKIPPED
 
-> _lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012)._
+> _lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012)._
 
 ## Adapter Value - SKIPPED
 
-> _lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012)._
+> _lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012)._
 
 ## Minimality Pressure - SKIPPED
 
-> _lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012)._
+> _lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012)._
 
 ## Security Containment - SKIPPED
 
-> _lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012)._
+> _lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012)._
 
 ## License Boundary - SKIPPED
 
-> _lineage intake CSV not found at /tmp/nonexistent_zrf.csv. The 64-row intake dataset is local-only and intentionally not committed. Set ZEREF_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (ZRF-AUDIT-012)._
+> _lineage intake CSV ZRF_64_repo_lineage_intake.csv not found. The 64-row intake dataset is local-only and intentionally not committed. Set SHIROE_LINEAGE_INTAKE_CSV or place the CSV at the repo root to run this axis. Skipped axes are reported explicitly and do not count as passing (SHR-AUDIT-012)._
 
 ## How to reproduce
 

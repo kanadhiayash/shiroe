@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from zeref.evidence import (
+from shiroe.evidence import (
     ContradictionError,
     EvidenceGrade,
     EvidenceGradingError,

@@ -8,9 +8,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-from zeref.audit.logger import AuditLogger
-from zeref.audit.reports import audit_report
-from zeref.memory import scaffold_project
+from shiroe.audit.logger import AuditLogger
+from shiroe.audit.reports import audit_report
+from shiroe.memory import scaffold_project
 
 
 def _env(repo_root: Path) -> dict:
@@ -21,7 +21,7 @@ def _env(repo_root: Path) -> dict:
 
 def _run(repo_root: Path, cwd: Path, args: list[str]) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, "-m", "zeref", *args],
+        [sys.executable, "-m", "shiroe", *args],
         cwd=str(cwd),
         capture_output=True,
         text=True,
@@ -59,7 +59,7 @@ def test_audit_logger_creates_append_only_log_and_schema(tmp_path: Path) -> None
     assert payload["event_id"] == event.event_id
     assert payload["event_type"] == "memory_write"
     assert payload["status"] == "accepted"
-    assert payload["actor"] == "zeref"
+    assert payload["actor"] == "shiroe"
     assert payload["guards_run"] == ["factguard"]
 
 
@@ -120,4 +120,4 @@ def test_audit_report_and_corrupt_jsonl_handling(repo_root: Path, tmp_path: Path
 
     cli = _run(repo_root, tmp_path, ["audit", "report", "--format", "md"])
     assert cli.returncode == 0, cli.stderr
-    assert "# Zeref Audit Report" in cli.stdout
+    assert "# Shiroe Audit Report" in cli.stdout

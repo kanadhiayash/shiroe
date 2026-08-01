@@ -8,9 +8,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-from zeref.release.checks import release_passed, run_release_check
-from zeref.release.doctor import doctor_passed, run_doctor
-from zeref.routing.policy import classify_task, validate_policy
+from shiroe.release.checks import release_passed, run_release_check
+from shiroe.release.doctor import doctor_passed, run_doctor
+from shiroe.routing.policy import classify_task, validate_policy
 
 
 def _env(repo_root: Path) -> dict:
@@ -21,7 +21,7 @@ def _env(repo_root: Path) -> dict:
 
 def _run(repo_root: Path, cwd: Path, args: list[str]) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, "-m", "zeref", *args],
+        [sys.executable, "-m", "shiroe", *args],
         cwd=str(cwd),
         capture_output=True,
         text=True,
@@ -52,7 +52,7 @@ def test_release_check(repo_root: Path) -> None:
     assert cli.returncode == 0, cli.stdout
     # WS4: the benchmark gate executes the suite live. Without the local-only
     # lineage intake fixture it must surface a loud SKIP, never a stored PASS.
-    from zeref.lineage.importer import default_csv_path
+    from shiroe.lineage.importer import default_csv_path
 
     if default_csv_path(repo_root).exists():
         assert "PASS benchmarks" in cli.stdout
