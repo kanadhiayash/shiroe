@@ -37,7 +37,7 @@ required_seats:
       independent_from:
         - analyst
 
-execution_graph:
+execution_sequence:
   - scout
   - analyst
   - reviewer

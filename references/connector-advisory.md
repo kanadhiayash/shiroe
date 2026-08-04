@@ -1,6 +1,6 @@
 # Connector Advisory
 
-> Sourced from SHIROE_OS §9 + DECISION_LOG D11. Shiroe ships **zero** bundled MCP tools. Recommendation-only.
+> Expands `AGENTS.md` §"Connector Advisory". Shiroe ships **zero** bundled MCP tools. Recommendation-only.
 
 ## Rules
 
@@ -57,4 +57,4 @@ When the trigger fires, Shiroe says (in `/status` or inline):
 - `PRIVACY.md` — modes and global policy
 - `REDACT.md` — concrete sensitive classes
 - `agents/pattern-observer.md` — detects the triggering signal
-- `references/v4x-canon/SHIROE_OS.md` §9
+- `AGENTS.md` §"Connector Advisory" — the live contract

@@ -14,8 +14,7 @@ Codex-specific notes.
 
 ## First action every session
 
-Identical to AGENTS.md §"First action every session" (reading order per
-SHIROE_OS §0):
+Identical to AGENTS.md §"First action every session":
 
 1. Read `config/PROJECT.md`
 2. Read `memory/hot.md` (≤500 words)

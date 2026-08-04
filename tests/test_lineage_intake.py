@@ -29,10 +29,10 @@ def _row(row_id: int, *, priority: str = "low", adoption: str = "Adapt") -> dict
         "source_type": "repository",
         "category": "memory",
         "decision_from_lineage": "test",
-        "zrf_adoption": adoption,
+        "shiroe_adoption": adoption,
         "priority": priority,
         "council_lens": "Memory Architect",
-        "why_it_matters_to_ZRF": "test",
+        "why_it_matters_to_shiroe": "test",
         "guardrail": "Do not bloat core.",
         "implementation_route": "test route",
         "next_analysis_question": "What is missing?",
@@ -85,3 +85,22 @@ def test_lineage_audit_cli_accepts_project_csv() -> None:
 
     assert result.returncode == 0, result.stdout + result.stderr
     assert '"rows": 64' in result.stdout
+
+
+def test_pre_rename_column_headers_still_load(tmp_path: Path) -> None:
+    """SHR-013: intake CSVs are hand-maintained off-repo, so the old headers
+    must keep working while only the Shiroe names are emitted."""
+    path = tmp_path / "legacy.csv"
+    row = _row(1, adoption="Reference only")
+    row["zrf_adoption"] = row.pop("shiroe_adoption")
+    row["why_it_matters_to_ZRF"] = row.pop("why_it_matters_to_shiroe")
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(row))
+        writer.writeheader()
+        writer.writerow(row)
+
+    loaded = load_rows(path)
+
+    assert loaded[0].shiroe_adoption == "Reference only"
+    assert loaded[0].is_reference_only
+    assert "zrf_adoption" not in loaded[0].to_dict()

@@ -115,7 +115,7 @@ def query_triples(
     limit: int = 20,
     as_of: str | None = None,
 ) -> dict[str, Any]:
-    """Read extracted triples from the SQLite index (memory/indexes/zeref.sqlite).
+    """Read extracted triples from the SQLite index (memory/indexes/shiroe.sqlite).
 
     Triples are index-only, same as the entities/links tables `indexer.py`
     already builds -- there is no JSONL fallback. Run `shiroe memory index`

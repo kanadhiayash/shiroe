@@ -65,19 +65,19 @@ def test_all_missions_present_and_schema_valid() -> None:
         assert mid in loaded, f"missing mission {mid!r}"
     for m in loaded.values():
         assert m.version == 1
-        assert m.execution_graph
+        assert m.execution_sequence
         for seat in m.required_seats:
             assert seat.get("provides"), f"seat {seat.get('id')} lacks provides"
 
 
-def test_execution_graph_is_acyclic_and_covered() -> None:
+def test_execution_sequence_is_acyclic_and_covered() -> None:
     for m in ms.load_all(REPO_ROOT):
         seat_ids = {s["id"] for s in m.required_seats}
-        # every graph step must map to a seat (already checked in schema
+        # every sequence step must map to a seat (already checked in schema
         # validator) and there must be no duplicates
-        assert len(m.execution_graph) == len(set(m.execution_graph)), \
-            f"mission {m.id} execution_graph has duplicates"
-        assert set(m.execution_graph) <= seat_ids
+        assert len(m.execution_sequence) == len(set(m.execution_sequence)), \
+            f"mission {m.id} execution_sequence has duplicates"
+        assert set(m.execution_sequence) <= seat_ids
 
 
 def test_independence_declarations_are_valid() -> None:
@@ -90,18 +90,18 @@ def test_mission_schema_rejects_missing_provides() -> None:
     bad = {
         "schema": MISSION_SCHEMA, "id": "bad", "version": 1,
         "required_seats": [{"id": "x"}],
-        "execution_graph": ["x"],
+        "execution_sequence": ["x"],
         "required_outputs": [], "completion": {},
     }
     with pytest.raises(MissionSchemaError):
         validate_mission(bad)
 
 
-def test_mission_schema_rejects_graph_step_not_in_seats() -> None:
+def test_mission_schema_rejects_sequence_step_not_in_seats() -> None:
     bad = {
         "schema": MISSION_SCHEMA, "id": "bad", "version": 1,
         "required_seats": [{"id": "a", "provides": ["x"]}],
-        "execution_graph": ["a", "ghost"],
+        "execution_sequence": ["a", "ghost"],
         "required_outputs": [], "completion": {},
     }
     with pytest.raises(MissionSchemaError):

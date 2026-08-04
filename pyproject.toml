@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "shiroe"
 version = "3.0.0-alpha.1"
-description = "Shiroe AI Tactician — local-first AI work control plane for governed execution, model routing, project memory, evidence, handoffs, and team synchronization."
+description = "Local-first AI work control plane for governed execution, model routing, project memory, evidence, and handoffs. Harness-agnostic, model-agnostic, privacy-first."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"

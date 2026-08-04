@@ -1,4 +1,4 @@
-name: ZRF Branch Retention
+name: Shiroe Branch Retention
 
 # Enforces the "never delete a protected branch" project policy.
 # Feature branches (feat/*, fix/*, audit/*, docs/*, ci/*, chore/*, release/* candidates

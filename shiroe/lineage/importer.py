@@ -106,16 +106,23 @@ class SourceIdentity:
         }
 
 
+INTAKE_CSV_NAME = "SHIROE_64_repo_lineage_intake.csv"
+# SHR-013: pre-rename filename. The CSV is local-only and hand-maintained, so
+# the old name is still accepted; dropping it is SHR-027 (PR 04).
+LEGACY_INTAKE_CSV_NAME = "ZRF_64_repo_lineage_intake.csv"
+
+
 def default_csv_path(root: Path | None = None) -> Path:
     """Return the conventional local intake path without committing it."""
     base = root or Path.cwd()
     env_path = env_get("LINEAGE_INTAKE_CSV")
     if env_path:
         return Path(env_path)
-    local = base / "ZRF_64_repo_lineage_intake.csv"
-    if local.exists():
-        return local
-    return base.parent / "ZRF_64_repo_lineage_intake.csv"
+    for parent in (base, base.parent):
+        for name in (INTAKE_CSV_NAME, LEGACY_INTAKE_CSV_NAME):
+            if (parent / name).exists():
+                return parent / name
+    return base.parent / INTAKE_CSV_NAME
 
 
 def import_lineage(

@@ -1,7 +1,7 @@
 <!-- privacy-audit: allow-file "Public hero doc. Documents install commands with example env-var names. No user memory." -->
 
 <p align="center">
-  <img src="./assets/shiroe-banner-motion.svg" alt="Shiroe — Strategy over noise. One governed project state across humans, agents, models, harnesses, and devices." width="100%">
+  <img src="./assets/shiroe-banner-motion.svg" alt="Shiroe — Strategy over noise. One governed project state across humans, agents, models, and harnesses." width="100%">
 </p>
 
 <p align="center">
@@ -77,7 +77,7 @@ below ~2k req/s. Re-open if we go multi-node.
 The next session, in any harness, reads that before it writes a line.
 
 <p align="center">
-  <img src="./assets/shiroe-character-snapshot-motion.svg" alt="Shiroe — the tactician: a coordinating intelligence over a bounded work graph" width="72%">
+  <img src="./assets/shiroe-character-snapshot-motion.svg" alt="Shiroe — the tactician: a coordinating intelligence over one governed project state" width="72%">
 </p>
 
 ---
@@ -342,8 +342,8 @@ Stated plainly, because the alternative is letting you discover them later.
 - **Shiroe performs no inference.** It routes and governs; your harness calls the model.
 - **Enforcement varies by harness.** Context-only integrations can be instructed but not compelled. Tiers are stated in [`docs/HARNESS_MATRIX.md`](docs/HARNESS_MATRIX.md).
 - **Privacy redaction is defense-in-depth.** It shrinks the blast radius of a mistake. It is not a reason to paste production credentials into a prompt.
-- **Single-machine memory.** No shared multi-device story yet, despite the "every device" framing in the tagline — that names where this is headed, not what runs today.
-- **No work graphs.** No work-graph module exists. Execution, routing, and handoffs are governed independently; nothing yet models them as a graph.
+- **Single-machine memory.** Project state lives on the machine it was written on. There is no sync, no shared store, and no multi-device or multi-user story yet.
+- **Execution is a sequence, not a graph.** A mission declares an ordered `execution_sequence` of seats. Execution, routing, and handoffs are governed independently; nothing models them as a task graph, and no task-graph module exists.
 - **Pattern detection proposes, never installs.** Drafts land in `skills/drafts/` for review.
 - **Alpha software.** Interfaces may change. MIT, no warranty.
 

@@ -66,7 +66,7 @@ def compile_team(
                 json.dumps({
                     "id": mission.id, "version": mission.version,
                     "required_seats": mission.required_seats,
-                    "execution_graph": mission.execution_graph,
+                    "execution_sequence": mission.execution_sequence,
                     "required_outputs": mission.required_outputs,
                     "completion": mission.completion,
                 }, sort_keys=True),
@@ -99,9 +99,9 @@ def compile_team(
                     json.dumps(a.rationale, sort_keys=True),
                 ),
             )
-        # Populate execution_steps in mission-graph order.
+        # Populate execution_steps in mission-sequence order.
         step_order = 0
-        for step in mission.execution_graph:
+        for step in mission.execution_sequence:
             step_order += 1
             conn.execute(
                 """
@@ -114,8 +114,8 @@ def compile_team(
                 (
                     "es_" + uuid.uuid4().hex[:16], run_id, step,
                     json.dumps([
-                        s for s in mission.execution_graph
-                        if mission.execution_graph.index(s) < step_order - 1
+                        s for s in mission.execution_sequence
+                        if mission.execution_sequence.index(s) < step_order - 1
                     ]),
                     600,
                 ),
@@ -145,7 +145,7 @@ def compile_team(
     return CompiledTeamPlan(
         run_id=run_id, task_id=task_id, mission_id=mission.id,
         policy_id=policy.id, active_harness=active_harness,
-        assignments=assignments, execution_graph=mission.execution_graph,
+        assignments=assignments, execution_sequence=mission.execution_sequence,
         retry_policy={"max_retries": 2, "backoff_s": 1.5},
         timeout_s=policy.cost_envelope.get("tokens_output_max", 600),
         stop_conditions=list(mission.completion.keys()),
