@@ -9,10 +9,17 @@
 
 ## 1. Local-first
 
-Canonical state is markdown on disk. No hosted dependency ever becomes source of
-truth. Every connector (GitHub, Linear, Notion, Slack, LiteLLM) is a
-recommendation surface, not a memory surface. If a hosted service disappears,
-Shiroe must still work.
+Canonical state lives on the user's own disk and nowhere else: a local SQLite
+store for current state, a hash-chained append-only JSONL log for history.
+Markdown pages, search indexes, and graphs are generated projections over those
+two — deletable and rebuildable, never the record itself. No hosted dependency
+ever becomes source of truth. Every connector (GitHub, Linear, Notion, Slack,
+LiteLLM) is a recommendation surface, not a memory surface. If a hosted service
+disappears, Shiroe must still work.
+
+Which store is authoritative is settled by
+[docs/adr/ADR-0001-canonical-store.md](docs/adr/ADR-0001-canonical-store.md), not
+by this file. Local-first is the *principle*; ADR-0001 is the *mechanism*.
 
 Enforcement: [PRIVACY.md](PRIVACY.md) §4.4; [SHARING_POLICY.md](SHARING_POLICY.md)
 defaults `enabled: false`.

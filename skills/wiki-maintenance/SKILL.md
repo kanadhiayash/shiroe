@@ -1,6 +1,6 @@
 ---
 name: wiki-maintenance
-description: Maintains canonical wiki state (flat memory/ layout) — index consistency, page summaries, decisions log, risks register, open questions queue. Activates after writes and on consolidation requests.
+description: Maintains the flat memory/ markdown surface — index consistency, page summaries, decisions log, risks register, open questions queue. Activates after writes and on consolidation requests.
 trigger:
   - post-write (called by memory-keeper after every write)
   - /done (consolidation pass)
@@ -20,7 +20,12 @@ max_turns: 15
 
 ## Mission
 
-Keep flat `memory/` clean, indexed, and useful.
+Keep the flat `memory/` markdown surface clean, indexed, and useful.
+
+This skill maintains an authored markdown layer, not the record of truth. Per
+`docs/adr/ADR-0001-canonical-store.md`, current state lives in the local SQLite
+store and history in the append-only JSONL log; `memory/views/` is generated
+from those and is out of scope here — never hand-edit it.
 
 ## Operations
 
