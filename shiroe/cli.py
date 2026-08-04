@@ -1,5 +1,5 @@
 """
-privacy-audit: allow-file "CLI help text names example commands, env-var-shaped tokens (ZEREF_ALLOW_*, GITHUB_TOKEN) as documentation of the security policy."
+privacy-audit: allow-file "CLI help text names example commands and env-var-shaped tokens (SHIROE_ALLOW_*, GITHUB_TOKEN) as documentation of the security policy."
 
 shiroe.cli — Reference CLI for Shiroe (Sprint 2).
 

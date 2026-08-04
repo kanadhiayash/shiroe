@@ -66,7 +66,7 @@ def test_blocks_contested_vendor_comparison(tmp_path: Path) -> None:
     assert any(f.constraint == "contested_vendor_comparison" for f in findings)
 
 
-def test_allows_citing_vendor_baselines_without_zeref_ranking(tmp_path: Path) -> None:
+def test_allows_citing_vendor_baselines_without_legacy_name_ranking(tmp_path: Path) -> None:
     """Citing a vendor's own published figures for context — e.g. Mem0's
     baseline showing full-context beats Mem0 — is not Shiroe making a
     ranking claim, and must not trip the gate just for mentioning a vendor
@@ -79,7 +79,7 @@ def test_allows_citing_vendor_baselines_without_zeref_ranking(tmp_path: Path) ->
     assert not any(f.constraint == "contested_vendor_comparison" for f in findings)
 
 
-def test_blocks_zeref_score_without_baselines(tmp_path: Path) -> None:
+def test_blocks_legacy_name_score_without_baselines(tmp_path: Path) -> None:
     (tmp_path / "README.md").write_text(
         "Shiroe scores 91% on the LoCoMo benchmark.\n",
         encoding="utf-8",
@@ -88,7 +88,7 @@ def test_blocks_zeref_score_without_baselines(tmp_path: Path) -> None:
     assert any(f.constraint == "missing_baseline_pair" for f in findings)
 
 
-def test_allows_zeref_score_with_both_baselines(tmp_path: Path) -> None:
+def test_allows_legacy_name_score_with_both_baselines(tmp_path: Path) -> None:
     (tmp_path / "README.md").write_text(
         "Shiroe scores 91% on the LoCoMo benchmark, next to a full-context "
         "baseline of 88% and a lexical baseline of 74%.\n",
@@ -133,15 +133,19 @@ def test_run_claim_gate_reports_pass_and_fail(tmp_path: Path) -> None:
 def test_superiority_claim_under_references_is_caught(tmp_path: Path) -> None:
     """references/ was unscanned until now.
 
-    An unevidenced self-rating table lived in
-    references/v4x-canon/MODEL_DEBATE.md claiming "Best-in-class" and
-    "Strongest differentiator vs. comparable systems". The gate never saw it
-    because only README.md and docs/ were scanned. The table is gone; this
-    pins the blind spot shut.
+    An unevidenced self-rating table lived in a model-comparison doc under
+    references/ claiming "Best-in-class" and "Strongest differentiator vs.
+    comparable systems". The gate never saw it because only README.md and
+    docs/ were scanned. The table is gone; this pins the blind spot shut.
+
+    Deliberately a *live* references/ path: SHR-027 excluded the archived
+    v4.x canon bundle from scanning, and this asserts that exclusion did not
+    reopen the rest of the directory. The exclusion itself is pinned in
+    tests/test_legacy_compatibility_boundary.py.
     """
-    canon = tmp_path / "references" / "v4x-canon"
-    canon.mkdir(parents=True)
-    (canon / "MODEL_DEBATE.md").write_text(
+    refs = tmp_path / "references"
+    refs.mkdir(parents=True)
+    (refs / "model-comparison.md").write_text(
         "| Privacy | 9.5 | Shiroe is best-in-class. |\n", encoding="utf-8",
     )
     findings = scan_public_claims(tmp_path)

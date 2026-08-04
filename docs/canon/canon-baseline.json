@@ -1,20 +1,9 @@
 {
   "schema": "shiroe.canon-baseline/v1",
-  "_comment": "SHR-004. Every canon contradiction this tree currently carries, acknowledged with an owner and the PR that will close it. This is an AUDIT-ONLY record: PR 01 detects, PR 02 and PR 03 fix. fix/shr-active-identity retired the six references/v4x-canon/**::archived-unmarked findings (each file now carries a Superseded banner) and the four cites-archived findings on commands/team.md and references/{connector-advisory,harness-translation-map,two-strikes-rule}.md (each citation now names a live surface). shiroe/release/claim_gate.py::cites-archived stays open for SHR-027 / PR 04. Drift is an error in both directions — a finding that appears without an entry here fails the build (NEW), and an entry here that no longer reproduces also fails the build (DROPPED), so fixing a contradiction without retiring its acknowledgement is caught too. Finding ids are (surface, rule), never line numbers, so reflowing a paragraph does not invent a finding.",
+  "_comment": "SHR-004. Every canon contradiction this tree currently carries, acknowledged with an owner and the PR that will close it. This is an AUDIT-ONLY record: PR 01 detects, PR 02 and PR 03 fix. fix/shr-active-identity retired the six references/v4x-canon/**::archived-unmarked findings (each file now carries a Superseded banner) and the four cites-archived findings on commands/team.md and references/{connector-advisory,harness-translation-map,two-strikes-rule}.md (each citation now names a live surface). fix/shr-compatibility-boundary (SHR-027) retired shiroe/release/claim_gate.py::cites-archived: the gate now excludes the archived canon bundle from its scan the same way it already excluded docs/adr/, so it derives no behaviour from a superseded surface and no longer names one. Drift is an error in both directions — a finding that appears without an entry here fails the build (NEW), and an entry here that no longer reproduces also fails the build (DROPPED), so fixing a contradiction without retiring its acknowledgement is caught too. Finding ids are (surface, rule), never line numbers, so reflowing a paragraph does not invent a finding.",
   "generated": "2026-08-03",
   "recorded_at_commit": "a4549e06d3a4b398fb2476039026eda49501176a",
   "findings": [
-    {
-      "id": "shiroe/release/claim_gate.py::cites-archived",
-      "shr": "SHR-004",
-      "count": 1,
-      "excerpt": "cites references/v4x-canon/",
-      "why_open": "Rank-1 code citing an archived path. This is the sharpest instance: the release claim gate derives behaviour from a document the authority map calls superseded, so the citation is either a real dependency (and the target is not archived) or dead weight in the gate.",
-      "owner": "kanadhiayash",
-      "resolving_pr": "fix/shr-active-identity",
-      "status": "acknowledged",
-      "digest": "59a00556d170"
-    },
     {
       "id": "shiroe-registry.json::commands.status-missing",
       "shr": "SHR-005",

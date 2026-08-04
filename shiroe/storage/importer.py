@@ -1,10 +1,16 @@
 """Importer — bring legacy v1 memory into SQLite v2 (vNext §6.5).
 
 Sources handled:
-- ``memory/state/zeref.sqlite`` (v1 ``memory_cards`` / ``memory_items``)
+- the v1 store under ``memory/state/`` (v1 ``memory_cards`` / ``memory_items``);
+  its filename is :data:`~shiroe.compat.legacy_identity.LEGACY_V1_STATE_DB_NAME`
 - ``memory/l1_atoms/*.jsonl`` (append-only atom stores)
 - Root markdown surfaces (``memory/DECISIONS.md``, ``memory/RISKS.md``,
   ``memory/CONFLICTS.md``, ``memory/MEMORY.md``)
+
+This is the migration path off the v1 store (SHR-016): the v1 file is read,
+never renamed and never deleted, and its rows land in the Shiroe-named vNext
+database. Store convergence — dropping the v1 file once its rows are in — is
+issue #208.
 
 Guarantees:
 - Dry-run: side-effect-free with the same manifest that the real run would
@@ -12,8 +18,8 @@ Guarantees:
 - Idempotent: re-running produces zero writes (records dedup by
   ``(source_type, source_ref, content_hash)``).
 - Backup: ``memory/state/shiroe.sqlite`` copied to
-  ``memory/state/backups/zeref2-<ts>.sqlite`` before any write.
-- Rollback: restores the most recent backup.
+  ``memory/state/backups/shiroe-<ts>.sqlite`` before any write.
+- Rollback: restores the most recent backup, pre-rename backups included.
 - Manifest: JSON with counts + hashes written to
   ``memory/state/imports/<ts>.json``.
 """
@@ -30,7 +36,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
+from shiroe.compat.legacy_identity import (
+    LEGACY_IMPORT_BACKUP_PREFIX,
+    LEGACY_V1_STATE_DB_NAME,
+)
 from shiroe.storage.state import StateDB
+
+BACKUP_PREFIX = "shiroe-"
 
 
 @dataclass
@@ -120,7 +132,7 @@ def _iter_markdown_records(root: Path) -> Iterable[tuple[str, str, str, str]]:
 
 
 def _iter_legacy_sqlite(root: Path) -> Iterable[tuple[str, dict]]:
-    legacy = root / "memory" / "state" / "zeref.sqlite"
+    legacy = root / "memory" / "state" / LEGACY_V1_STATE_DB_NAME
     if not legacy.exists():
         return
     conn = sqlite3.connect(legacy)
@@ -184,7 +196,7 @@ def run_import(root: Path | str, *, dry_run: bool = True) -> ImportManifest:
     if not dry_run:
         backup_dir = root / "memory" / "state" / "backups"
         backup_dir.mkdir(parents=True, exist_ok=True)
-        backup = backup_dir / f"zeref2-{manifest.timestamp.replace(':','')}.sqlite"
+        backup = backup_dir / f"{BACKUP_PREFIX}{manifest.timestamp.replace(':','')}.sqlite"
         db.close()
         shutil.copy2(db.path, backup)
         manifest.backup_path = str(backup.relative_to(root))
@@ -258,7 +270,13 @@ def rollback(root: Path | str) -> Path:
     root = Path(root)
     db = StateDB(root)
     backup_dir = root / "memory" / "state" / "backups"
-    backups = sorted(backup_dir.glob("zeref2-*.sqlite"))
+    # Both prefixes: a backup written before the rename is exactly the one
+    # somebody reaches for when an import went wrong on an upgrade.
+    backups = sorted(
+        (*backup_dir.glob(f"{BACKUP_PREFIX}*.sqlite"),
+         *backup_dir.glob(f"{LEGACY_IMPORT_BACKUP_PREFIX}*.sqlite")),
+        key=lambda p: (p.stat().st_mtime, p.name),
+    )
     if not backups:
         raise FileNotFoundError("no backups to roll back to")
     latest = backups[-1]

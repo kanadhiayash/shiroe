@@ -1,15 +1,17 @@
 """StateDB — thin SQLite wrapper for the vNext canonical state DB.
 
-Path convention: ``<root>/memory/state/shiroe.sqlite`` (separate file from the
-legacy ``zeref.sqlite`` so v1 consumers are untouched during the migration
-window).
+Path convention: ``<root>/memory/state/shiroe.sqlite`` — a separate file from
+the v1 store (:data:`shiroe.compat.legacy_identity.LEGACY_V1_STATE_DB_NAME`)
+so v1 consumers are untouched during the migration window.
 """
 
 from __future__ import annotations
 
 import sqlite3
+import warnings
 from pathlib import Path
 
+from shiroe.compat.legacy_identity import LEGACY_VNEXT_STATE_DB_NAME
 from shiroe.migrations import current_version, migrate
 
 
@@ -17,7 +19,7 @@ DB_RELPATH = Path("memory") / "state" / "shiroe.sqlite"
 # Pre-rebrand filename. This is canonical state, not a cache, so an existing
 # project's database is renamed into place on first open -- leaving it behind
 # would present as total memory loss rather than as a rename.
-_LEGACY_DB_RELPATH = Path("memory") / "state" / "zeref2.sqlite"
+_LEGACY_DB_RELPATH = Path("memory") / "state" / LEGACY_VNEXT_STATE_DB_NAME
 
 
 class StateDB:
@@ -38,6 +40,12 @@ class StateDB:
         legacy = self.root / _LEGACY_DB_RELPATH
         if self.path.exists() or not legacy.exists():
             return
+        warnings.warn(
+            f"{LEGACY_VNEXT_STATE_DB_NAME} is deprecated; renaming it to "
+            f"{self.path.name} (see docs/DEPRECATIONS.md, removal in 4.0.0).",
+            DeprecationWarning,
+            stacklevel=3,
+        )
         legacy.rename(self.path)
         for suffix in ("-wal", "-shm"):
             side = legacy.with_name(legacy.name + suffix)

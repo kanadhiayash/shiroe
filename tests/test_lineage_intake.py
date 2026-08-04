@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from shiroe.compat.legacy_identity import LEGACY_LINEAGE_COLUMN_ALIASES
 from shiroe.lineage.intake import REQUIRED_COLUMNS, audit_csv, load_rows
 
 
@@ -92,8 +93,8 @@ def test_pre_rename_column_headers_still_load(tmp_path: Path) -> None:
     must keep working while only the Shiroe names are emitted."""
     path = tmp_path / "legacy.csv"
     row = _row(1, adoption="Reference only")
-    row["zrf_adoption"] = row.pop("shiroe_adoption")
-    row["why_it_matters_to_ZRF"] = row.pop("why_it_matters_to_shiroe")
+    for new_name, old_name in LEGACY_LINEAGE_COLUMN_ALIASES.items():
+        row[old_name] = row.pop(new_name)
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(row))
         writer.writeheader()
@@ -103,4 +104,6 @@ def test_pre_rename_column_headers_still_load(tmp_path: Path) -> None:
 
     assert loaded[0].shiroe_adoption == "Reference only"
     assert loaded[0].is_reference_only
-    assert "zrf_adoption" not in loaded[0].to_dict()
+    emitted = loaded[0].to_dict()
+    for old_name in LEGACY_LINEAGE_COLUMN_ALIASES.values():
+        assert old_name not in emitted
