@@ -450,3 +450,55 @@ def test_unledgered_numeric_claim_fails(repo_root: Path, tmp_path: Path) -> None
     result = _run(repo_root / SCRIPT_REL, root)
     assert result.returncode == 1, f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
     assert "unledgered-claim" in result.stderr, result.stderr
+
+
+@pytest.fixture(scope="module")
+def canon_module(repo_root: Path):
+    """The canon checker loaded as a module, for unit-level detector tests."""
+    import importlib.util
+
+    path = repo_root / SCRIPT_REL
+    spec = importlib.util.spec_from_file_location("_canon_checker_unit", path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+# --- Exculpation scope (security audit finding: one-word bypass of SHR-004) ---
+#
+# EXCULPATING_RE used to be tested against the whole line, so appending any
+# qualifying word anywhere on it silenced a real contradiction. It is now scoped
+# to the clause containing the hit. These cases are the audit's proof-of-concept.
+
+_BYPASS_MUST_FIRE = [
+    "Canonical state is markdown on disk.",
+    "Canonical state is markdown on disk. Views are generated.",
+    "Canonical state is markdown on disk. [docs](https://example.invalid/views/y)",
+    "| store | Canonical state is markdown on disk | generated |",
+]
+
+_MUST_STAY_SILENT = [
+    "Markdown views are generated (never canonical)",
+    "JSONL holds canonical append-only history; Markdown is a generated view",
+    "| Markdown | a generated view, never canonical |",
+]
+
+
+def _hits(canon, text: str) -> list[str]:
+    return [h for _rule, pat in canon.CONFLICT_RULES for h in canon._contradiction_hits(text, pat)]
+
+
+@pytest.mark.parametrize("line", _BYPASS_MUST_FIRE)
+def test_exculpation_cannot_be_bypassed_by_an_unrelated_clause(canon_module, line: str) -> None:
+    assert _hits(canon_module, line), (
+        f"contradiction silenced by an unrelated qualifier on the same line: {line!r}. "
+        "EXCULPATING_RE must be scoped to the clause containing the hit."
+    )
+
+
+@pytest.mark.parametrize("line", _MUST_STAY_SILENT)
+def test_correct_invariant_statements_do_not_fire(canon_module, line: str) -> None:
+    assert not _hits(canon_module, line), (
+        f"line restates ADR-0001 correctly but was flagged: {line!r}"
+    )
