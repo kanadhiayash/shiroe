@@ -16,7 +16,7 @@ required_seats:
       write: project
     reasoning_class: balanced
 
-execution_graph:
+execution_sequence:
   - operator
 
 required_outputs:

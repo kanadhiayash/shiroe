@@ -1,4 +1,4 @@
-name: ZRF Verify
+name: Shiroe Verify
 
 on:
   push:
@@ -186,7 +186,7 @@ jobs:
           python-version: '3.12'
 
       - name: Run internal quality-axis benchmarks
-        # Axes requiring the lineage intake fixture (ZRF_64_repo_lineage_intake.csv)
+        # Axes requiring the lineage intake fixture (SHIROE_64_repo_lineage_intake.csv)
         # are local-only inputs and SKIP cleanly on a fresh checkout; skipped axes
         # do not fail the run (see benchmarks/run-all.py docstring / SHR-AUDIT-012).
         run: |

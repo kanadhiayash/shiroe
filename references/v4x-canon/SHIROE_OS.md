@@ -1,4 +1,11 @@
 # ZEREF OS — Universal Behavioral Constitution v4.x
+
+> **Superseded snapshot.** Retired v4.x canon, archived under
+> `references/v4x-canon/**` by `docs/canon/SOURCE_AUTHORITY.md`. Its section
+> numbering (SHIROE_OS §0, §8, §9, §10, §11) is quoted by older documents; the
+> live equivalents are the matching sections of `AGENTS.md`. Nothing active may
+> cite this file.
+
 > Harness-agnostic. Developer-first. Local-first. Free to install.
 > Works in: Claude Code · Gemini CLI / Antigravity · Cursor · Codex · Hermes · Windsurf · Aider · Amp · Zed · Perplexity Computer · any agent that reads AGENTS.md
 

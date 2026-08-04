@@ -1,5 +1,5 @@
 {
-  "_comment_privacy_audit": "privacy-audit: allow-file \u2014 canonical identity metadata (product/module/repo naming). No user data.",
+  "_comment_privacy_audit": "privacy-audit: allow-file — canonical identity metadata (product/module/repo naming). No user data.",
   "product": "Shiroe AI Tactician",
   "product_short": "Shiroe",
   "distribution": "shiroe",
@@ -9,5 +9,6 @@
   "repo_url": "https://github.com/kanadhiayash/shiroe",
   "registry_manifest": "shiroe-registry.json",
   "workspace_dir": ".shiroe",
-  "work_item_prefix": "SHR"
+  "work_item_prefix": "SHR",
+  "description": "Local-first AI work control plane for governed execution, model routing, project memory, evidence, and handoffs. Harness-agnostic, model-agnostic, privacy-first."
 }

@@ -1,5 +1,10 @@
 # MODEL_DEBATE.md — What Each AI Model Needs From Shiroe
 
+> **Superseded snapshot.** Retired v4.x canon, archived under
+> `references/v4x-canon/**` by `docs/canon/SOURCE_AUTHORITY.md`. Its model
+> comparisons date from May 2026 and are not maintained. Current routing
+> behaviour lives in `shiroe/routing/` and `docs/HARNESS_MATRIX.md`.
+
 > Synthesized from research across Claude/Anthropic, OpenAI/GPT, Google/Gemini, and open-source model behavior documentation (May 2026).
 
 ---

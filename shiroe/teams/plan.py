@@ -23,7 +23,7 @@ class CompiledTeamPlan:
     policy_id: str
     active_harness: str
     assignments: list[SeatAssignment] = field(default_factory=list)
-    execution_graph: list[str] = field(default_factory=list)
+    execution_sequence: list[str] = field(default_factory=list)
     retry_policy: dict = field(default_factory=dict)
     timeout_s: int = 600
     stop_conditions: list[str] = field(default_factory=list)
@@ -42,7 +42,7 @@ class CompiledTeamPlan:
                  "score": a.score, "rationale": a.rationale}
                 for a in self.assignments
             ],
-            "execution_graph": self.execution_graph,
+            "execution_sequence": self.execution_sequence,
             "retry_policy": self.retry_policy, "timeout_s": self.timeout_s,
             "stop_conditions": self.stop_conditions,
             "verification_required": self.verification_required,

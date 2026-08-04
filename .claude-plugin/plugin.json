@@ -1,8 +1,8 @@
 {
-  "_comment_privacy_audit": "privacy-audit: allow-file \u2014 author metadata + descriptor. No user data.",
+  "_comment_privacy_audit": "privacy-audit: allow-file — author metadata + descriptor. No user data.",
   "name": "shiroe",
   "version": "3.0.0-alpha.1",
-  "description": "Local-first AI work control plane for governed execution, model routing, project memory, evidence, handoffs, and team synchronization. Harness-agnostic, model-agnostic, privacy-first. Flat memory layout, append-only pattern log, snapshots, on-demand team packs (small/medium/enterprise). Makes AI work cumulative across every harness.",
+  "description": "Local-first AI work control plane for governed execution, model routing, project memory, evidence, and handoffs. Harness-agnostic, model-agnostic, privacy-first.",
   "author": {
     "name": "Yash Kanadhia"
   }

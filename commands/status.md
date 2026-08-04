@@ -1,5 +1,5 @@
 ---
-description: Show current session state without modifying anything. Read-only. Operates over flat memory/ layout per SHIROE_OS §0.
+description: Show current session state without modifying anything. Read-only. Operates over the flat memory/ layout per AGENTS.md §"First action every session".
 ---
 
 Read-only. Do not write to memory or modify config.

@@ -21,14 +21,22 @@ REQUIRED_COLUMNS = [
     "source_type",
     "category",
     "decision_from_lineage",
-    "zrf_adoption",
+    "shiroe_adoption",
     "priority",
     "council_lens",
-    "why_it_matters_to_ZRF",
+    "why_it_matters_to_shiroe",
     "guardrail",
     "implementation_route",
     "next_analysis_question",
 ]
+
+# SHR-013: pre-rename column headers. Intake CSVs are hand-maintained outside
+# the repo, so both spellings are accepted on read; only the new names are
+# emitted. Dropping the fallback is SHR-027 (PR 04).
+LEGACY_COLUMN_ALIASES = {
+    "shiroe_adoption": "zrf_adoption",
+    "why_it_matters_to_shiroe": "why_it_matters_to_ZRF",
+}
 
 EXPECTED_TOTAL = 64
 EXPECTED_PRIORITY_COUNTS = {"critical": 10, "high": 21}
@@ -50,10 +58,10 @@ class LineageRow:
     source_type: str
     category: str
     decision_from_lineage: str
-    zrf_adoption: str
+    shiroe_adoption: str
     priority: str
     council_lens: str
-    why_it_matters_to_zrf: str
+    why_it_matters_to_shiroe: str
     guardrail: str
     implementation_route: str
     next_analysis_question: str
@@ -63,7 +71,7 @@ class LineageRow:
 
     @property
     def is_reference_only(self) -> bool:
-        return self.zrf_adoption.lower() == "reference only"
+        return self.shiroe_adoption.lower() == "reference only"
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -73,7 +81,7 @@ class LineageRow:
             "repo_url": self.repo_url,
             "source_type": self.source_type,
             "category": self.category,
-            "zrf_adoption": self.zrf_adoption,
+            "shiroe_adoption": self.shiroe_adoption,
             "priority": self.priority,
             "council_lens": self.council_lens,
             "guardrail": self.guardrail,
@@ -89,7 +97,12 @@ def load_rows(csv_path: str | Path) -> list[LineageRow]:
     path = Path(csv_path)
     with path.open(newline="", encoding="utf-8-sig") as handle:
         reader = csv.DictReader(handle)
-        missing = [column for column in REQUIRED_COLUMNS if column not in (reader.fieldnames or [])]
+        present = set(reader.fieldnames or [])
+        missing = [
+            column for column in REQUIRED_COLUMNS
+            if column not in present
+            and LEGACY_COLUMN_ALIASES.get(column) not in present
+        ]
         if missing:
             raise ValueError(f"missing required columns: {', '.join(missing)}")
         rows = [_normalize_row(raw) for raw in reader]
@@ -102,7 +115,7 @@ def audit_csv(csv_path: str | Path) -> dict[str, Any]:
     issues: list[dict[str, Any]] = []
     ids = [row.id for row in rows]
     priorities = Counter(row.priority.lower() for row in rows)
-    adoptions = Counter(row.zrf_adoption for row in rows)
+    adoptions = Counter(row.shiroe_adoption for row in rows)
     source_kinds = Counter(row.source_kind for row in rows)
     categories = Counter(row.category for row in rows)
 
@@ -159,6 +172,13 @@ def audit_csv(csv_path: str | Path) -> dict[str, Any]:
     }
 
 
+def _column(raw: dict[str, str], name: str) -> str | None:
+    """Column value, falling back to the pre-rename header (SHR-013)."""
+    if name in raw:
+        return raw[name]
+    return raw.get(LEGACY_COLUMN_ALIASES.get(name, name))
+
+
 def _normalize_row(raw: dict[str, str]) -> LineageRow:
     try:
         row_id = int((raw.get("id") or "").strip())
@@ -178,10 +198,10 @@ def _normalize_row(raw: dict[str, str]) -> LineageRow:
         source_type=_clean(raw.get("source_type")),
         category=_clean(raw.get("category")),
         decision_from_lineage=_clean(raw.get("decision_from_lineage")),
-        zrf_adoption=_clean(raw.get("zrf_adoption")),
+        shiroe_adoption=_clean(_column(raw, "shiroe_adoption")),
         priority=_clean(raw.get("priority")).lower(),
         council_lens=_clean(raw.get("council_lens")),
-        why_it_matters_to_zrf=_clean(raw.get("why_it_matters_to_ZRF")),
+        why_it_matters_to_shiroe=_clean(_column(raw, "why_it_matters_to_shiroe")),
         guardrail=_clean(raw.get("guardrail")),
         implementation_route=_clean(raw.get("implementation_route")),
         next_analysis_question=_clean(raw.get("next_analysis_question")),

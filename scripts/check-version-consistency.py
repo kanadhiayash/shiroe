@@ -19,6 +19,10 @@ Surfaces verified:
     - .claude-plugin/plugin.json:.name           == .distribution
     - .claude-plugin/marketplace.json:.name      == .distribution
     - .claude-plugin/marketplace.json:.plugins[0].name == .distribution
+    - pyproject.toml:[project].description        == .description
+    - .claude-plugin/plugin.json:.description     == .description
+    - .claude-plugin/marketplace.json:.description == .description
+    - .claude-plugin/marketplace.json:.plugins[0].description == .description
     - .registry_manifest file exists on disk
     - CODEOWNERS exists on disk
 
@@ -148,6 +152,32 @@ def _check_identity_marketplace_plugin0(root: Path, identity: dict) -> tuple[str
     return (".claude-plugin/marketplace.json:.plugins[0].name", identity["distribution"], observed)
 
 
+def _check_identity_pyproject_description(root: Path, identity: dict) -> tuple[str, str, str | None]:
+    text = _read(root, "pyproject.toml")
+    m = re.search(r'(?m)^description\s*=\s*"([^"]+)"', text)
+    return ("pyproject.toml:[project].description", identity["description"],
+            m.group(1) if m else None)
+
+
+def _check_identity_plugin_description(root: Path, identity: dict) -> tuple[str, str, str | None]:
+    data = json.loads(_read(root, ".claude-plugin/plugin.json"))
+    return (".claude-plugin/plugin.json:.description", identity["description"],
+            data.get("description"))
+
+
+def _check_identity_marketplace_description(root: Path, identity: dict) -> tuple[str, str, str | None]:
+    data = json.loads(_read(root, ".claude-plugin/marketplace.json"))
+    return (".claude-plugin/marketplace.json:.description", identity["description"],
+            data.get("description"))
+
+
+def _check_identity_marketplace_plugin0_description(root: Path, identity: dict) -> tuple[str, str, str | None]:
+    data = json.loads(_read(root, ".claude-plugin/marketplace.json"))
+    plugins = data.get("plugins") or []
+    return (".claude-plugin/marketplace.json:.plugins[0].description", identity["description"],
+            plugins[0].get("description") if plugins else None)
+
+
 def _check_identity_registry_manifest(root: Path, identity: dict) -> tuple[str, str, str | None]:
     name = identity["registry_manifest"]
     exists = (root / name).exists()
@@ -166,6 +196,10 @@ IDENTITY_CHECKS = [
     _check_identity_plugin,
     _check_identity_marketplace_name,
     _check_identity_marketplace_plugin0,
+    _check_identity_pyproject_description,
+    _check_identity_plugin_description,
+    _check_identity_marketplace_description,
+    _check_identity_marketplace_plugin0_description,
     _check_identity_registry_manifest,
     _check_identity_codeowners,
 ]
