@@ -451,17 +451,37 @@ CONFLICT_RULES: list[tuple[str, re.Pattern[str]]] = [
 #
 # The discriminator is whether the line frames Markdown as derived. If it says
 # generated / derived / view / never canonical, ADR-0001 is being restated, not
-# contradicted. Checked against the whole line, not the matched window, because
-# the qualifier usually sits past the end of the window.
+# contradicted.
+#
+# Scoped to the CLAUSE containing the hit, never the whole line. Line scope was a
+# one-word bypass of the entire SHR-004 scan: appending "Views are generated." to
+# a contradicting sentence silenced it, and a Markdown table row with a
+# "generated" cell silenced a contradiction in an adjacent cell. Clause bounds use
+# the same '.' and ';' characters as the CONFLICT_RULES windows, so the two agree.
 EXCULPATING_RE = re.compile(r"(?i)\bgenerated\b|\bderive[sd]?\b|\bviews?\b|never canonical")
+
+# '|' is a boundary too: a Markdown table row carries no sentence punctuation, so
+# without it one cell's "generated" exculpates a contradiction in another cell.
+# Narrower than the CONFLICT_RULES window on purpose — narrowing the exculpation
+# scope can only surface more findings, never hide one.
+_CLAUSE_BOUNDS = ".;|"
+
+
+def _clause_around(line: str, start: int, end: int) -> str:
+    """The clause containing [start:end), bounded by '.' or ';' (or the line ends)."""
+    lo = max(line.rfind(c, 0, start) for c in _CLAUSE_BOUNDS)
+    after = [i for i in (line.find(c, end) for c in _CLAUSE_BOUNDS) if i != -1]
+    hi = min(after) if after else len(line)
+    return line[lo + 1 : hi]
 
 
 def _contradiction_hits(text: str, pattern: re.Pattern[str]) -> list[str]:
     hits: list[str] = []
     for line in text.splitlines():
-        if EXCULPATING_RE.search(line):
-            continue
-        hits.extend(m.group(0).strip() for m in pattern.finditer(line))
+        for m in pattern.finditer(line):
+            if EXCULPATING_RE.search(_clause_around(line, m.start(), m.end())):
+                continue
+            hits.append(m.group(0).strip())
     return hits
 
 
