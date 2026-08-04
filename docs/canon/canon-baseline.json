@@ -3,26 +3,5 @@
   "_comment": "SHR-004. Every canon contradiction this tree currently carries, acknowledged with an owner and the PR that will close it. This is an AUDIT-ONLY record: PR 01 detects, PR 02 and PR 03 fix. fix/shr-active-identity retired the six references/v4x-canon/**::archived-unmarked findings (each file now carries a Superseded banner) and the four cites-archived findings on commands/team.md and references/{connector-advisory,harness-translation-map,two-strikes-rule}.md (each citation now names a live surface). fix/shr-compatibility-boundary (SHR-027) retired shiroe/release/claim_gate.py::cites-archived: the gate now excludes the archived canon bundle from its scan the same way it already excluded docs/adr/, so it derives no behaviour from a superseded surface and no longer names one. Drift is an error in both directions — a finding that appears without an entry here fails the build (NEW), and an entry here that no longer reproduces also fails the build (DROPPED), so fixing a contradiction without retiring its acknowledgement is caught too. Finding ids are (surface, rule), never line numbers, so reflowing a paragraph does not invent a finding.",
   "generated": "2026-08-03",
   "recorded_at_commit": "a4549e06d3a4b398fb2476039026eda49501176a",
-  "findings": [
-    {
-      "id": "README.md::claim-drift/readme-test-files",
-      "shr": "SHR-006",
-      "count": 1,
-      "excerpt": "ledger says 82 test files, tree has 83",
-      "why_open": "Self-inflicted and deliberate: this PR adds tests/test_canon_consistency.py, which moves a number README.md states as prose. Left open as the working proof that the ledger detects a PR changing a published count. Fixing it means making the count a generated surface instead of hand-maintained text.",
-      "owner": "kanadhiayash",
-      "resolving_pr": "docs/shr-generated-surfaces",
-      "status": "acknowledged"
-    },
-    {
-      "id": "team-packs::agent-cap-contradiction",
-      "shr": "SHR-006",
-      "count": 1,
-      "excerpt": "public cap is 4 (README.md, AGENTS.md x2); team-packs/enterprise.md declares agents_active: 6",
-      "why_open": "Three public surfaces publish a hard cap of 4 agents per pack while a shipped pack declares 6. One side is wrong and only a human can say which: raising the published cap changes the product promise, lowering enterprise.md changes shipped behaviour.",
-      "owner": "kanadhiayash",
-      "resolving_pr": "docs/shr-generated-surfaces",
-      "status": "acknowledged"
-    }
-  ]
+  "findings": []
 }
