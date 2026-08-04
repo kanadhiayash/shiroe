@@ -24,6 +24,7 @@ import os
 from shiroe.env import getenv as env_get
 import random
 import time
+import uuid
 from pathlib import Path
 
 
@@ -117,17 +118,43 @@ class MemoryLock:
 
 
 def atomic_write(path: Path, content: str) -> None:
-    """Write content to path atomically: tmp -> fsync -> replace."""
-    tmp = path.with_suffix(path.suffix + ".tmp")
+    """
+    Write content to path atomically: staging -> fsync -> replace.
+
+    The staging name is unique per writer. A fixed `<name>.tmp` made two
+    concurrent writers share one staging file: each overwrote the other's
+    partially written bytes, and `os.replace` then published the mixture. The
+    rename was always atomic; what it renamed was not.
+
+    Staging is removed on failure too. Leaving it behind both litters the tree
+    and hands the next writer a half-written file to reason about.
+
+    The parent directory is fsynced after the rename, because on most
+    filesystems the rename is only durable once the directory entry is. Without
+    it a crash can leave the old content in place after a write reported success.
+    """
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.{uuid.uuid4().hex[:8]}.tmp")
     tmp.parent.mkdir(parents=True, exist_ok=True)
 
-    fd = os.open(str(tmp), os.O_CREAT | os.O_WRONLY | os.O_TRUNC, 0o644)
     try:
-        os.write(fd, content.encode("utf-8"))
-        os.fsync(fd)
+        fd = os.open(str(tmp), os.O_CREAT | os.O_WRONLY | os.O_TRUNC, 0o644)
+        try:
+            os.write(fd, content.encode("utf-8"))
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+        os.replace(tmp, path)
+    except BaseException:
+        tmp.unlink(missing_ok=True)
+        raise
+
+    dir_fd = os.open(str(tmp.parent), os.O_RDONLY)
+    try:
+        os.fsync(dir_fd)
+    except OSError:
+        pass  # some filesystems refuse directory fsync; file data is already synced
     finally:
-        os.close(fd)
-    os.replace(tmp, path)
+        os.close(dir_fd)
 
 
 def atomic_append(path: Path, content: str) -> None:
