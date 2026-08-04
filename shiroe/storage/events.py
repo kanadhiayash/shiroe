@@ -239,11 +239,28 @@ class EventLog:
                     )
 
     def replay_into(self, conn: sqlite3.Connection) -> int:
-        """Rebuild ``memory_events`` rows from the JSONL log. Returns row count."""
+        """
+        Rebuild current state from the JSONL log. Returns events replayed.
+
+        Rebuilds ``memory_records`` as well as ``memory_events``. Mirroring the
+        events alone left canonical state empty after a rebuild, which made the
+        JSONL log a write-only audit trail and SQLite the only copy of the truth
+        -- the single point of failure that ADR-0001's split exists to remove.
+
+        Events are folded in file order, which is append order, so a later
+        supersede lands after the write it supersedes. Interpretation is
+        delegated to ``records.apply_event``, the same function the live write
+        path uses: a second interpreter here is how a replay stops reproducing
+        the state it is meant to.
+        """
+        from shiroe.storage.records import apply_event
+
         conn.execute("DELETE FROM memory_events")
+        conn.execute("DELETE FROM memory_records")
         count = 0
         for env in self.iter_events():
             _mirror_row(conn, env)
+            apply_event(conn, env)
             count += 1
         conn.commit()
         return count
