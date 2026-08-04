@@ -502,3 +502,44 @@ def test_correct_invariant_statements_do_not_fire(canon_module, line: str) -> No
     assert not _hits(canon_module, line), (
         f"line restates ADR-0001 correctly but was flagged: {line!r}"
     )
+
+
+# --- Content drift (audit: acknowledgements were laundering slots) ---
+
+
+def test_acknowledged_finding_is_bound_to_its_matched_text(canon_module) -> None:
+    """Same rule, same surface, same count, different text must not stay [KNOWN]."""
+    a = canon_module.Finding("x.md", "r", "SHR-004", count=1, hits=("canonical state is markdown",))
+    b = canon_module.Finding("x.md", "r", "SHR-004", count=1, hits=("the markdown wiki is canonical",))
+    assert a.id == b.id and a.count == b.count
+    assert a.digest and b.digest and a.digest != b.digest
+
+
+def test_baseline_digests_cover_every_finding_that_can_supply_one(repo_root: Path, canon_module) -> None:
+    amap = canon_module.load_authority_map(repo_root)
+    cls, _ = canon_module.classify(amap, canon_module.walk_files(repo_root))
+    observed = (
+        canon_module.check_canon_conflicts(repo_root, cls, amap)
+        + canon_module.check_live_citations_of_archived(repo_root, amap, cls)
+    )
+    baseline = json.loads((repo_root / "docs/canon/canon-baseline.json").read_text())
+    entries = {f["id"]: f for f in baseline["findings"]}
+    missing = [
+        f.id for f in observed
+        if f.digest and f.id in entries and not entries[f.id].get("digest")
+    ]
+    assert not missing, f"acknowledged finding(s) with no content digest: {missing}"
+
+
+# --- Claim shapes must see marked-up and capitalised numbers (audit CRITICAL 3) ---
+
+
+@pytest.mark.parametrize(
+    "phrase",
+    ["500 tests", "**500** tests", "`500` tests", "500 Tests", "500 tests",
+     "capped at **4** agents", "Max **4** agents per pack"],
+)
+def test_claim_shapes_see_marked_up_numbers(canon_module, phrase: str) -> None:
+    assert any(s.search(phrase) for s in canon_module.CLAIM_SHAPES), (
+        f"public surfaces bold their numbers; claim shape is blind to {phrase!r}"
+    )
