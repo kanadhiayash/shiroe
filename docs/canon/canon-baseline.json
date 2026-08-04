@@ -5,36 +5,6 @@
   "recorded_at_commit": "a4549e06d3a4b398fb2476039026eda49501176a",
   "findings": [
     {
-      "id": "shiroe-registry.json::commands.status-missing",
-      "shr": "SHR-005",
-      "count": 8,
-      "excerpt": "8 of 8 command entries carry no status label",
-      "why_open": "SHR-005 requires every public capability to be labelled runtime, adapter, contract, or experimental. Skills and agents are fully labelled; commands are not labelled at all. Adding the labels means editing shiroe-registry.json and extending the schema, which is registry parity work, not audit work.",
-      "owner": "kanadhiayash",
-      "resolving_pr": "fix/shr-registry-parity",
-      "status": "acknowledged"
-    },
-    {
-      "id": "shiroe-registry.json::team_packs.status-missing",
-      "shr": "SHR-005",
-      "count": 9,
-      "excerpt": "9 of 9 team-pack entries carry no status label",
-      "why_open": "Same gap as commands: the schema defines the status enum only under skills and agents, so team_packs entries have nowhere to declare one.",
-      "owner": "kanadhiayash",
-      "resolving_pr": "fix/shr-registry-parity",
-      "status": "acknowledged"
-    },
-    {
-      "id": "shiroe-registry.json::gates.status-missing",
-      "shr": "SHR-005",
-      "count": 5,
-      "excerpt": "5 of 5 gate entries carry no status label",
-      "why_open": "Same gap as commands and team_packs. Gates are the most consequential of the three to mislabel, since a gate advertised as runtime but implemented as contract would silently not run.",
-      "owner": "kanadhiayash",
-      "resolving_pr": "fix/shr-registry-parity",
-      "status": "acknowledged"
-    },
-    {
       "id": "README.md::claim-drift/readme-test-files",
       "shr": "SHR-006",
       "count": 1,
