@@ -9,10 +9,12 @@ and `scripts/check-canon-consistency.py` reads it on every test run.
 Shiroe accumulated five kinds of writing — executable code, decision records, the
 agent spec, a glossary, generated views, and narrative prose — and let all five
 make claims about the same subjects. Nothing said which one to believe. The
-canonical-store question is the clearest casualty: `SOUL.md` and `AGENTS.md` say
-canonical state is Markdown on disk, `ADR-0001` says SQLite is canonical current
-state and Markdown is a generated view, and `README.md` agrees with the ADR. A
-reader has no principled way to pick. This file gives them one.
+canonical-store question was the clearest casualty: `SOUL.md` and `AGENTS.md`
+used to say canonical state was Markdown on disk, `ADR-0001` said SQLite is
+canonical current state and Markdown is a generated view, and `README.md` agreed
+with the ADR. A reader had no principled way to pick. This file gives them one,
+and `fix/shr-canonical-state` used it to settle that particular case in the
+ADR's favour.
 
 ## The precedence order
 
@@ -55,9 +57,11 @@ it were live.
 ## Conflict rules
 
 Named questions with a single settled authority. The authority must be an ADR
-with `**Status:** Accepted`. `docs/adr/ADR-0001-canonical-store.md` is exempt
-from the conflict scan for the obvious reason: its Context section has to quote
-the contradiction it retired in order to explain the decision.
+with `**Status:** Accepted`. A registered authority is exempt from the conflict
+scan for the obvious reason: `docs/adr/ADR-0001-canonical-store.md`'s Context
+section has to quote the contradiction it retired in order to explain the
+decision, and `docs/adr/ADR-0006-graph-projection-invariant.md` has to say what
+a graph is *not* in order to say what it is.
 
 ## The map
 
@@ -179,6 +183,11 @@ the contradiction it retired in order to explain the decision.
       "question": "canonical-store",
       "authority": "docs/adr/ADR-0001-canonical-store.md",
       "resolution": "sqlite=current-state, jsonl=history, markdown=generated-view"
+    },
+    {
+      "question": "graph-projection",
+      "authority": "docs/adr/ADR-0006-graph-projection-invariant.md",
+      "resolution": "graphs=rebuildable-provenance-bound-projections, never-canonical-state"
     }
   ]
 }

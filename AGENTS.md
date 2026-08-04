@@ -9,7 +9,9 @@ This is the canonical agent specification for **Shiroe**. All harness-specific f
 
 ## Identity
 
-Shiroe is a local-first AI work control plane. Harness-agnostic, model-agnostic, privacy-first. Per-project canonical wiki (flat `memory/` layout) + append-only pattern log + snapshots.
+Shiroe is a local-first AI work control plane. Harness-agnostic, model-agnostic, privacy-first. Per-project memory on the user's own disk: a local SQLite current-state store + a hash-chained append-only event log, with markdown pages, indexes, graphs, and snapshots generated from them (see `## Memory model` below).
+
+This document is canonical for **behaviour** — what agents do, in what order, under which gates. It is not the authority on **storage**: which store holds the record of truth is settled by `docs/adr/ADR-0001-canonical-store.md`, and this file defers to it.
 
 ## First action every session (reading order — SHIROE_OS §0)
 
@@ -29,7 +31,7 @@ Do NOT read individual wiki pages for general coding questions or things already
 
 ## Core principles
 
-1. **Local-first**: canonical state is markdown on disk; no hosted dependency
+1. **Local-first**: state lives on the user's own disk; no hosted dependency. SQLite holds current state and JSONL holds append-only history; markdown, indexes, and graphs are generated projections (ADR-0001)
 2. **Privacy-first**: every write passes through `privacy-guardian` (PRIVACY.md + REDACT.md + SHARING_POLICY.md)
 3. **Boundary-first reads**: hot → index → page section, never full pages by default
 4. **Human arbitration**: contradictions surface; never silently resolved
@@ -152,7 +154,28 @@ All skills' `reasoning_class` fields in `shiroe-registry.json` audited against w
 - `/review-skill` — review pattern-detected skill drafts in `skills/drafts/`
 - `/team [solo|build|research|red|audit|ship]` — activate on-demand team pack (per SHIROE_OS §8)
 
-## Memory model (flat layout per SHIROE_OS §12)
+## Memory model
+
+Two layers live under `memory/`, and they are **not** the same thing. Conflating
+them is the mistake ADR-0001 exists to prevent.
+
+### The canonical store (ADR-0001)
+
+- `memory/state/shiroe.sqlite` — current state (`shiroe/storage/state.py`)
+- `memory/events/<yyyy>/<mm>/events.jsonl` — hash-chained, replayable append-only history (`shiroe/storage/events.py`)
+- `memory/views/*.md` — generated views over the store, each stamped with a `DO NOT EDIT DIRECTLY` banner (`shiroe/storage/views.py`); regenerating overwrites hand edits by design
+- `memory/indexes/derived-graph.json` — a rebuildable projection, never a store (see `docs/adr/ADR-0006-graph-projection-invariant.md`)
+
+State must always be rebuildable from the event log alone.
+
+### The v1 flat surface (still markdown-authored)
+
+The files below are the v1 layout. They are written directly as markdown by
+`memory-keeper` (`shiroe/memory/core.py`) and are **not** rendered from SQLite
+today — `shiroe/storage/importer.py` is what migrates them into the canonical
+store, and `shiroe/memory/render.py` deliberately leaves `memory/hot.md` alone
+while writing its own output to `memory/views/`. Treat this layer as an
+authored input to the record of truth, not as the record.
 
 - `memory/hot.md` — last 3 sessions, ≤500 words (read first)
 - `memory/index.md` — domain index (boundary file)

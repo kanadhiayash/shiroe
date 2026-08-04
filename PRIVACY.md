@@ -44,7 +44,8 @@ If user cancels the interview: Shiroe boots in READ-ONLY mode until the schema i
 
 ## Local-First Canonical Rule (§4.4)
 
-- Local markdown files are the canonical memory. Always.
+- Memory is local files on your own disk. Always. Nothing has to leave the machine for Shiroe to work, and nothing does without your per-action approval.
+- Within those local files, the record of truth is the SQLite current-state store plus the append-only JSONL history; markdown pages, indexes, and graphs are generated projections over them. See `docs/adr/ADR-0001-canonical-store.md`.
 - Notion, Linear, GitHub, Slack are connected surfaces, not source-of-truth memory.
 - Switching harnesses requires no reconfiguration of memory because memory is files.
 
