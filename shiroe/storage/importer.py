@@ -151,9 +151,34 @@ def _iter_legacy_sqlite(root: Path) -> Iterable[tuple[str, dict]]:
         conn.close()
 
 
+def _atom_temporal(atom: dict) -> dict:
+    """
+    Carry a v1 atom's bi-temporal position across the migration.
+
+    An atom has two independent time axes: valid time (`valid_from` /
+    `valid_until`, when the fact was true in the world) and transaction time
+    (`recorded_at` / `superseded_at`, when Shiroe learned or un-learned it).
+    Both were previously dropped into the `summary` JSON blob, so every imported
+    row arrived with NULL valid bounds and status 'active' -- a fact that stopped
+    being true in 2020 read as currently true, and a belief we had already
+    dropped read as one we still held.
+
+    Nulls are preserved as nulls. An open bound means "unknown", and inventing
+    one would be fabricating evidence rather than migrating it.
+    """
+    out: dict = {}
+    for column in ("valid_from", "valid_until"):
+        value = atom.get(column)
+        if value:
+            out[column] = str(value)
+    if atom.get("superseded_at"):
+        out["status"] = "superseded"
+    return out
+
+
 def _insert_record(conn: sqlite3.Connection, log: EventLog, *, id_: str, kind: str,
                    title: str, claim: str, summary: str, source_type: str,
-                   source_ref: str, content_hash: str) -> None:
+                   source_ref: str, content_hash: str, **temporal: object) -> None:
     """
     Import one v1 record through the event log, not straight into the table.
 
@@ -167,7 +192,7 @@ def _insert_record(conn: sqlite3.Connection, log: EventLog, *, id_: str, kind: s
     write_record(
         conn, log,
         id_=id_, kind=kind, title=title, claim=claim, summary=summary,
-        owner="importer", timestamp=now,
+        owner="importer", timestamp=now, **temporal,
         sources=[{
             "id": "src_" + uuid.uuid4().hex[:16],
             "source_type": source_type,
@@ -208,7 +233,7 @@ def run_import(root: Path | str, *, dry_run: bool = True) -> ImportManifest:
     counts = {"atom_jsonl": 0, "legacy_sqlite": 0, "markdown": 0}
 
     def _try_insert(source_type: str, source_ref: str, kind: str, title: str,
-                    claim: str, summary: str) -> None:
+                    claim: str, summary: str, temporal: dict | None = None) -> None:
         content_hash = _sha256(f"{title}\n{claim}\n{summary}")
         rid = _record_id(source_type, source_ref, content_hash)
         if rid in existing:
@@ -221,7 +246,7 @@ def run_import(root: Path | str, *, dry_run: bool = True) -> ImportManifest:
         _insert_record(
             conn, log, id_=rid, kind=kind, title=title, claim=claim,
             summary=summary, source_type=source_type, source_ref=source_ref,
-            content_hash=content_hash,
+            content_hash=content_hash, **(temporal or {}),
         )
         manifest.records_written += 1
 
@@ -233,7 +258,8 @@ def run_import(root: Path | str, *, dry_run: bool = True) -> ImportManifest:
         claim = str(atom.get("claim") or atom.get("text") or "")
         summary = json.dumps({k: v for k, v in atom.items() if k not in ("claim", "text")},
                              sort_keys=True)[:2000]
-        _try_insert("atom_jsonl", rel, kind, title, claim, summary)
+        _try_insert("atom_jsonl", rel, kind, title, claim, summary,
+                    temporal=_atom_temporal(atom))
 
     # 2. legacy SQLite
     for table, row in _iter_legacy_sqlite(root):
