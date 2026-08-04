@@ -50,7 +50,7 @@ CRITICAL_IMPLEMENTATIONS: dict[int, dict[str, str]] = {
     39: {
         "source": "GitHub Actions",
         "implemented_as": "CI discipline",
-        "gate": "pull requests to dev/main run pinned pytest, privacy, and version checks",
+        "gate": "pull requests to main run pinned pytest, privacy, and version checks",
     },
     40: {
         "source": "NVIDIA NeMo Guardrails",
