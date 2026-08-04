@@ -107,21 +107,25 @@ def test_run_all_is_idempotent(repo_root: Path, tmp_path: Path) -> None:
     Guards the whole pipeline, not just the axes above: any future axis that
     interpolates a timestamp, temp path, or random id would dirty two tracked
     files on every run and is caught here.
+
+    Both outputs go to tmp_path. Writing to the tracked defaults and restoring
+    afterwards left `docs/BENCHMARK_REPORT.md` dirty on every full-suite run,
+    which made `git status --short` — itself a release gate — unreliable.
     """
-    results = repo_root / "benchmarks" / "results.json"
-    original = results.read_bytes()
-    try:
-        digests = []
-        for _ in range(2):
-            completed = subprocess.run(
-                [sys.executable, "benchmarks/run-all.py"],
-                cwd=repo_root, capture_output=True, text=True,
-            )
-            assert completed.returncode == 0, completed.stderr
-            digests.append(json.dumps(json.loads(results.read_text(encoding="utf-8")), sort_keys=True))
-        assert digests[0] == digests[1], "run-all.py output differs between consecutive runs"
-    finally:
-        results.write_bytes(original)
+    results = tmp_path / "results.json"
+    digests = []
+    for _ in range(2):
+        completed = subprocess.run(
+            [
+                sys.executable, "benchmarks/run-all.py",
+                "--out-json", str(results),
+                "--out-report", str(tmp_path / "BENCHMARK_REPORT.md"),
+            ],
+            cwd=repo_root, capture_output=True, text=True,
+        )
+        assert completed.returncode == 0, completed.stderr
+        digests.append(json.dumps(json.loads(results.read_text(encoding="utf-8")), sort_keys=True))
+    assert digests[0] == digests[1], "run-all.py output differs between consecutive runs"
 
 
 def test_ci_detection_matches_workflow_content_not_filename() -> None:
