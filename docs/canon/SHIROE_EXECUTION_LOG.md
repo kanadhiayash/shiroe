@@ -124,7 +124,7 @@ None taken. All require explicit authorization:
 | Sanitize issue #89 (local path) and #152 (local env detail) | PR 05 / SHR-023, SHR-024 |
 | Rename legacy-identity issue titles (15) | PR 05 / SHR-026 |
 | Remove private Notion URL from `CHANGELOG.md`, `GITHUB_OS.md`, `references/v4x-canon/RESEARCH_RESOURCES.md`, `scripts/shiroe-publish-releases.sh` | PR 05 / SHR-022 |
-| Remove `$HOME/Desktop/SHIROE/shiroe` hardcode in `scripts/shiroe-cleanup-branches.sh:15` | PR 05 / SHR-022 |
+| Remove the `<redacted:operator-path>` hardcode in `scripts/shiroe-cleanup-branches.sh:15` | PR 05 / SHR-022 |
 | Retire `dev` and the 16 stale local branches | PR 06 / SHR-025 |
 | Any history rewrite or force push | PR 07 / SHR-029, SHR-031 |
 

@@ -75,12 +75,12 @@ ALLOWLIST: dict[str, str] = {
     "skills/memory-import-export/SKILL.md": "Names the v3/v4.2 Zeref OS layouts its migration scripts convert from.",
 
     # --- records of past runs and of the public surface as it stands --------
-    "scripts/shiroe-publish-releases.sh": "Reproduces the published GitHub release notes of pre-rename versions verbatim.",
     "docs/BENCHMARK_REPORT.md": "Generated evidence; records the run that produced it, not current intent.",
     "benchmarks/results.json": "Generated evidence; same as docs/BENCHMARK_REPORT.md.",
     "docs/RELEASE_VERDICT_2.0.0-alpha.3.md": "Dated release verdict. A record, not a live surface.",
     "docs/RELEASE_VERDICT_3.0.0-alpha.1.md": "Dated release verdict. A record, not a live surface.",
     "docs/canon/GITHUB_SURFACE_INVENTORY.md": "Quotes the live GitHub metadata verbatim, including the legacy homepageUrl awaiting owner approval.",
+    "docs/canon/GITHUB_ISSUE_ACTIONS.md": "Quotes the live GitHub issue titles and bodies verbatim — including the legacy identity the proposed SHR-026 renames exist to remove. Replaces the scripts/shiroe-publish-releases.sh entry retired in the same commit, so the register did not grow.",
     "docs/canon/SHIROE_BASELINE.md": "Recorded audit baseline (SHR-004). Immutable evidence.",
     "docs/canon/SHIROE_EXECUTION_LOG.md": "Recorded audit execution log (SHR-004). Immutable evidence.",
 

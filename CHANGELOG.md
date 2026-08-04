@@ -536,4 +536,6 @@ branch. The v2.6 pack is the canonical surface.
 
 ## Command center
 
-Notion: https://copper-tv-288.notion.site/Zeref-Agent-OS-Command-Center-358d695d836a81af9f6adf30770217c3
+Notion: private maintainer workspace. The URL is redacted here rather than the
+section removed (SHR-022) — this file is append-only history, and the link was
+never part of a release entry.

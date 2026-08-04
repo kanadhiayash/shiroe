@@ -71,4 +71,5 @@ Existing repo files (SKILL.md, AGENTS.md, CHANGELOG.md, etc.) keep their establi
 
 ## Command center
 
-Notion: https://copper-tv-288.notion.site/Shiroe-Agent-OS-Command-Center-358d695d836a81af9f6adf30770217c3
+Notion: private maintainer workspace. The URL is not published in this
+repository (SHR-022).

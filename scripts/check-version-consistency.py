@@ -24,7 +24,7 @@ Surfaces verified:
     - .claude-plugin/marketplace.json:.description == .description
     - .claude-plugin/marketplace.json:.plugins[0].description == .description
     - .registry_manifest file exists on disk
-    - CODEOWNERS exists on disk
+    - .github/CODEOWNERS (the file GitHub actually reads) exists on disk
 
 Exit code:
     0  all surfaces agree
@@ -185,8 +185,11 @@ def _check_identity_registry_manifest(root: Path, identity: dict) -> tuple[str, 
 
 
 def _check_identity_codeowners(root: Path, identity: dict) -> tuple[str, str, str | None]:
-    exists = (root / "CODEOWNERS").exists()
-    return ("CODEOWNERS exists", "True", str(exists) if exists else None)
+    # SHR-020: GitHub reads one CODEOWNERS per repo and prefers .github/ over
+    # the root. Checking the root file passed while the rules that actually
+    # governed review lived elsewhere; check the effective one.
+    exists = (root / ".github" / "CODEOWNERS").exists()
+    return (".github/CODEOWNERS exists", "True", str(exists) if exists else None)
 
 
 IDENTITY_CHECKS = [

@@ -1,11 +1,32 @@
+# Shiroe CODEOWNERS — the single effective ownership file (SHR-020).
+#
+# GitHub reads exactly one CODEOWNERS per repo and prefers .github/CODEOWNERS
+# over a root one. The root file therefore looked authoritative while having
+# no effect; its rules were merged here and it was deleted.
+#
+# Matching is LAST-match-wins, so the catch-all comes first and every
+# path-specific rule after it. Reviews are auto-requested when a PR touches
+# matching paths.
+
 * @kanadhiayash
 
-/.github/ @kanadhiayash
+# --- spec and governance surfaces ---
 /AGENTS.md @kanadhiayash
+/SKILL.md @kanadhiayash
+/CLAUDE.md @kanadhiayash
+/GEMINI.md @kanadhiayash
+/CHANGELOG.md @kanadhiayash
 /SECURITY.md @kanadhiayash
 /PRIVACY.md @kanadhiayash
 /REDACT.md @kanadhiayash
 /SHARING_POLICY.md @kanadhiayash
+
+# --- packaging and automation ---
+/.github/ @kanadhiayash
+/.claude-plugin/ @kanadhiayash
+/scripts/ @kanadhiayash
+
+# --- evidence surfaces ---
 /benchmarks/ @kanadhiayash
 /docs/BENCHMARK_REPORT.md @kanadhiayash
 /docs/RELEASE_GATES.md @kanadhiayash
