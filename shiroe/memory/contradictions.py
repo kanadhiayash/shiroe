@@ -122,26 +122,31 @@ def _write_conflicts_md(root: Path, created: list[dict[str, Any]]) -> str:
     """
     memory_dir = root / "memory"
     path = memory_dir / "CONFLICTS.md"
-    existing = path.read_text(encoding="utf-8") if path.exists() else "# Conflicts\n"
-    if not existing.strip():
-        existing = "# Conflicts\n"
-    body = existing.rstrip() + "\n"
     detected_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-    for atom in created:
-        if f"## {atom['id']}" in existing:
-            continue
-        sides = {link.get("relation"): link.get("target_id") for link in atom.get("links", [])}
-        body += (
-            f"\n## {atom['id']}\n"
-            f"**Detected:** {detected_at}\n"
-            f"**Side A:** {sides.get('left_claim', '?')}\n"
-            f"**Side B:** {sides.get('right_claim', '?')}\n"
-            f"**Status:** open\n"
-            f"**Summary:** {atom['summary']}\n"
-            f"\n---\n"
-        )
     memory_dir.mkdir(parents=True, exist_ok=True)
+
+    # Read-modify-write, so the read belongs inside the lock with the write.
+    # Reading first let two detections start from the same base text and each
+    # append its own block; the second write then erased the first. A silently
+    # dropped contradiction is the one loss this file exists to prevent.
     with MemoryLock(memory_dir):
+        existing = path.read_text(encoding="utf-8") if path.exists() else "# Conflicts\n"
+        if not existing.strip():
+            existing = "# Conflicts\n"
+        body = existing.rstrip() + "\n"
+        for atom in created:
+            if f"## {atom['id']}" in existing:
+                continue
+            sides = {link.get("relation"): link.get("target_id") for link in atom.get("links", [])}
+            body += (
+                f"\n## {atom['id']}\n"
+                f"**Detected:** {detected_at}\n"
+                f"**Side A:** {sides.get('left_claim', '?')}\n"
+                f"**Side B:** {sides.get('right_claim', '?')}\n"
+                f"**Status:** open\n"
+                f"**Summary:** {atom['summary']}\n"
+                f"\n---\n"
+            )
         atomic_write(path, body)
     return str(path)
 
