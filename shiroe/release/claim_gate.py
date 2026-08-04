@@ -44,6 +44,8 @@ import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from shiroe.compat.legacy_identity import LEGACY_PRODUCT_NAME
+
 NAMESPACES = ("conformance", "integration", "performance", "external_benchmark", "security_review")
 EVIDENCE_TIERS = ("fixture_tested", "external_tested")
 MATURITIES = ("runtime", "contract", "experimental")
@@ -189,7 +191,7 @@ _VENDOR_NAMES = ("zep", "mem0", "locomo")
 # the corpus this gate reads: docs still in flight, archived reports, and any
 # third-party copy all say "Shiroe". A gate that stopped matching the former
 # name would quietly let a Shiroe-attributed overclaim through.
-_PRODUCT_NAMES = ("shiroe", "zeref")
+_PRODUCT_NAMES = ("shiroe", LEGACY_PRODUCT_NAME)
 _COMPARISON_WORDS = (
     "beats", "outperform", "better than", " vs ", " vs. ", "ranked #",
     "wins over", "surpasses", "ahead of",
@@ -202,7 +204,7 @@ _UNSCORED_DISCLAIMER_MARKERS = (
     "no score", "explicitly unscored",
 )
 # (d) issue #153 gap: a generic "we're the best" claim needs no vendor name
-# and no percentage to be a problem — references/v4x-canon/MODEL_DEBATE.md
+# and no percentage to be a problem — a model-comparison doc under references/
 # carried exactly this shape ("Best-in-class", "Strongest differentiator vs.
 # comparable systems") for a long time, unevidenced, unseen because
 # references/ was never scanned. Phrases here are drawn directly from the
@@ -231,6 +233,11 @@ class ClaimFinding:
         return asdict(self)
 
 
+# Directory names whose contents are frozen records, matched on any path
+# segment. See _public_docs.__doc__ for why each one is here.
+_EXCLUDED_PARTS = frozenset({"_evidence", "_research", "adr", "release-evidence", "v4x-canon"})
+
+
 def _public_docs(root: Path) -> list[Path]:
     """Every file a visitor can read before cloning or installing Shiroe.
 
@@ -238,19 +245,22 @@ def _public_docs(root: Path) -> list[Path]:
     gaps:
 
     - `references/` was never scanned at all. An unevidenced self-rating
-      table sat in references/v4x-canon/MODEL_DEBATE.md for a long time,
-      claiming "Best-in-class" and "Strongest differentiator" with no
-      benchmark behind either — the gate never saw it because it lives under
-      references/. That table is gone now, but the blind spot was real.
+      table sat in a model-comparison doc there for a long time, claiming
+      "Best-in-class" and "Strongest differentiator" with no benchmark behind
+      either — the gate never saw it because it lives under references/. That
+      table is gone now, but the blind spot was real.
     - SECURITY.md, CONTRIBUTING.md and AGENTS.md are named as "primary
       surfaces" in docs/PUBLIC_SURFACE.md itself, yet were never scanned.
 
     Excluded on purpose, not silently skipped:
     - docs/_evidence/, docs/_research/ — internal working notes, not public.
-    - docs/adr/, docs/audits/release-evidence/ — frozen historical records
-      (architecture decisions and dated release-evidence blobs). Editing
-      history to satisfy a gate would falsify the record, so these paths are
-      excluded from scanning rather than ever being hand-edited to pass.
+    - docs/adr/, docs/audits/release-evidence/, and the archived v4.x canon
+      bundle under references/ — frozen historical records (architecture
+      decisions, dated release-evidence blobs, and superseded canon, each
+      carrying its own banner saying so). Editing history to satisfy a gate
+      would falsify the record, so these paths are excluded from scanning
+      rather than ever being hand-edited to pass. SHR-027: the gate derives
+      no behaviour from an archived surface.
     - CHANGELOG.md — historical by definition; was never scanned and stays
       that way for the same reason.
     """
@@ -265,7 +275,7 @@ def _public_docs(root: Path) -> list[Path]:
             return []
         return [
             p for p in sorted(base.rglob("*.md"))
-            if not ({"_evidence", "_research", "adr", "release-evidence"} & set(p.parts))
+            if not (_EXCLUDED_PARTS & set(p.parts))
         ]
 
     out.extend(_walk(root / "docs"))

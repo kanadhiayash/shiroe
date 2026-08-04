@@ -14,10 +14,11 @@ Checks:
 - agents/, commands/, team-packs/ — discovered from the filesystem and
   cross-checked against the counts declared in shiroe-registry.json
   (agents/commands/team_packs); mismatch in either direction = error
-- references/v4x-canon/ has 6 design docs (historical reference)
 - harness stubs present
 - plugin.json + marketplace.json present and valid JSON
 - Deprecation warning if legacy memory/wiki/ still has live content
+- The archived v4.x canon bundle is NOT validated (SHR-027): requiring an
+  archive to exist makes the archive undeletable.
 - PATTERNS.jsonl event allowlist + per-event JSON-schema
 - skill-route stack-length lint (max 5)
 - Auto-Activation Gate presence lint (warn if missing gate events in recent log)
@@ -40,10 +41,6 @@ EXPECTED = {
     "config": ["PROJECT.md", "PERMISSIONS.md", "PARENT_SYNC.md", "BUDGET.md", "claude-overrides.md"],
     "memory_dirs": ["raw", "snapshots", "sync/outbound", "sync/parent", "archive", "patterns"],
     "memory_flat": ["hot.md", "index.md", "MEMORY.md", "DECISIONS.md", "OPEN_QUESTIONS.md", "RISKS.md", "CONFLICTS.md"],
-    "v4x_canon": [
-        "SHIROE_OS.md", "DECISION_LOG.md", "MODEL_DEBATE.md",
-        "USE_CASES.md", "RESEARCH_RESOURCES.md", "PACKAGE_INDEX.md",
-    ],
     "harness_stubs": [".cursor/rules/shiroe.mdc", ".windsurfrules", ".aider.conf.yml.example"],
     "plugin_manifests": [".claude-plugin/plugin.json", ".claude-plugin/marketplace.json"],
 }
@@ -381,11 +378,6 @@ def main():
     if not team_pack_files:
         errors.append("team-packs/ has no pack .md files")
 
-    # references/v4x-canon/
-    check_dir("references/v4x-canon", "canon")
-    for c in EXPECTED["v4x_canon"]:
-        check_file(f"references/v4x-canon/{c}", "v4x canon doc")
-
     # Harness stubs (per SHIROE_OS §10)
     for s in EXPECTED["harness_stubs"]:
         check_file(s, "harness stub")
@@ -413,7 +405,6 @@ def main():
     print(f"Team packs:       {_declared('team_packs', len(team_pack_files))} (filesystem vs registry)")
     print(f"Config:           {sum((ROOT / 'config' / c).is_file() for c in EXPECTED['config'])}/5")
     print(f"Root privacy:     {sum((ROOT / f).is_file() for f in EXPECTED['root_privacy'])}/3 (PRIVACY, REDACT, SHARING_POLICY)")
-    print(f"v4x canon:        {sum((ROOT / 'references/v4x-canon' / c).is_file() for c in EXPECTED['v4x_canon'])}/6")
     print(f"Harness stubs:    {sum((ROOT / s).is_file() for s in EXPECTED['harness_stubs'])}/3")
     print(f"Memory layout:    flat")
     print(f"PATTERNS lint:    {len(gate_lint)} finding(s)")

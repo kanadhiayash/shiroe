@@ -13,10 +13,12 @@ ALLOWLIST is active: a `Zeref`/`ZRF` token there is a failure. Adding a path to
 ALLOWLIST costs a written reason and shows up in the diff, which is the point —
 the list is a reviewed exception register, never a way to go green.
 
-Scope note: this is an identity scan, not a rename tool. `shiroe/env.py`,
-`shiroe/storage/importer.py`, and `shiroe/lineage/importer.py` deliberately
-*read* legacy names so old workspaces keep working; isolating those readers is
-SHR-027 (PR 04), not this gate.
+Scope note: this is an identity scan, not a rename tool. The runtime still
+deliberately *reads* legacy names so old workspaces keep working — but since
+SHR-014 every one of those spellings is a named constant in
+`shiroe/compat/legacy_identity.py`, and no other module under `shiroe/` may
+appear below. `tests/test_legacy_compatibility_boundary.py` enforces both that
+rule and a ceiling on the length of ALLOWLIST.
 
 Exit code:
     0  no legacy identity on an active surface
@@ -64,21 +66,12 @@ ARCHIVED: dict[str, str] = {
 # Active surfaces carrying a justified legacy reference. Each entry is a single
 # path (or a narrow prefix) plus the reason it is exempt. Read before adding.
 ALLOWLIST: dict[str, str] = {
-    # --- migration readers; SHR-027 / PR 04 isolates them -------------------
-    "shiroe/env.py": "Reads the deprecated ZEREF_* variables so existing shells keep working (SHR-027).",
-    "shiroe/storage/importer.py": "Imports the v1 zeref.sqlite store into the vNext store (SHR-027).",
-    "shiroe/storage/state.py": "Names the legacy DB path it deliberately does not collide with (SHR-027).",
-    "shiroe/policy/loader.py": "Falls back to the legacy .zeref/ workspace directory (SHR-027).",
-    "shiroe/memory/indexer.py": "Deletes the pre-rename index cache on rebuild (SHR-027).",
-    "shiroe/memory/core.py": "The v1 memory layout's on-disk filename; renaming the file is a data migration (issue #208, SHR-027).",
-    "shiroe/memory_state.py": "Generated view footer names the v1 store file it was generated from (SHR-027).",
-    "shiroe/release/checks.py": "Probes the v1 store path when deciding whether evidence checks can run (SHR-027).",
-    "shiroe/lineage/importer.py": "Falls back to the pre-rename intake filename when the Shiroe-named one is absent (SHR-027).",
-    "shiroe/lineage/intake.py": "Maps the pre-rename CSV headers to the Shiroe field names on read (SHR-027).",
-    "memory/state/schema.json": "Scaffold generated from shiroe/memory/core.py STATE_SCHEMA; names the v1 store file (SHR-027).",
-    "shiroe/release/claim_gate.py": "The claim scanner must recognise both product names to catch stale marketing copy.",
-    "shiroe/cli.py": "Help text documents the deprecated ZEREF_ALLOW_* variables as part of the security policy.",
-    "scripts/fetch-benchmark-data.py": "Reads the deprecated ZEREF_BENCHMARK_DATA variable (SHR-027).",
+    # --- migration readers that cannot import the compat boundary -----------
+    # Everything under shiroe/ moved behind shiroe/compat/legacy_identity.py in
+    # SHR-014 and is gone from this list. What is left cannot import it: a
+    # standalone script with a stdlib-only contract, and a generated artifact.
+    "scripts/fetch-benchmark-data.py": "Standalone stdlib-only downloader — runs with no package on sys.path, so it cannot import shiroe/compat/. Composes the deprecated env prefix inline.",
+    "memory/state/schema.json": "Generated at runtime from shiroe/memory/core.py STATE_SCHEMA; records the v1 store filename it was generated for. Gitignored, so it exists only in working trees.",
     "skills/memory-import-export/SKILL.md": "Names the v3/v4.2 Zeref OS layouts its migration scripts convert from.",
 
     # --- records of past runs and of the public surface as it stands --------
@@ -92,13 +85,11 @@ ALLOWLIST: dict[str, str] = {
     "docs/canon/SHIROE_EXECUTION_LOG.md": "Recorded audit execution log (SHR-004). Immutable evidence.",
 
     # --- tests that pin the compat behaviour --------------------------------
-    "tests/test_env_compat.py": "Pins the ZEREF_* fallback.",
-    "tests/test_db_rename_migration.py": "Pins the zeref2.sqlite -> shiroe.sqlite migration.",
+    # The compat tests now read their legacy spellings from
+    # shiroe/compat/legacy_identity.py, so only the two that must write the
+    # tokens literally remain.
     "tests/test_install_identity.py": "Asserts the legacy identity is absent from installed payloads.",
-    "tests/test_claim_gate.py": "Builds an archived-canon fixture to exercise the claim gate.",
-    "tests/test_memory_core_cli.py": "Pins the v1 layout's on-disk filename.",
     "tests/test_ws3_memory_coherence.py": "Names the audit run the test reproduces.",
-    "tests/test_lineage_intake.py": "Feeds the deprecated CSV column names to prove they still load.",
     "tests/test_active_identity.py": "This gate's own test: it injects legacy references on purpose.",
     "scripts/check-active-identity.py": "This file. It has to spell the tokens it looks for.",
 

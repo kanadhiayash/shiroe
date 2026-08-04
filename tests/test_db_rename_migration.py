@@ -1,9 +1,12 @@
 """A pre-rebrand database is adopted, not orphaned.
 
-Canonical state moved from memory/state/zeref2.sqlite to shiroe.sqlite. A
-rename with no migration would not error -- StateDB would simply open a new
-empty database beside the old one, which presents to the operator as total
-memory loss rather than as a rename.
+Canonical state moved to memory/state/shiroe.sqlite. A rename with no
+migration would not error -- StateDB would simply open a new empty database
+beside the old one, which presents to the operator as total memory loss rather
+than as a rename.
+
+The old spellings come from shiroe/compat/legacy_identity.py, so this file
+pins the boundary rather than a copy of it.
 """
 
 from __future__ import annotations
@@ -11,6 +14,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
+from shiroe.compat.legacy_identity import LEGACY_WORKSPACE_DIR
 from shiroe.storage.state import DB_RELPATH, StateDB, _LEGACY_DB_RELPATH
 
 
@@ -60,7 +64,7 @@ def test_no_legacy_database_is_a_no_op(tmp_path: Path) -> None:
 
 
 def test_legacy_workspace_policy_still_loads(tmp_path: Path) -> None:
-    """.zeref/policy/deny.json still applies after the rename to .shiroe/.
+    """The legacy workspace deny.json still applies after the rename.
 
     These are deny rules. A rename that stopped loading them would not error
     -- the guard would just quietly stop denying, which is the failure mode
@@ -68,7 +72,7 @@ def test_legacy_workspace_policy_still_loads(tmp_path: Path) -> None:
     """
     from shiroe.policy.loader import ActionKind, load_policy_stack
 
-    legacy = tmp_path / ".zeref" / "policy"
+    legacy = tmp_path / LEGACY_WORKSPACE_DIR / "policy"
     legacy.mkdir(parents=True)
     (legacy / "deny.json").write_text('{"deny": ["network"]}', encoding="utf-8")
 
@@ -79,7 +83,7 @@ def test_legacy_workspace_policy_still_loads(tmp_path: Path) -> None:
 def test_new_workspace_location_is_preferred(tmp_path: Path) -> None:
     from shiroe.policy.loader import ActionKind, load_policy_stack
 
-    for base, rule in ((".zeref", "subprocess"), (".shiroe", "network")):
+    for base, rule in ((LEGACY_WORKSPACE_DIR, "subprocess"), (".shiroe", "network")):
         d = tmp_path / base / "policy"
         d.mkdir(parents=True)
         (d / "deny.json").write_text(f'{{"deny": ["{rule}"]}}', encoding="utf-8")

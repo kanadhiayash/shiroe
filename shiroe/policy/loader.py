@@ -15,9 +15,11 @@ from __future__ import annotations
 
 import json
 import os
+import warnings
 from pathlib import Path
 from typing import Iterable
 
+from shiroe.compat.legacy_identity import LEGACY_WORKSPACE_DIR
 from shiroe.policy.schema import ActionKind, PolicyLayer
 
 
@@ -102,16 +104,24 @@ WORKSPACE_DIR = ".shiroe"
 # scopes -- if a rename made them stop loading, nothing would error, the
 # guard would just quietly stop denying. So the old location is still read
 # when the new one has no file at that path.
-_LEGACY_WORKSPACE_DIR = ".zeref"
+_LEGACY_WORKSPACE_DIR = LEGACY_WORKSPACE_DIR
 
 
 def _workspace_file(root: Path, *parts: str) -> Path:
-    """Path under .shiroe/, falling back to .zeref/ when only the old one exists."""
+    """Path under .shiroe/, falling back to the legacy dir when only it exists."""
     current = root.joinpath(WORKSPACE_DIR, *parts)
     if current.exists():
         return current
     legacy = root.joinpath(_LEGACY_WORKSPACE_DIR, *parts)
-    return legacy if legacy.exists() else current
+    if not legacy.exists():
+        return current
+    warnings.warn(
+        f"{_LEGACY_WORKSPACE_DIR}/ is deprecated; move it to {WORKSPACE_DIR}/ "
+        f"(see docs/DEPRECATIONS.md, removal in 4.0.0).",
+        DeprecationWarning,
+        stacklevel=3,
+    )
+    return legacy
 
 
 def load_policy_stack(project_root: Path | str,

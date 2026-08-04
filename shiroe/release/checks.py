@@ -10,6 +10,7 @@ import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from shiroe.compat.legacy_identity import LEGACY_V1_STATE_DB_NAME
 from shiroe.guards.evidence_guard import check_public_docs, check_store
 from shiroe.guards.fact_guard import scan_path as fact_scan
 from shiroe.memory import MEMORY_FILES, MemoryRoot
@@ -428,7 +429,7 @@ def _check_factguard(root: Path) -> ReleaseFinding:
 
 
 def _check_evidence(store: MemoryStore, root: Path) -> ReleaseFinding:
-    state_db = root / "memory" / "state" / "zeref.sqlite"
+    state_db = root / "memory" / "state" / LEGACY_V1_STATE_DB_NAME
     store_findings = [] if _is_macos_dataless_placeholder(state_db) else check_store(store)
     doc_issues = check_public_docs(root / "docs")
     if store_findings or doc_issues:
