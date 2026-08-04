@@ -5,56 +5,6 @@
   "recorded_at_commit": "a4549e06d3a4b398fb2476039026eda49501176a",
   "findings": [
     {
-      "id": "AGENTS.md::canonical-wiki",
-      "shr": "SHR-004",
-      "count": 1,
-      "excerpt": "Per-project canonical wiki (flat `memory/` layout)",
-      "why_open": "The spec surface calls the wiki canonical. ADR-0001 says SQLite is canonical current state and every Markdown view is generated. 'Canonical wiki' is the pre-ADR vocabulary and has to go, but rewording the opening paragraph of AGENTS.md is a content change, not an audit change.",
-      "owner": "kanadhiayash",
-      "resolving_pr": "fix/shr-canonical-state",
-      "status": "acknowledged"
-    },
-    {
-      "id": "AGENTS.md::markdown-canonical",
-      "shr": "SHR-004",
-      "count": 1,
-      "excerpt": "**Local-first**: canonical state is markdown on disk; no hosted dependency",
-      "why_open": "Direct contradiction of ADR-0001. The intent behind the sentence — no hosted dependency — is correct and worth keeping; only the claim about which store is canonical is wrong. Rewriting it is PR 02's job.",
-      "owner": "kanadhiayash",
-      "resolving_pr": "fix/shr-canonical-state",
-      "status": "acknowledged"
-    },
-    {
-      "id": "SOUL.md::markdown-canonical",
-      "shr": "SHR-004",
-      "count": 1,
-      "excerpt": "Canonical state is markdown on disk.",
-      "why_open": "The same contradiction as AGENTS.md, stated on the highest-read narrative surface in the repository. Must be fixed in the same pass so the two do not diverge again.",
-      "owner": "kanadhiayash",
-      "resolving_pr": "fix/shr-canonical-state",
-      "status": "acknowledged"
-    },
-    {
-      "id": "PRIVACY.md::markdown-canonical",
-      "shr": "SHR-004",
-      "count": 1,
-      "excerpt": "Local markdown files are the canonical memory. Always.",
-      "why_open": "Third restatement, and the most emphatic — 'Always'. PRIVACY.md is a policy surface, so the fix needs care: the privacy guarantee it is really making (nothing leaves the machine) survives ADR-0001 untouched and must not be weakened while correcting the store claim.",
-      "owner": "kanadhiayash",
-      "resolving_pr": "fix/shr-canonical-state",
-      "status": "acknowledged"
-    },
-    {
-      "id": "skills/wiki-maintenance/SKILL.md::canonical-wiki",
-      "shr": "SHR-004",
-      "count": 1,
-      "excerpt": "Maintains canonical wiki state (flat memory/ layout)",
-      "why_open": "Skill frontmatter carrying the pre-ADR vocabulary. The description is what the router matches on, so changing it can move routing behaviour; it needs the skill's own tests re-run, which is out of scope for an audit-only PR.",
-      "owner": "kanadhiayash",
-      "resolving_pr": "fix/shr-canonical-state",
-      "status": "acknowledged"
-    },
-    {
       "id": "references/v4x-canon/DECISION_LOG.md::archived-unmarked",
       "shr": "SHR-004",
       "count": 1,
