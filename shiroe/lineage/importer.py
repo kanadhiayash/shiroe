@@ -12,6 +12,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import warnings
 
 from shiroe.env import getenv as env_get
 import ssl
@@ -23,6 +24,7 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Callable
 
+from shiroe.compat.legacy_identity import LEGACY_LINEAGE_INTAKE_CSV_NAME
 from shiroe.lineage.intake import LineageRow, load_rows
 
 
@@ -107,9 +109,10 @@ class SourceIdentity:
 
 
 INTAKE_CSV_NAME = "SHIROE_64_repo_lineage_intake.csv"
-# SHR-013: pre-rename filename. The CSV is local-only and hand-maintained, so
-# the old name is still accepted; dropping it is SHR-027 (PR 04).
-LEGACY_INTAKE_CSV_NAME = "ZRF_64_repo_lineage_intake.csv"
+# SHR-013/SHR-014: pre-rename filename. The CSV is local-only and
+# hand-maintained, so the old name is still accepted on read; the spelling
+# lives in shiroe/compat/legacy_identity.py.
+LEGACY_INTAKE_CSV_NAME = LEGACY_LINEAGE_INTAKE_CSV_NAME
 
 
 def default_csv_path(root: Path | None = None) -> Path:
@@ -121,6 +124,14 @@ def default_csv_path(root: Path | None = None) -> Path:
     for parent in (base, base.parent):
         for name in (INTAKE_CSV_NAME, LEGACY_INTAKE_CSV_NAME):
             if (parent / name).exists():
+                if name == LEGACY_INTAKE_CSV_NAME:
+                    warnings.warn(
+                        f"{LEGACY_INTAKE_CSV_NAME} is deprecated; rename it to "
+                        f"{INTAKE_CSV_NAME} (see docs/DEPRECATIONS.md, "
+                        f"removal in 4.0.0).",
+                        DeprecationWarning,
+                        stacklevel=2,
+                    )
                 return parent / name
     return base.parent / INTAKE_CSV_NAME
 

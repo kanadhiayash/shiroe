@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import csv
 import re
+import warnings
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
+
+from shiroe.compat.legacy_identity import LEGACY_LINEAGE_COLUMN_ALIASES
 
 
 REQUIRED_COLUMNS = [
@@ -30,13 +33,10 @@ REQUIRED_COLUMNS = [
     "next_analysis_question",
 ]
 
-# SHR-013: pre-rename column headers. Intake CSVs are hand-maintained outside
-# the repo, so both spellings are accepted on read; only the new names are
-# emitted. Dropping the fallback is SHR-027 (PR 04).
-LEGACY_COLUMN_ALIASES = {
-    "shiroe_adoption": "zrf_adoption",
-    "why_it_matters_to_shiroe": "why_it_matters_to_ZRF",
-}
+# SHR-013/SHR-014: pre-rename column headers. Intake CSVs are hand-maintained
+# outside the repo, so both spellings are accepted on read; only the new names
+# are emitted. The old spellings live in shiroe/compat/legacy_identity.py.
+LEGACY_COLUMN_ALIASES = LEGACY_LINEAGE_COLUMN_ALIASES
 
 EXPECTED_TOTAL = 64
 EXPECTED_PRIORITY_COUNTS = {"critical": 10, "high": 21}
@@ -176,7 +176,15 @@ def _column(raw: dict[str, str], name: str) -> str | None:
     """Column value, falling back to the pre-rename header (SHR-013)."""
     if name in raw:
         return raw[name]
-    return raw.get(LEGACY_COLUMN_ALIASES.get(name, name))
+    legacy_name = LEGACY_COLUMN_ALIASES.get(name, name)
+    if legacy_name != name and legacy_name in raw:
+        warnings.warn(
+            f"intake column {legacy_name!r} is deprecated; rename it to "
+            f"{name!r} (see docs/DEPRECATIONS.md, removal in 4.0.0).",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+    return raw.get(legacy_name)
 
 
 def _normalize_row(raw: dict[str, str]) -> LineageRow:

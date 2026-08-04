@@ -54,6 +54,10 @@ contradict current canon — that is what "superseded" means — but it must say
 in its first 15 lines, and no active surface may cite an archived directory as if
 it were live.
 
+`CHANGELOG.md` and `MIGRATION.md` are archived for a narrower reason and carry no
+marker: they are *about* the pre-rename project, so they have to name what they
+renamed. Rewriting either to read as current would falsify a record.
+
 ## Conflict rules
 
 Named questions with a single settled authority. The authority must be an ADR
@@ -148,6 +152,10 @@ a graph is *not* in order to say what it is.
     {
       "id": "changelog",
       "paths": ["CHANGELOG.md"]
+    },
+    {
+      "id": "rename-migration-guide",
+      "paths": ["MIGRATION.md"]
     },
     {
       "id": "plans",

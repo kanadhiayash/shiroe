@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+from shiroe.compat.legacy_identity import LEGACY_V1_STATE_DB_NAME
 from shiroe.lock import LockError, MemoryLock, atomic_append
 from shiroe.privacy import scrub
 
@@ -86,7 +87,8 @@ MEMORY_FILES: tuple[str, ...] = (
 
 STATE_SCHEMA: dict = {
     "schema_version": "memory-state.v1",
-    "canonical_store": "memory/state/zeref.sqlite",  # v1 compat; vNext canonical = memory/state/shiroe.sqlite (ADR-0001)
+    # v1 compat; vNext canonical = memory/state/shiroe.sqlite (ADR-0001).
+    "canonical_store": f"memory/state/{LEGACY_V1_STATE_DB_NAME}",
     "event_log": "memory/state/events.jsonl",
     "tables": {
         "memory_items": {
@@ -160,7 +162,7 @@ class MemoryLayout:
 
     @property
     def state_db(self) -> Path:
-        return self.state_dir / "zeref.sqlite"
+        return self.state_dir / LEGACY_V1_STATE_DB_NAME
 
     @property
     def state_events(self) -> Path:

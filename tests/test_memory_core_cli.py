@@ -8,6 +8,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from shiroe.compat.legacy_identity import LEGACY_V1_STATE_DB_NAME
+
 
 def _env(repo_root: Path) -> dict:
     env = os.environ.copy()
@@ -85,7 +87,7 @@ def test_memory_cli_add_search_get_update_history_explain(repo_root: Path, tmp_p
     assert item["authority"] == "canonical"
 
     state_dir = tmp_path / "memory" / "state"
-    assert (state_dir / "zeref.sqlite").is_file()
+    assert (state_dir / LEGACY_V1_STATE_DB_NAME).is_file()
     assert (state_dir / "schema.json").is_file()
     assert "memory-state.v1" in (state_dir / "schema.json").read_text(encoding="utf-8")
 
@@ -155,7 +157,7 @@ def test_memory_cli_add_search_get_update_history_explain(repo_root: Path, tmp_p
     ]
 
     decisions = (tmp_path / "memory" / "views" / "decisions.md").read_text(encoding="utf-8")
-    assert "Generated from `memory/state/zeref.sqlite`" in decisions
+    assert f"Generated from `memory/state/{LEGACY_V1_STATE_DB_NAME}`" in decisions
     assert "memory state decision" in decisions
     assert "**Layer:** L1" in decisions
     assert "**Source:** docs/memory-core.md" in decisions

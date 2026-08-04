@@ -7,13 +7,14 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
+from shiroe.compat.legacy_identity import LEGACY_MEMORY_INDEX_DB_NAME
 from shiroe.memory.atom_store import AtomStore
 
 
 INDEX_PATH = Path("memory/indexes/shiroe.sqlite")
 # Pre-rebrand cache filename. Purely derived from the JSONL atoms, so it is
 # deleted rather than migrated -- rebuild_index regenerates it in full.
-_LEGACY_INDEX_PATH = Path("memory/indexes/zeref.sqlite")
+_LEGACY_INDEX_PATH = Path("memory/indexes") / LEGACY_MEMORY_INDEX_DB_NAME
 
 
 def rebuild_index(root: Path | str = Path(".")) -> dict[str, Any]:

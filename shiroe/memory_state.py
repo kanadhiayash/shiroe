@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from shiroe.compat.legacy_identity import LEGACY_V1_STATE_DB_NAME
 from shiroe.core.schema import MemoryCard, create_memory_card
 from shiroe.lock import MemoryLock, atomic_append, atomic_write
 from shiroe.memory import MEMORY_LAYERS, MemoryRoot, STATE_SCHEMA
@@ -789,7 +790,7 @@ def _render_view(*, title: str, kind: str, items: list[MemoryItem]) -> str:
     lines = [
         f"# {title}",
         "",
-        "_Generated from `memory/state/zeref.sqlite`. Markdown views are generated (never canonical); SQLite is canonical current state per ADR-0001._",
+        f"_Generated from `memory/state/{LEGACY_V1_STATE_DB_NAME}`. Markdown views are generated (never canonical); SQLite is canonical current state per ADR-0001._",
         "",
     ]
     if not items:
