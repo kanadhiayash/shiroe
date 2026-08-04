@@ -47,8 +47,15 @@ is drift-checked.
 Exit codes:
     0  clean — observed findings exactly match the baseline
     1  drift — a new, dropped, regressed, or miscounted finding
-    2  the checker's own inputs are missing or malformed, or an acknowledgement
-       in the baseline is anonymous (no owner / resolving_pr / why_open)
+    2  the checker's own inputs are missing or malformed, an acknowledgement in
+       the baseline is anonymous (no owner / resolving_pr / why_open), a data
+       file names a path outside --root, or the audit outran its time budget
+
+Availability is part of the contract. The inputs are data files, and data must
+not be able to stop the gate: a ledger-supplied regex is compiled and run per
+file, a surface may be a symlink or FIFO, and a glob may be superlinear. Reads
+are restricted to regular files inside --root, and the whole run is bounded by
+CANON_AUDIT_BUDGET_S (default 30s against a ~0.2s real-tree runtime).
 
 Usage:
     python3 scripts/check-canon-consistency.py [--root <repo-root>]
@@ -65,6 +72,8 @@ import hashlib
 import json
 import os
 import re
+import signal
+import stat
 import sys
 from functools import lru_cache
 from pathlib import Path
@@ -95,12 +104,60 @@ PRUNE_DIRS = {
 BINARY_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".ico", ".sqlite", ".db", ".parquet", ".pyc"}
 MAX_SCAN_BYTES = 2 * 1024 * 1024
 
+# Wall-clock ceiling for the whole audit. The real tree finishes in ~0.2s, so 30s
+# is ~150x headroom and only a runaway can reach it. Overridable so the
+# denial-of-service tests do not have to burn the full budget to prove a point.
+CANON_AUDIT_BUDGET_S = float(os.environ.get("CANON_AUDIT_BUDGET_S", "30"))
+
+# A quantified group that is itself quantified — (a+)+, (a*)*, (?:a|a){2,} — is
+# the shape that backtracks exponentially when the match fails. This is a
+# DIAGNOSTIC that names the offending claim, never the guard: regex safety is not
+# statically decidable, and the watchdog is what actually bounds the damage.
+NESTED_QUANTIFIER_RE = re.compile(r"\)[*+{]")
+
 ACKNOWLEDGED_STATUSES = {"acknowledged", "wontfix"}
 BASELINE_STATUSES = ACKNOWLEDGED_STATUSES | {"resolved"}
 
 
 class InputError(Exception):
     """The checker's own inputs are missing or malformed — exit 2."""
+
+
+def install_watchdog() -> None:
+    """
+    Bound the audit's wall clock, so no input can stop the gate by running long.
+
+    `verify.pattern` is attacker-supplied data compiled and run per file, and a
+    nested quantifier backtracks exponentially — 40 bytes of input outlasts any
+    CI job. Pattern-length caps and `(?m)^` anchoring were both measured against
+    it and both fail (an 11-character anchored pattern hangs just as hard), and
+    anchoring would additionally break a shipped verified claim. So the boundary
+    is time, not pattern shape: it needs no prediction about which regexes are
+    dangerous, and it covers the superlinear `**/` glob case for free.
+
+    CPython's regex loop polls signals, so SIGALRM interrupts a running findall
+    rather than waiting for it to finish.
+
+    Ceiling: SIGALRM is POSIX and main-thread only. CI is ubuntu-latest, so this
+    always arms there; on a hypothetical Windows runner it becomes a no-op and
+    the denial-of-service exposure returns silently.
+    """
+    if not hasattr(signal, "SIGALRM"):
+        return
+
+    def _expired(_signum: int, _frame: object) -> None:
+        raise InputError(
+            f"canon audit exceeded its {CANON_AUDIT_BUDGET_S:g}s budget — a "
+            f"ledger-supplied regex or an authority-map glob is not terminating"
+        )
+
+    signal.signal(signal.SIGALRM, _expired)
+    signal.setitimer(signal.ITIMER_REAL, CANON_AUDIT_BUDGET_S)
+
+
+def cancel_watchdog() -> None:
+    if hasattr(signal, "SIGALRM"):
+        signal.setitimer(signal.ITIMER_REAL, 0)
 
 
 # --------------------------------------------------------------------------- #
@@ -164,13 +221,31 @@ def walk_files(root: Path) -> list[str]:
     return sorted(found)
 
 
+def is_regular_file(path: Path) -> bool:
+    """
+    True only for a real file, following no symlink.
+
+    `stat()` follows symlinks and reports st_size 0 for a character device, so
+    `x.md -> /dev/zero` cleared the MAX_SCAN_BYTES gate below and was then read
+    until memory ran out; a FIFO never returns from open() at all. `lstat` plus
+    S_ISREG closes symlink, FIFO, device and socket in one call, and reports the
+    honest size of the entry itself.
+    """
+    try:
+        return stat.S_ISREG(path.lstat().st_mode)
+    except OSError:
+        return False
+
+
 def read_text(root: Path, rel: str) -> str | None:
-    """Text content, or None for binary / oversized files."""
+    """Text content, or None for non-regular / binary / oversized files."""
     path = root / rel
     if path.suffix.lower() in BINARY_SUFFIXES:
         return None
+    if not is_regular_file(path):
+        return None
     try:
-        if path.stat().st_size > MAX_SCAN_BYTES:
+        if path.lstat().st_size > MAX_SCAN_BYTES:
             return None
         return path.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError):
@@ -248,6 +323,22 @@ def load_authority_map(root: Path) -> dict:
         if key not in amap:
             raise InputError(f"{AUTHORITY_REL}: missing required key {key!r}")
 
+    # An archived entry silences its files from the conflict scan, and
+    # check_archived_files_marked skips any entry that carries no marker. So a
+    # markerless archived entry is a scope hole with nothing to review: it looks
+    # exactly like the two legitimate ones already in the map. Demand a marker or
+    # a written reason — the attacker must then either stamp a visible lie into
+    # the file or write one into the map, next to honest entries for comparison.
+    #
+    # Deliberately not a *finding*: that would mean baselining the two legitimate
+    # entries, rebuilding the laundering slot that finding digests exist to close.
+    for entry in amap["archived"]:
+        if not entry.get("marker") and not entry.get("why_no_marker"):
+            raise InputError(
+                f"{AUTHORITY_REL}: archived entry {entry.get('id')!r} carries neither "
+                f"'marker' nor 'why_no_marker' — an unmarked archived surface reads as live"
+            )
+
     ranks = [t["rank"] for t in amap["tiers"]]
     if len(ranks) != len(set(ranks)):
         raise InputError(f"{AUTHORITY_REL}: tier ranks are not unique: {ranks}")
@@ -307,6 +398,13 @@ def load_ledger(root: Path) -> dict:
         if cid in seen:
             raise InputError(f"{LEDGER_REL}: duplicate claim id {cid!r}")
         seen.add(cid)
+        # A claim whitelists every numeric phrase its `claim` string contains
+        # (check_unledgered_claims does a substring match), so one without any
+        # evidence handle can silence a whole surface while looking verified.
+        # tests/test_canon_consistency.py already asserted this; the checker's
+        # own contract was the weaker of the two.
+        if not any(k in claim for k in ("verify", "evidence_command", "evidence_path")):
+            raise InputError(f"{LEDGER_REL}: claim {cid!r} carries no evidence handle")
         if claim.get("status") != "verified":
             for field in ("owner", "resolving_pr", "why_unverified"):
                 if not claim.get(field):
@@ -352,6 +450,7 @@ class Classification:
         self.archived: dict[str, str] = {}            # rel -> archived entry id
         self.unscoped: set[str] = set()
         self.unclassified: list[str] = []
+        self.excluded: set[str] = set()  # carved out of a tier by an `exclude` glob
 
 
 def classify(amap: dict, files: list[str]) -> tuple[Classification, list[Finding]]:
@@ -371,6 +470,8 @@ def classify(amap: dict, files: list[str]) -> tuple[Classification, list[Finding
         keeps the dead-glob check honest.
         """
         if any(_matches(glob, rel) for glob in entry.get("exclude", ())):
+            if any(_matches(glob, rel) for glob in entry["paths"]):
+                result.excluded.add(rel)  # would have been claimed but for the exclude
             return []
         return [glob for glob in entry["paths"] if _matches(glob, rel)]
 
@@ -405,6 +506,15 @@ def classify(amap: dict, files: list[str]) -> tuple[Classification, list[Finding
         if matched_unscoped:
             result.unscoped.add(rel)
             used_globs.update(matched_unscoped)
+            if rel in result.excluded:
+                # `unscoped` is exempt from the dead-glob check, so a tier
+                # `exclude` plus a covering unscoped glob drops a live surface
+                # out of every scan and leaves no unused glob behind to notice.
+                # Excluding into another tier is the intended use and stays quiet.
+                findings.append(
+                    Finding(rel, "excluded-into-unscoped", "SHR-003",
+                            excerpt="carved out of its tier, then absorbed by an unscoped glob")
+                )
             continue
 
         result.unclassified.append(rel)
@@ -425,6 +535,29 @@ def classify(amap: dict, files: list[str]) -> tuple[Classification, list[Finding
                     Finding(glob, "dead-glob", "SHR-003", excerpt=f"archived {entry['id']} matches no file")
                 )
     return result, findings
+
+
+def check_readable_surfaces(root: Path, cls: Classification) -> list[Finding]:
+    """
+    A canon surface the checker cannot safely read is a finding, not a skip.
+
+    `read_text` returning None is the *skip* path, so without this a committed
+    `docs/x.md -> ../elsewhere/contradicting.md` would classify active, be
+    skipped by every prose scan, and ship an unscanned contradiction — the exact
+    evasion SHR-004 exists to stop. Unscoped surfaces are never read, so firing
+    there would be noise rather than coverage.
+    """
+    findings: list[Finding] = []
+    for rel in sorted(set(cls.active) | set(cls.archived)):
+        path = root / rel
+        if path.suffix.lower() in BINARY_SUFFIXES:
+            continue
+        if not is_regular_file(path):
+            findings.append(
+                Finding(rel, "unreadable-surface", "SHR-003",
+                        excerpt="not a regular file (symlink, FIFO, device or socket)")
+            )
+    return findings
 
 
 def check_conflict_authorities(root: Path, amap: dict) -> list[Finding]:
@@ -704,13 +837,34 @@ def _dotted(data: object, path: str) -> object:
     return data
 
 
+def resolve_within(root: Path, rel: str) -> Path:
+    """
+    A data-file path, confined to the repository.
+
+    `root / rel` silently yields `rel` itself when `rel` is absolute, and `..`
+    walks out just as easily. The ledger is data, so this is the difference
+    between recomputing evidence and reading an arbitrary file on the host —
+    which is both an existence oracle and, pointed at a device or FIFO, the same
+    unbounded read the surface reader was just hardened against.
+
+    The glob-driven kinds need no equivalent: they match against walk_files(root)
+    output, so they can only ever name paths already inside the tree.
+    """
+    path = (root / rel).resolve()
+    if not path.is_relative_to(root.resolve()):
+        raise InputError(f"path escapes --root: {rel!r}")
+    if not is_regular_file(path):
+        raise InputError(f"not a regular file: {rel!r}")
+    return path
+
+
 def recompute(root: Path, verify: dict) -> int:
     """Pure-stdlib evidence recomputation. No subprocess, no network."""
     kind = verify.get("kind")
     if kind == "count_json_array":
         rel = verify["file"]
         try:
-            data = json.loads((root / rel).read_text(encoding="utf-8"))
+            data = json.loads(resolve_within(root, rel).read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
             raise InputError(f"count_json_array: cannot read {rel}: {exc}") from exc
         node = _dotted(data, verify["path"])
@@ -882,6 +1036,7 @@ def main() -> int:
     root = Path(args.root).resolve()
 
     try:
+        install_watchdog()
         amap = load_authority_map(root)
         baseline_doc = load_baseline(root)
         ledger = load_ledger(root)
@@ -892,6 +1047,7 @@ def main() -> int:
 
         observed: list[Finding] = []
         observed += authority_findings
+        observed += check_readable_surfaces(root, cls)
         observed += check_conflict_authorities(root, amap)
         observed += check_canon_conflicts(root, cls, amap)
         observed += check_archived_files_marked(root, amap, cls)
@@ -905,6 +1061,15 @@ def main() -> int:
     except InputError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
+    except (KeyError, IndexError, ValueError, TypeError) as exc:
+        # A malformed data file reaches here as a raw lookup/parse error from any
+        # of a dozen sites (t["rank"], entry["paths"], rule["authority"],
+        # claim["verify"], _dotted's descent). The documented contract for bad
+        # input is exit 2, and a traceback with exit 1 reads as "drift found".
+        print(f"ERROR: malformed checker input: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return 2
+    finally:
+        cancel_watchdog()
 
     commit = head_commit(root)
     print(f"Canon audit — {root}")
