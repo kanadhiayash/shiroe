@@ -22,9 +22,9 @@ from pathlib import Path
 from shiroe.release.manifest import _packaged_files, build_manifest, is_stale
 
 # Specific current *display* surfaces — the doc/manifest text a user actually
-# reads. Deliberately NOT a blanket repo grep: historical records (CHANGELOG,
-# scripts/shiroe-publish-releases.sh), migration notes (skills/memory-import-export,
-# skills/parent-sync), and test fixtures are allowed to keep the old name.
+# reads. Deliberately NOT a blanket repo grep: historical records (CHANGELOG),
+# migration notes (skills/memory-import-export, skills/parent-sync), and test
+# fixtures are allowed to keep the old name.
 DISPLAY_SURFACES = [
     "README.md", "SKILL.md", "AGENTS.md", "CLAUDE.md", "CODEX.md", "GEMINI.md",
     "LLAMA.md", "GITHUB_OS.md", "config/PROJECT.md", "commands/status.md",

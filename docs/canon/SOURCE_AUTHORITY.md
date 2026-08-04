@@ -183,8 +183,7 @@ a graph is *not* in order to say what it is.
     ".windsurfrules",
     ".aider.conf.yml.example",
     "pytest.ini",
-    "LICENSE",
-    "CODEOWNERS"
+    "LICENSE"
   ],
   "conflict_rules": [
     {

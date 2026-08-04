@@ -57,7 +57,6 @@
 
 ### Shiroe Space Source References
 - bytebytego.com/courses/system-design-interview/scale-from-zero-to-millions-of-users
-- copper-tv-288.notion.site/Shiroe-Skills-Fleet-Command-Center-358d695d836a81af9f6adf30770217c3
 - gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
 - github.com/addyosmani/agent-skills
 - github.com/affaan-m/ecc
