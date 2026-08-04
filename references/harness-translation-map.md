@@ -1,6 +1,6 @@
 # Harness Translation Map
 
-> Sourced from SHIROE_OS §10 + DECISION_LOG D7. `AGENTS.md` is the source of truth. Per-harness loader files defer to it.
+> Expands `AGENTS.md` §"Harness Translation Map". `AGENTS.md` is the source of truth. Per-harness loader files defer to it.
 
 ## The principle
 
@@ -56,5 +56,5 @@ Per-harness quirks: config/<harness>-overrides.md
 ## Related
 
 - `AGENTS.md` — canonical spec
-- `references/v4x-canon/SHIROE_OS.md` §10
+- `docs/HARNESS_MATRIX.md` — enforcement tier per harness
 - `INSTALL.md` — per-harness install commands

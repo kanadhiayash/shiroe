@@ -1,5 +1,10 @@
 # PACKAGE_INDEX.md — Shiroe 4.x Upgrade Package
 
+> **Superseded snapshot.** Retired v4.x canon, archived under
+> `references/v4x-canon/**` by `docs/canon/SOURCE_AUTHORITY.md`. It indexes the
+> v4.x upgrade package, not what ships today. Current surfaces are listed in
+> `README.md` and `shiroe-registry.json`.
+
 > Compiled: May 30, 2026
 > Based on: Full Shiroe 4.0 design session (3 conversations, ~8 hours of decisions)
 > Session sources: Perplexity AI Shiroe Space

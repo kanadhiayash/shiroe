@@ -1,5 +1,9 @@
 # RESEARCH_RESOURCES.md — Shiroe 4.x Reference Links and Sources
 
+> **Superseded snapshot.** Retired v4.x canon, archived under
+> `references/v4x-canon/**` by `docs/canon/SOURCE_AUTHORITY.md`. The links were
+> collected in May 2026 and are not checked or maintained.
+
 ---
 
 ## Foundational References

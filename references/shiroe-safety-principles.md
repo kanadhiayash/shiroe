@@ -22,7 +22,7 @@ These rules exist not as arbitrary restrictions but because Shiroe handles persi
 **Why**: Silent resolution destroys both sides of a real disagreement and erodes user trust in the wiki as canonical state.
 **What**: When `memory-keeper` detects a conflict, both sides go to `memory/CONFLICTS.md`. User arbitrates. `contradiction-resolution` skill orchestrates.
 
-## Rule 5 — Boundary-first reads (per SHIROE_OS §0)
+## Rule 5 — Boundary-first reads (per AGENTS.md §"First action every session")
 **Why**: Loading full wiki pages on every operation blows the token budget and defeats progressive activation.
 **What**: Always read `memory/hot.md` first (≤500 words). If insufficient, read `memory/index.md`. Find the relevant domain. Read only the named section of the named page.
 

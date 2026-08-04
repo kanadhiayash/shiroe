@@ -5,7 +5,7 @@ argument-hint: "[solo|build|research|red|audit|ship] [--write] [--scope=PATH] [-
 
 # /team
 
-Activate an on-demand team pack per SHIROE_OS §8. Max 4 agents. Outputs land in `team/` (never inline-only).
+Activate an on-demand team pack per `AGENTS.md` §"Team Packs". Max 4 agents. Outputs land in `team/` (never inline-only).
 
 ## Usage
 
@@ -44,13 +44,13 @@ Pack-specific args:
 
 ## Safety
 
-- **red** team is read-only by default. Per SHIROE_OS §8 anti-pattern: "Do NOT activate a team without user trigger or explicit recommendation."
+- **red** team is read-only by default. Per `references/two-strikes-rule.md` anti-pattern: "Do NOT activate a team without user trigger or explicit recommendation."
 - **ship** Deploy verifier blocks on failed checklist. User can override; override is recorded.
 - All team writes still pass through `privacy-guardian` per `PRIVACY.md`.
 
 ## Related
 
 - `team-packs/` — pack definitions
-- `references/v4x-canon/SHIROE_OS.md` §8
+- `AGENTS.md` §"Team Packs" — the live pack contract
 - `references/shiroe-qa-gate.md` — used by audit and build Reviewer
 - `references/shiroe-safety-principles.md` — used by red team

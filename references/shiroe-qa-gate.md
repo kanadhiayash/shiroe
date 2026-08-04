@@ -22,7 +22,7 @@ Every wiki write carries: source event hash, session ts, agent that produced it.
 Payload passed through `privacy-guardian` per current root `PRIVACY.md` mode + `REDACT.md` classes + `SHARING_POLICY.md` connector allowlist. Transformation logged if mode = abstract.
 
 ### 4. Boundary-first compliance
-Reads happened via `memory/hot.md` → `memory/index.md` → page section (per SHIROE_OS §0), not full pages. Skill outputs ≤ skill's declared `max_turns` token equivalent.
+Reads happened via `memory/hot.md` → `memory/index.md` → page section (per AGENTS.md §"First action every session"), not full pages. Skill outputs ≤ skill's declared `max_turns` token equivalent.
 
 ### 5. Anti-hallucination
 No invented file paths, metrics, user research, citations, repo state, or build results. Exact commands / paths / URLs / errors preserved verbatim.

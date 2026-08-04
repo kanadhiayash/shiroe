@@ -40,7 +40,7 @@ required_seats:
         - attacker
         - defender
 
-execution_graph:
+execution_sequence:
   - attacker
   - defender
   - judge

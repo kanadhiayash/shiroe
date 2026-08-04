@@ -36,7 +36,7 @@ required_seats:
       independent_from:
         - implementer
 
-execution_graph:
+execution_sequence:
   - planner
   - implementer
   - verifier

@@ -1,7 +1,8 @@
 # Memory Model
 
 Shiroe stores project memory locally. Human-readable Markdown remains visible in
-`memory/`, while structured memory cards live in `memory/state/zeref.sqlite`.
+`memory/`, while structured memory cards live in the SQLite state store under
+`memory/state/` — canonical current state per ADR-0001.
 
 ## Memory Cards
 

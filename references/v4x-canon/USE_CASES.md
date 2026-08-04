@@ -1,5 +1,10 @@
 # USE_CASES.md — Shiroe at 110% Strength
 
+> **Superseded snapshot.** Retired v4.x canon, archived under
+> `references/v4x-canon/**` by `docs/canon/SOURCE_AUTHORITY.md`. The capability
+> claims here describe the v4.x design intent, not shipped behaviour; see
+> `README.md` "Limitations" for what runs today.
+
 > Six use cases demonstrating Shiroe's full capability: Shiroe AI Tactician + privacy layer + team packs + pattern detection + skill generation + harness portability + God Mode.
 
 ---

@@ -1,4 +1,10 @@
 # DECISION_LOG.md — Shiroe 4.x Design Decisions
+
+> **Superseded snapshot.** Retired v4.x canon, archived under
+> `references/v4x-canon/**` by `docs/canon/SOURCE_AUTHORITY.md`. It records the
+> decisions as they were taken in May 2026 and is allowed to contradict current
+> canon. Live decision records are `docs/adr/ADR-*.md`; the live spec is
+> `AGENTS.md`.
 > All architectural decisions made during the Shiroe 4.0 upgrade session (May 2026).
 
 ---

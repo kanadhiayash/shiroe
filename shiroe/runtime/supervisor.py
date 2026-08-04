@@ -257,7 +257,7 @@ class Supervisor:
                                  budget=self._budget.snapshot())
 
             # Resolve step name → seat assignment. Missions declare seats
-            # in the order they appear in execution_graph, which matches
+            # in the order they appear in execution_sequence, which matches
             # step_name for the sample missions.
             seat = step_name if step_name in assignments else step_seat_map[
                 min(len(completed), len(step_seat_map) - 1)
