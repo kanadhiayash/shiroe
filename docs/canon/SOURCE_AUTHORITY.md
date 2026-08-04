@@ -62,6 +62,12 @@ it were live.
 marker: they are *about* the pre-rename project, so they have to name what they
 renamed. Rewriting either to read as current would falsify a record.
 
+Every archived entry must therefore carry **either** a `marker` **or** a
+`why_no_marker`; an entry with neither is rejected outright (exit 2). A markerless
+entry silences its files from the conflict scan while looking indistinguishable
+from the two legitimate cases above, so the exemption has to be stated rather than
+inferred from an absent field.
+
 ## Conflict rules
 
 Named questions with a single settled authority. The authority must be an ADR
@@ -155,11 +161,13 @@ a graph is *not* in order to say what it is.
     },
     {
       "id": "changelog",
-      "paths": ["CHANGELOG.md"]
+      "paths": ["CHANGELOG.md"],
+      "why_no_marker": "A changelog is about the pre-rename project and is still appended to. Stamping it 'Superseded' would falsify a live record."
     },
     {
       "id": "rename-migration-guide",
-      "paths": ["MIGRATION.md"]
+      "paths": ["MIGRATION.md"],
+      "why_no_marker": "The migration guide describes the rename and states that everything below it still works today. A 'Superseded' banner would contradict its own content."
     },
     {
       "id": "plans",
@@ -212,3 +220,12 @@ Adding a directory means adding it to exactly one of `tiers`, `archived`, or
 fails the audit. Deleting a directory without deleting its glob fails the audit
 as a dead glob. All three failures are intentional: the map is only worth having
 if it cannot silently rot.
+
+Two further rules exist because both were reachable ways to remove a live surface
+from every scan without leaving anything for a reviewer to see:
+
+- A new `archived` entry must carry a `marker` or a `why_no_marker`. Neither
+  fails the audit at exit 2.
+- Using a tier's `exclude` to carve out a file that an `unscoped` glob then
+  absorbs is reported as `excluded-into-unscoped`. Excluding a file into another
+  *tier* is the intended use and stays silent.

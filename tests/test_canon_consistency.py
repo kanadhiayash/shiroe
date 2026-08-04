@@ -8,9 +8,25 @@ Two halves:
   canonical-store question, every baseline acknowledgement must be attributable,
   and the checker must exit clean.
 * Synthetic-tree tests are the anti-vacuity proof. A checker that never fires is
-  worthless, so each detector is fed a tmp_path repo with exactly one injected
-  defect and must fail on it — and must stay silent when the same defect lives
-  under an archived glob.
+  worthless, so a detector is fed a tmp_path repo with one injected defect and
+  must fail on it — and must stay silent when the same defect lives under an
+  archived glob.
+
+Coverage is partial, and saying otherwise in a file whose whole purpose is
+punishing unverified claims would be the exact failure SHR-006 exists to catch.
+What has a synthetic single-defect proof:
+
+    markdown-canonical, unclassified-surface, unledgered-claim, claim-drift,
+    cites-archived, archived-unmarked, unreadable-surface,
+    excluded-into-unscoped, markerless-archived-entry, ledger ReDoS,
+    ledger path escape, missing evidence handle, and the reconcile verdicts
+    NEW, DROPPED, COUNT DRIFT, CONTENT DRIFT, REGRESSED.
+
+What still has none — each is a real gap, not a decision:
+
+    ambiguous-authority, dead-glob, missing-authority, authority-not-accepted,
+    canonical-wiki, markdown-source-of-truth, status-enum-divergence,
+    status-missing, status-invalid, agent-cap-contradiction.
 
 The script filename has hyphens and is not importable; it is driven via
 subprocess, matching tests/test_validator.py and tests/test_version_consistency.py.
@@ -19,6 +35,7 @@ subprocess, matching tests/test_validator.py and tests/test_version_consistency.
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -56,11 +73,21 @@ KNOWN_CONTRADICTIONS = [
 ]
 
 
-def _run(script: Path, root: Path) -> subprocess.CompletedProcess[str]:
+def _run(
+    script: Path, root: Path, budget_s: float | None = None
+) -> subprocess.CompletedProcess[str]:
+    # timeout is load-bearing, not hygiene: the denial-of-service tests below
+    # assert the checker *terminates*, and without a bound their failure mode is
+    # a pytest run that never finishes rather than a red test.
+    env = None
+    if budget_s is not None:
+        env = {**os.environ, "CANON_AUDIT_BUDGET_S": str(budget_s)}
     return subprocess.run(
         [sys.executable, str(script), "--root", str(root)],
         capture_output=True,
         text=True,
+        timeout=60,
+        env=env,
     )
 
 
@@ -284,8 +311,9 @@ def _synth(tmp_path: Path, **overrides: str | None) -> Path:
     """
     Minimum viable synthetic root: every file classified, zero findings.
 
-    `overrides` maps a repo-relative path to file content; a value of None
-    deletes the file. JSON structures are injected by writing the path directly.
+    `overrides` maps a repo-relative path to file content; a value of None omits
+    the file from an otherwise fresh tree (it deletes nothing — there is nothing
+    there yet). JSON structures are injected by writing the path directly.
     """
     root = tmp_path / "synth"
     files: dict[str, str] = {
@@ -321,6 +349,22 @@ def _synth(tmp_path: Path, **overrides: str | None) -> Path:
 
 def _baseline_with(*findings: dict) -> str:
     return json.dumps({**_SYNTH_BASELINE, "findings": list(findings)}, indent=2)
+
+
+def _ledger_counting(n: int) -> dict:
+    """The synth ledger, re-pinned to a tree holding `n` note files."""
+    claim = {**_SYNTH_LEDGER["claims"][0], "claim": f"{n} files of notes", "evidence_value": n}
+    return {**_SYNTH_LEDGER, "claims": [claim]}
+
+
+def _authority_doc(amap: dict) -> str:
+    """Render an authority map back into the prose+fenced-block file shape."""
+    return (
+        "# Source authority\n\nPrecedence, highest first.\n\n"
+        "```json shiroe.source-authority/v1\n"
+        + json.dumps(amap, indent=2)
+        + "\n```\n"
+    )
 
 
 CONTRADICTION_LINE = "Canonical state is markdown on disk.\n"
@@ -543,3 +587,309 @@ def test_claim_shapes_see_marked_up_numbers(canon_module, phrase: str) -> None:
     assert any(s.search(phrase) for s in canon_module.CLAIM_SHAPES), (
         f"public surfaces bold their numbers; claim shape is blind to {phrase!r}"
     )
+
+
+# --- Availability: a surface the checker cannot safely read (audit HIGH 1) ---
+
+
+@pytest.mark.skipif(not hasattr(os, "mkfifo"), reason="POSIX FIFOs only")
+def test_non_regular_active_surface_is_reported_not_read(repo_root: Path, tmp_path: Path) -> None:
+    """A non-regular file on an active surface must fail the audit, not hang it.
+
+    `read_text` sized files with `stat()`, which follows symlinks and reports 0
+    for character devices, so a committed `x.md -> /dev/zero` passed the
+    MAX_SCAN_BYTES guard and was then read unbounded. A FIFO is the same defect
+    without the memory blow-up: `open()` simply never returns.
+
+    Silence is not a safe answer either. `read_text` returning None is the *skip*
+    path, so a symlinked surface would classify active, be skipped by the
+    conflict scan, and ship an unscanned contradiction -- exactly the evasion
+    SHR-004 exists to stop. Hence a finding, not a quiet pass.
+    """
+    root = _synth(tmp_path)
+    os.mkfifo(root / "docs" / "notes" / "evil.md")
+
+    result = _run(repo_root / SCRIPT_REL, root)
+
+    assert result.returncode == 1, (
+        f"non-regular active surface should fail the audit (exit {result.returncode}):\n"
+        f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+    )
+    assert "unreadable-surface" in result.stdout + result.stderr
+
+
+# --- Availability: a ledger-supplied regex must not run forever (audit HIGH 2) ---
+
+
+_REDOS_LEDGER = {
+    **_SYNTH_LEDGER,
+    "claims": [
+        {
+            "id": "synth-redos",
+            "surface": "README.md",
+            "line": 3,
+            "claim": "1 files of notes",
+            "claim_class": "machine_verified",
+            "status": "verified",
+            "evidence_value": 1,
+            # No 'x' anywhere in the input, so the match must FAIL -- and it is
+            # the failing case that backtracks. A pattern that succeeds returns
+            # immediately and proves nothing.
+            "verify": {"kind": "count_regex", "file": "docs/notes/*.md", "pattern": "(a+)+x"},
+        }
+    ],
+}
+
+
+def test_ledger_supplied_regex_cannot_hang_the_audit(repo_root: Path, tmp_path: Path) -> None:
+    """`verify.pattern` is data, and data must not be able to stop the gate.
+
+    A nested quantifier backtracks exponentially: this pattern needs about 2**n
+    steps on n leading 'a's, so 40 bytes of input outlasts any CI job. Pattern
+    length caps and `(?m)^` anchoring were both measured and both fail -- an
+    11-character anchored pattern hangs just as hard -- so the guard is a wall
+    clock budget on the whole audit rather than a filter on the pattern.
+    """
+    root = _synth(
+        tmp_path,
+        **{
+            "docs/notes/note.md": "a" * 40 + "\n",
+            LEDGER_REL: json.dumps(_REDOS_LEDGER, indent=2),
+        },
+    )
+
+    # A short budget only shortens the test; the pattern outruns any ceiling.
+    result = _run(repo_root / SCRIPT_REL, root, budget_s=5)
+
+    assert result.returncode == 2, (
+        f"a runaway ledger regex is malformed input, so exit 2 (got {result.returncode}):\n"
+        f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+    )
+    assert "budget" in result.stderr
+
+
+def test_ledger_path_cannot_escape_the_root(repo_root: Path, tmp_path: Path) -> None:
+    """`verify.file` is data; `root / "/abs"` silently yields "/abs".
+
+    Left unconfined this reads arbitrary host files -- an existence oracle, and
+    pointed at a device or FIFO the same unbounded read the surface reader was
+    hardened against. A FIFO outside the root proves both halves at once.
+    """
+    outside = tmp_path / "outside.json"
+    if hasattr(os, "mkfifo"):
+        os.mkfifo(outside)
+    else:  # pragma: no cover - POSIX-only CI
+        outside.write_text("[]", encoding="utf-8")
+
+    escaping = {
+        **_SYNTH_LEDGER,
+        "claims": [{**_SYNTH_LEDGER["claims"][0],
+                    "verify": {"kind": "count_json_array", "file": str(outside), "path": "x"}}],
+    }
+    result = _run(
+        repo_root / SCRIPT_REL,
+        _synth(tmp_path, **{LEDGER_REL: json.dumps(escaping, indent=2)}),
+        budget_s=5,
+    )
+
+    assert result.returncode == 2, (
+        f"a ledger path outside --root is malformed input (got {result.returncode}):\n"
+        f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+    )
+    assert "escapes --root" in result.stderr
+
+
+def test_malformed_ledger_verify_exits_two_not_one(repo_root: Path, tmp_path: Path) -> None:
+    """Bad input is exit 2. A traceback with exit 1 reads as 'drift found'."""
+    broken = {
+        **_SYNTH_LEDGER,
+        "claims": [{**_SYNTH_LEDGER["claims"][0],
+                    "verify": {"kind": "count_json_array",
+                               "file": "shiroe-registry.json", "path": "nope"}}],
+    }
+    result = _run(
+        repo_root / SCRIPT_REL,
+        _synth(tmp_path, **{LEDGER_REL: json.dumps(broken, indent=2)}),
+    )
+    assert result.returncode == 2, (
+        f"malformed verify block should exit 2, got {result.returncode}:\n"
+        f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+    )
+
+
+def test_ledger_claim_without_evidence_handle_exits_two(repo_root: Path, tmp_path: Path) -> None:
+    """A verified claim with no handle silences every numeric phrase it contains."""
+    naked = {**_SYNTH_LEDGER["claims"][0]}
+    naked.pop("verify")
+    result = _run(
+        repo_root / SCRIPT_REL,
+        _synth(tmp_path, **{LEDGER_REL: json.dumps({**_SYNTH_LEDGER, "claims": [naked]}, indent=2)}),
+    )
+    assert result.returncode == 2
+    assert "evidence handle" in result.stderr
+
+
+# --- Scope holes in the authority map (audit HIGH 3) ---
+
+
+def test_excluding_a_surface_into_unscoped_is_reported(repo_root: Path, tmp_path: Path) -> None:
+    """`exclude` + a covering `unscoped` glob drops a live surface silently.
+
+    `unscoped` is deliberately exempt from the dead-glob check, so this pairing
+    leaves no unused glob behind for the audit to notice.
+    """
+    amap = json.loads(json.dumps(_SYNTH_AUTHORITY_MAP))  # deep copy
+    amap["tiers"][-1]["exclude"] = ["docs/notes/hidden.md"]
+    amap["unscoped"] = [*amap["unscoped"], "docs/notes/hidden.md"]
+
+    # A second note keeps `docs/notes/*.md` matching, so no dead-glob fires and
+    # `excluded-into-unscoped` is the only thing standing between this map and a
+    # silently unscanned surface. Without the sibling the test would pass on the
+    # dead glob alone and prove nothing.
+    root = _synth(
+        tmp_path,
+        **{
+            AUTHORITY_REL: _authority_doc(amap),
+            "docs/notes/hidden.md": "# Hidden\n\n" + CONTRADICTION_LINE,
+            # The sibling note moves the counted total to 2; record that so the
+            # tree's only finding is the scope hole under test.
+            LEDGER_REL: json.dumps(_ledger_counting(2), indent=2),
+            "README.md": "# Synth\n\nSQLite is canonical for current state.\n2 files of notes.\n",
+        },
+    )
+    result = _run(repo_root / SCRIPT_REL, root)
+
+    assert result.returncode == 1, (
+        f"excluded-then-unscoped surface should fail the audit:\n{result.stdout}"
+    )
+    assert "excluded-into-unscoped" in result.stdout
+    assert "dead-glob" not in result.stdout, (
+        "this tree must fail on the exclusion itself, not on an incidental dead glob"
+    )
+
+
+def test_markerless_archived_entry_exits_two(repo_root: Path, tmp_path: Path) -> None:
+    """An archived entry with no marker silences its files and looks ordinary.
+
+    The shipped map legitimately carries two markerless entries (CHANGELOG.md,
+    MIGRATION.md), so a third would pass review unremarked. Demanding a marker
+    or a written reason makes the exemption reviewable.
+    """
+    amap = json.loads(json.dumps(_SYNTH_AUTHORITY_MAP))
+    # Tiers are matched before archived, so the entry only captures anything if
+    # the tier lets go first. exclude + markerless archived is the actual hole:
+    # the file leaves the conflict scan and check_archived_files_marked skips it
+    # for want of a marker, so nothing anywhere reports it.
+    amap["tiers"][-1]["exclude"] = ["docs/notes/hidden.md"]
+    amap["archived"].append({"id": "sneaky", "paths": ["docs/notes/hidden.md"]})
+
+    root = _synth(
+        tmp_path,
+        **{
+            AUTHORITY_REL: _authority_doc(amap),
+            "docs/notes/hidden.md": "# Hidden\n\n" + CONTRADICTION_LINE,
+            # The sibling note moves the counted total to 2; record that so the
+            # tree's only finding is the scope hole under test.
+            LEDGER_REL: json.dumps(_ledger_counting(2), indent=2),
+            "README.md": "# Synth\n\nSQLite is canonical for current state.\n2 files of notes.\n",
+        },
+    )
+    result = _run(repo_root / SCRIPT_REL, root)
+
+    assert result.returncode == 2, (
+        f"markerless archived entry should be rejected outright:\n"
+        f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+    )
+    assert "why_no_marker" in result.stderr
+
+
+# --- Reconcile verdicts that had no synthetic proof ---
+
+
+_BAD_NOTE = {"docs/notes/bad.md": "# Bad\n\n" + CONTRADICTION_LINE}
+_BAD_ID = "docs/notes/bad.md::markdown-canonical"
+
+
+def test_resolved_finding_that_reappears_is_regressed(repo_root: Path, tmp_path: Path) -> None:
+    """The whole `status: "resolved"` lifecycle rests on this verdict.
+
+    Marking a finding resolved is the only way to retire it from the baseline
+    without DROPPED failing the build. If a resolved finding can come back
+    unnoticed, every closed finding is reopenable in silence -- and this was the
+    one reconcile verdict with no test at all.
+    """
+    root = _synth(
+        tmp_path,
+        **{
+            **_BAD_NOTE,
+            BASELINE_REL: _baseline_with(
+                {"id": _BAD_ID, "shr": "SHR-004", "count": 1, "status": "resolved",
+                 "excerpt": "canonical state is markdown"}
+            ),
+        },
+    )
+
+    result = _run(repo_root / SCRIPT_REL, root)
+
+    assert result.returncode == 1, (
+        f"a resolved finding present again must fail the audit:\n{result.stdout}"
+    )
+    assert "REGRESSED" in result.stderr
+
+
+def test_acknowledged_finding_with_changed_text_is_content_drift(
+    repo_root: Path, tmp_path: Path
+) -> None:
+    """Same surface, same rule, same count, different text: the laundering slot."""
+    root = _synth(
+        tmp_path,
+        **{
+            **_BAD_NOTE,
+            BASELINE_REL: _baseline_with(
+                {"id": _BAD_ID, "shr": "SHR-004", "count": 1, "status": "acknowledged",
+                 "excerpt": "something else", "digest": "0" * 12,
+                 "owner": "tests", "resolving_pr": "none", "why_open": "fixture"}
+            ),
+        },
+    )
+
+    result = _run(repo_root / SCRIPT_REL, root)
+
+    assert result.returncode == 1
+    assert "CONTENT DRIFT" in result.stderr
+
+
+def test_active_surface_citing_an_archived_directory_fails(
+    repo_root: Path, tmp_path: Path
+) -> None:
+    """Pointing a reader at superseded material reads as pointing them at canon."""
+    result = _run(
+        repo_root / SCRIPT_REL,
+        _synth(tmp_path, **{"docs/notes/note.md": "# Note\n\nSee references/old/ for detail.\n"}),
+    )
+    assert result.returncode == 1
+    assert "cites-archived" in result.stdout
+
+
+def test_archived_surface_without_its_marker_fails(repo_root: Path, tmp_path: Path) -> None:
+    """An archived file that does not say so reads as live to every reader."""
+    result = _run(
+        repo_root / SCRIPT_REL,
+        _synth(tmp_path, **{"references/old/legacy.md": "# Legacy\n\nStill current, honest.\n"}),
+    )
+    assert result.returncode == 1
+    assert "archived-unmarked" in result.stdout
+
+
+def test_claim_drift_between_ledger_and_tree_fails(repo_root: Path, tmp_path: Path) -> None:
+    """The recorded evidence value must still match what the tree computes."""
+    drifted = {
+        **_SYNTH_LEDGER,
+        "claims": [{**_SYNTH_LEDGER["claims"][0], "evidence_value": 5}],
+    }
+    result = _run(
+        repo_root / SCRIPT_REL,
+        _synth(tmp_path, **{LEDGER_REL: json.dumps(drifted, indent=2)}),
+    )
+    assert result.returncode == 1
+    assert "claim-drift" in result.stdout
