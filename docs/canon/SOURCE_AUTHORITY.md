@@ -38,7 +38,11 @@ authoritative, while superseded prose is silenced no matter how confidently it i
 written. Reversing the two would let an archive glob mute a live decision record.
 
 **2. `unscoped` is evaluated last.** It is the explicit "not a canon surface"
-list — tests, scripts, CI, fixtures, generated evidence. Anything not matched by
+list — tests, scripts, CI, fixtures, recorded evidence. `docs/security/**` sits
+here for the same reason `docs/canon/**` and `docs/audits/**` do: a redaction
+manifest records what was found in the object store at one commit and what the
+owner decided about it. It makes no claim about how the product works, so it has
+no authority to conflict with. Anything not matched by
 `tiers`, `archived`, or `unscoped` is an **unclassified surface** and fails the
 audit. There is no implicit default. That is the whole point: a new top-level
 directory must be given an authority answer before it can ship.
@@ -177,6 +181,7 @@ a graph is *not* in order to say what it is.
     "memory/**",
     "team/**",
     "docs/canon/**",
+    "docs/security/**",
     "docs/audits/**",
     "docs/_evidence/**",
     ".gitignore",

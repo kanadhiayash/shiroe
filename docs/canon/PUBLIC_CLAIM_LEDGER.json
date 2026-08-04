@@ -30,7 +30,7 @@
       },
       "owner": "kanadhiayash",
       "resolving_pr": "docs/shr-generated-surfaces",
-      "why_unverified": "README.md publishes 82; the tree now holds 88 (fix/shr-canon-consistency added tests/test_canon_consistency.py, fix/shr-active-identity added tests/test_execution_sequence_compat.py and tests/test_active_identity.py, chore/shr-repository-cleanup added tests/test_no_private_operational_references.py). Recorded at the published value on purpose: the resulting claim-drift finding is the tripwire proving the ledger notices when a PR moves a number the README states."
+      "why_unverified": "README.md publishes 82; the tree now holds 90 (fix/shr-canon-consistency added tests/test_canon_consistency.py, fix/shr-active-identity added tests/test_execution_sequence_compat.py and tests/test_active_identity.py, chore/shr-repository-cleanup added tests/test_no_private_operational_references.py, security/shr-redaction-manifest added tests/test_redaction_manifest.py). Recorded at the published value on purpose: the resulting claim-drift finding is the tripwire proving the ledger notices when a PR moves a number the README states."
     },
     {
       "id": "readme-release-checks",

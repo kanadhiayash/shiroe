@@ -36,7 +36,14 @@ COMPAT_REL = "shiroe/compat/legacy_identity.py"
 # every runtime reader behind shiroe/compat/. Growing it back is the failure
 # mode this ceiling exists to catch: raise it only with a written reason in the
 # same diff, never to make a red build green.
-MAX_ALLOWLISTED_PATHS = 16
+#
+# 16 → 17 (SHR-029/031, security/shr-redaction-manifest): the history-redaction
+# manifest quotes historical file paths and commit subjects verbatim, three of
+# which are spelled with the pre-rename identity. Redacting them would falsify
+# the evidence the rewrite decision rests on, so the file is allowlisted and the
+# ceiling moves by exactly one. It is one file entry, not a docs/security/
+# prefix, so a second file in that directory does not inherit the exemption.
+MAX_ALLOWLISTED_PATHS = 17
 
 
 # --------------------------------------------------------------------------- #

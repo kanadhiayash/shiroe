@@ -83,6 +83,7 @@ ALLOWLIST: dict[str, str] = {
     "docs/canon/GITHUB_ISSUE_ACTIONS.md": "Quotes the live GitHub issue titles and bodies verbatim — including the legacy identity the proposed SHR-026 renames exist to remove. Replaces the scripts/shiroe-publish-releases.sh entry retired in the same commit, so the register did not grow.",
     "docs/canon/SHIROE_BASELINE.md": "Recorded audit baseline (SHR-004). Immutable evidence.",
     "docs/canon/SHIROE_EXECUTION_LOG.md": "Recorded audit execution log (SHR-004). Immutable evidence.",
+    "docs/security/HISTORY_REDACTION_MANIFEST.md": "History-redaction evidence (SHR-029/031). Three of the fourteen historical file paths carrying the private Notion URL are spelled with the pre-rename identity, as are the commit subjects that introduced and removed it. Renaming them would falsify the evidence a rewrite decision rests on. Scoped to this one file, not to docs/security/.",
 
     # --- tests that pin the compat behaviour --------------------------------
     # The compat tests now read their legacy spellings from
