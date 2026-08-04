@@ -1,4 +1,4 @@
-# GitHub issue actions — approval-ready (SHR-023, SHR-024, SHR-026)
+# GitHub issue actions — approval-ready (SHR-023, SHR-024, SHR-025, SHR-026)
 
 **Status:** proposed, **nothing executed**. Every action below is a mutating
 GitHub call. The agent that produced this file had no authorization to run one,
@@ -169,6 +169,82 @@ the reasoning above), not 15.
 
 ---
 
+## 4. Branch protection on `main` (SHR-025)
+
+| | |
+|---|---|
+| **Surface** | Repository rulesets, not an issue |
+| **Verdict** | **Enable `protect-main-soft`; delete the retired-branch ruleset** |
+| **Severity** | High — the trunk this repository documents as protected is not protected |
+| **Cross-ref** | `docs/BRANCHING.md`; `docs/RELEASE_VERDICT_3.0.0-alpha.1.md` §"Re-select the required status checks" |
+
+**Provenance.** Three read-only calls made while writing this section, on
+`ci/shr-main-only-trunk` at `3da7ff2`. No mutating call was made.
+
+```
+gh api repos/kanadhiayash/shiroe/branches --jq '.[].name'
+gh api repos/kanadhiayash/shiroe/rulesets
+gh api repos/kanadhiayash/shiroe/branches/main/protection
+```
+
+**What was found.**
+
+| Ruleset | Target | Enforcement |
+|---|---|---|
+| `protect-dev-soft` (id `18747477`) | `refs/heads/dev` | **disabled** |
+| `protect-main-soft` (id `18747523`) | `refs/heads/main` | **disabled** |
+| `protect-release-tags` (id `18747540`) | tags | active |
+
+`gh api .../branches` returns exactly one name, `main` — the remote is already
+main-only, which is what PR 06 asserts in code and docs. But
+`.../branches/main/protection` returns `404 Branch not protected`, and the
+ruleset that would protect it is switched off. So today the trunk can be
+force-pushed and deleted, and `protect-main-soft`'s `pull_request` rule — the
+one that would stop a direct push — never evaluates.
+
+The second finding is the retired-branch ruleset. `protect-dev-soft` still
+targets `refs/heads/dev`, a ref that no longer exists on the remote. Disabled
+and pointed at nothing, it is inert; its cost is that the next person to read
+the ruleset list will reasonably conclude the two-branch model is still live.
+
+**Third: `protect-main-soft` permits merge commits.** Its `allowed_merge_methods`
+is `["merge", "squash", "rebase"]`. `docs/BRANCHING.md` requires squash-and-merge,
+and merge commits are the mechanism issue #151 records as producing the
+divergence that PR 06 exists to retire. Configuration and doctrine disagree, and
+right now the configuration is the one nobody is enforcing.
+
+**Proposed changes, in order.**
+
+1. Set `protect-main-soft` enforcement to `active`.
+2. Narrow its `allowed_merge_methods` to `["squash"]`.
+3. Add the `required_status_checks` rule and select the `Shiroe Verify` jobs
+   (`Validate`, `pytest`, `version-consistency`, `privacy`, `benchmarks`,
+   `release-check`, `e2e`, `doc-freshness`). The v3.0.0-alpha.1 release verdict
+   already recorded that the required checks were never re-selected; that item
+   is still open.
+4. Delete `protect-dev-soft`.
+
+**Commands (for the approver to run, not the agent):**
+
+```
+gh api -X PUT repos/kanadhiayash/shiroe/rulesets/18747523 --input <edited-ruleset.json>
+gh api -X DELETE repos/kanadhiayash/shiroe/rulesets/18747477
+```
+
+**Why this is not done here.** All four are mutating repository-administration
+calls. Enabling enforcement changes who can push to the trunk and could lock the
+maintainer out of an in-flight workflow; deleting a ruleset is not reversible
+from the API. Neither belongs to an agent.
+
+**What PR 06 could do without approval** is everything in-tree: the workflows,
+`docs/BRANCHING.md`, `CONTRIBUTING.md`, `GITHUB_OS.md`, and
+`tests/test_workflow_branch_policy.py`. Those are done. The gate "protected
+`main` plus short-lived branches is consistently *configured* and documented" is
+therefore met on the documented half and blocked on the configured half, by
+design.
+
+---
+
 ## Summary
 
 | Issue | Leaked / stale | Action | Approval |
@@ -178,6 +254,8 @@ the reasoning above), not 15.
 | #196 | Legacy `zeref` in title | Edit title | Required — mutating `gh issue edit` |
 | #208 | Legacy `zeref` in title, but it is the subject | **No action** | — |
 | 12 closed legacy-titled issues | Legacy `zeref` in title | **No action** — historical record | — |
+| Ruleset `protect-main-soft` | Disabled; permits merge commits; no required checks | Enable, restrict to squash, select `Shiroe Verify` checks | Required — mutating `gh api -X PUT` |
+| Ruleset `protect-dev-soft` | Targets a ref that no longer exists | Delete | Required — mutating `gh api -X DELETE` |
 
 **Nothing here is closed.** No issue in this set is stale enough to close: #89
 and #152 describe unresolved problems and #196 is an open benchmark finding.

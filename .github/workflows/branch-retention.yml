@@ -1,10 +1,16 @@
 name: Shiroe Branch Retention
 
-# Enforces the "never delete a protected branch" project policy.
-# Feature branches (feat/*, fix/*, audit/*, docs/*, ci/*, chore/*, release/* candidates
-# tracked as `release-candidate/*`) may be auto-deleted by GitHub on PR merge —
-# that is expected and this workflow does not fire on them. Only protected refs
-# (main, dev, release/*) fire the guard.
+# Enforces the "never delete a protected ref" project policy.
+#
+# The repository runs one branch model: a protected trunk (`main`) plus
+# short-lived topic branches — see docs/BRANCHING.md. Topic branches
+# (feat/*, fix/*, audit/*, docs/*, ci/*, chore/*, security/*, test/*, perf/*,
+# bench/*) are *meant* to be deleted on merge, so this guard does not fire on
+# them. Only the trunk and frozen release baselines (`release/*`) do.
+#
+# This is a tripwire, not enforcement: GitHub has already deleted the ref by
+# the time the `delete` event fires. A red run is the signal that someone
+# removed history that the project promised to keep.
 
 on:
   delete:
@@ -19,7 +25,6 @@ jobs:
     if: >-
       ${{ github.event.ref_type == 'branch' && (
         github.event.ref == 'main' ||
-        github.event.ref == 'dev' ||
         startsWith(github.event.ref, 'release/')
       ) }}
     steps:
@@ -27,6 +32,6 @@ jobs:
         run: |
           DELETED_REF="${{ github.event.ref }}"
           echo "Protected branch delete detected: ${DELETED_REF}"
-          echo "Project policy retains protected branches (main, dev, release/*)."
+          echo "Project policy retains protected refs (main, release/*)."
           echo "Rename to archive/<original-name> instead of deleting."
           exit 1

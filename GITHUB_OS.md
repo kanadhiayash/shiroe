@@ -11,14 +11,23 @@ Git and release conventions for this repository.
 
 ## Conventions
 
+### Branch model
+
+Protected trunk (`main`) plus short-lived topic branches. `main` is the only
+long-lived branch and the only base a PR targets. Full model — allowed types,
+branch lifetime, squash-merge and retention rules — in `docs/BRANCHING.md`.
+
 ### Branch naming
 
-`<type>/shiroe__<short-description>`.
+`<type>/shr-<short-description>`.
 
 Examples:
-- `feat/shiroe__skill-router-v2`
-- `fix/shiroe__validator-skills-count`
-- `release/v<major>.<minor>` — frozen-baseline snapshot (never receives further commits after creation)
+- `feat/shr-skill-router-v2`
+- `fix/shr-validator-skills-count`
+- `release/*` — frozen-baseline snapshot (never receives further commits after creation; named per `docs/RELEASE_PROCESS.md`)
+
+Branches predating the rename carry `<type>/shiroe__<short-description>` and
+`<type>/<legacy-product-name>__<short-description>`. Those are history; do not create new ones.
 
 ### Tags
 
