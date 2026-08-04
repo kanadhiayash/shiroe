@@ -349,7 +349,7 @@ exemption.
     {
       "id": "SHR-029-C6",
       "pattern_class": "operator-working-copy-path",
-      "what": "Working-copy paths of the ~/Desktop/<project> and ~/Documents/<project> shape. Zero occurrences in any of the 2944 blobs — the class is clean and has always been clean. It is listed because a scanner that reports nothing is only trustworthy if you can see it looked.",
+      "what": "Working-copy paths of the `~/Desktop` and `~/Documents` shape with a project directory beneath them. Zero occurrences in any of the 2944 blobs — the class is clean and has always been clean. It is listed because a scanner that reports nothing is only trustworthy if you can see it looked.",
       "classification": "current-tree cleanup",
       "still_live": false,
       "owner": "kanadhiayash",
@@ -367,7 +367,7 @@ exemption.
     {
       "id": "SHR-029-C7",
       "pattern_class": "personal-cloud-sync-path",
-      "what": "One unreachable blob (8779829) holding an earlier draft of tests/test_no_private_operational_references.py, from before that file learned to bracket its own literals. It spells `com~apple~CloudDocs` as a pattern name in a comment. It is the name of a shape the guard hunts for, not a location anyone syncs anything to.",
+      "what": "One unreachable blob (8779829) holding an earlier draft of tests/test_no_private_operational_references.py, from before that file learned to bracket its own literals. It spells the macOS iCloud container name as a pattern literal in a comment (written here as com[~]apple[~]CloudDocs, the same bracketing the current guard uses on itself). It is the name of a shape the guard hunts for, not a location anyone syncs anything to.",
       "classification": "preserved historical lineage",
       "still_live": true,
       "owner": "kanadhiayash",

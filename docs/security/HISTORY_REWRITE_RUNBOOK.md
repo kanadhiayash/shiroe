@@ -138,8 +138,15 @@ spell the two account-name segments. Read them off the machine instead of
 copying them from a document:
 
 ```bash
-printf 'regex:/Users/%s(?=/)==></Users/<operator>\n' "$(id -un)" >> "$EXPR"
+HOMEROOT="/Users"        # "/home" on Linux
+printf 'regex:%s/%s(?=/)==>%s/<operator>\n' "$HOMEROOT" "$(id -un)" "$HOMEROOT" >> "$EXPR"
 ```
+
+(The home root is assembled from a variable rather than typed as a literal for
+the same reason the account name is read from `id -un`: this file is tracked, and
+`tests/test_no_private_operational_references.py` is right to reject a rooted
+operator path in a tracked file even when the file is describing how to remove
+one.)
 
 Add the second, older account-name segment by hand if it differs from the
 current one; `git log --all --format='%ae' | sort -u` and the paths listed under
