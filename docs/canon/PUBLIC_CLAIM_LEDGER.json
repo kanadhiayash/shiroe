@@ -1,0 +1,159 @@
+{
+  "schema": "shiroe.public-claim-ledger/v1",
+  "_comment": "SHR-006. Numeric and count claims made on public surfaces, each bound to evidence. Scope is deliberately narrow: NUMBERS ONLY. Prose claims ('local-first', 'privacy-first', 'no hosted dependency') are already gated by shiroe/release/claim_gate.py and are NOT duplicated here — two gates over one claim is how they drift apart. machine_verified claims are recomputed on every test run by scripts/check-canon-consistency.py using pure-stdlib verifiers (no subprocess, no network); a mismatch against evidence_value is a claim-drift finding. command_attested claims name the command a human must run. manual claims name a file a human must read. Any claim whose status is not 'verified' must name an owner, a resolving PR, and why it is still open.",
+  "verified_at_commit": "a4549e06d3a4b398fb2476039026eda49501176a",
+  "claims": [
+    {
+      "id": "readme-test-count",
+      "surface": "README.md",
+      "line": 122,
+      "claim": "pytest — 979 tests, Python 3.11/3.12/3.13",
+      "claim_class": "command_attested",
+      "status": "contradicted",
+      "evidence_value": 979,
+      "evidence_command": "python3 -m pytest -q",
+      "owner": "kanadhiayash",
+      "resolving_pr": "docs/shr-generated-surfaces",
+      "why_unverified": "Was accurate at a4549e0 (978 passed + 1 skipped). This PR adds tests/test_canon_consistency.py, so `python3 -m pytest -q` now reports 999 passed + 1 skipped = 1000. Not machine_verified because counting tests without running them means reimplementing collection; the honest fix is to generate the number from a real run rather than keep it as a sentence someone remembers to edit."
+    },
+    {
+      "id": "readme-test-files",
+      "surface": "README.md",
+      "line": 122,
+      "claim": "82 files",
+      "claim_class": "machine_verified",
+      "status": "contradicted",
+      "evidence_value": 82,
+      "verify": {
+        "kind": "count_glob",
+        "glob": "tests/test_*.py"
+      },
+      "owner": "kanadhiayash",
+      "resolving_pr": "docs/shr-generated-surfaces",
+      "why_unverified": "This PR adds a test file, so the tree now holds 83. Recorded at the published value on purpose: the resulting claim-drift finding is the tripwire proving the ledger notices when a PR moves a number the README states."
+    },
+    {
+      "id": "readme-release-checks",
+      "surface": "README.md",
+      "line": 123,
+      "claim": "shiroe release check — 16 checks",
+      "claim_class": "machine_verified",
+      "status": "verified",
+      "evidence_value": 16,
+      "verify": {
+        "kind": "count_regex",
+        "file": "shiroe/release/checks.py",
+        "pattern": "(?m)^def _check_"
+      }
+    },
+    {
+      "id": "readme-cli-commands",
+      "surface": "README.md",
+      "line": 263,
+      "claim": "shiroe --help lists all 31",
+      "claim_class": "machine_verified",
+      "status": "verified",
+      "evidence_value": 31,
+      "verify": {
+        "kind": "count_regex",
+        "file": "shiroe/cli*.py",
+        "pattern": "\\bsub\\.add_parser\\("
+      }
+    },
+    {
+      "id": "readme-skills-count",
+      "surface": "README.md",
+      "line": 359,
+      "claim": "skills/ — 15 on-trigger procedures",
+      "claim_class": "machine_verified",
+      "status": "verified",
+      "evidence_value": 15,
+      "verify": {
+        "kind": "count_json_array",
+        "file": "shiroe-registry.json",
+        "path": "skills"
+      }
+    },
+    {
+      "id": "readme-agents-count",
+      "surface": "README.md",
+      "line": 360,
+      "claim": "agents/ — 6 background roles",
+      "claim_class": "machine_verified",
+      "status": "verified",
+      "evidence_value": 6,
+      "verify": {
+        "kind": "count_json_array",
+        "file": "shiroe-registry.json",
+        "path": "agents"
+      }
+    },
+    {
+      "id": "readme-commands-count",
+      "surface": "README.md",
+      "line": 361,
+      "claim": "commands/ — 8 user-facing command contracts",
+      "claim_class": "machine_verified",
+      "status": "verified",
+      "evidence_value": 8,
+      "verify": {
+        "kind": "count_json_array",
+        "file": "shiroe-registry.json",
+        "path": "commands"
+      }
+    },
+    {
+      "id": "readme-team-packs-count",
+      "surface": "README.md",
+      "line": 362,
+      "claim": "team-packs/ — 9 on-demand multi-agent configurations",
+      "claim_class": "machine_verified",
+      "status": "verified",
+      "evidence_value": 9,
+      "verify": {
+        "kind": "count_json_array",
+        "file": "shiroe-registry.json",
+        "path": "team_packs"
+      }
+    },
+    {
+      "id": "readme-agent-cap",
+      "surface": "README.md",
+      "line": 362,
+      "claim": "team-packs/ — 9 on-demand multi-agent configurations, capped at 4 agents",
+      "claim_class": "manual",
+      "status": "contradicted",
+      "evidence_value": 4,
+      "evidence_path": "team-packs/enterprise.md",
+      "owner": "kanadhiayash",
+      "resolving_pr": "docs/shr-generated-surfaces",
+      "why_unverified": "team-packs/enterprise.md declares agents_active: 6, above the cap this line publishes. Either the cap is 6 and three surfaces understate it, or enterprise.md is over budget. A human decides which; the checker only proves they disagree."
+    },
+    {
+      "id": "agents-pack-cap-max",
+      "surface": "AGENTS.md",
+      "line": 226,
+      "claim": "Max 4 agents per pack",
+      "claim_class": "manual",
+      "status": "contradicted",
+      "evidence_value": 4,
+      "evidence_path": "team-packs/enterprise.md",
+      "owner": "kanadhiayash",
+      "resolving_pr": "docs/shr-generated-surfaces",
+      "why_unverified": "Same contradiction as readme-agent-cap, restated on the spec surface: enterprise.md declares agents_active: 6."
+    },
+    {
+      "id": "agents-pack-cap-capped",
+      "surface": "AGENTS.md",
+      "line": 252,
+      "claim": "Team packs are on-demand only and capped at 4 agents",
+      "claim_class": "manual",
+      "status": "contradicted",
+      "evidence_value": 4,
+      "evidence_path": "team-packs/enterprise.md",
+      "owner": "kanadhiayash",
+      "resolving_pr": "docs/shr-generated-surfaces",
+      "why_unverified": "Third restatement of the same cap. AGENTS.md publishes it twice and README.md once; all three disagree with team-packs/enterprise.md."
+    }
+  ]
+}

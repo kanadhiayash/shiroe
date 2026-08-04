@@ -1,0 +1,193 @@
+# Source authority (SHR-003)
+
+When two surfaces in this repository disagree, this file decides which one wins.
+It is the machine-readable answer to "who is allowed to say what is true here",
+and `scripts/check-canon-consistency.py` reads it on every test run.
+
+## Why this exists
+
+Shiroe accumulated five kinds of writing — executable code, decision records, the
+agent spec, a glossary, generated views, and narrative prose — and let all five
+make claims about the same subjects. Nothing said which one to believe. The
+canonical-store question is the clearest casualty: `SOUL.md` and `AGENTS.md` say
+canonical state is Markdown on disk, `ADR-0001` says SQLite is canonical current
+state and Markdown is a generated view, and `README.md` agrees with the ADR. A
+reader has no principled way to pick. This file gives them one.
+
+## The precedence order
+
+Six tiers, highest authority first. A claim from a lower-numbered rank overrides
+a conflicting claim from any higher-numbered rank.
+
+| Rank | Tier | What it is | Why it ranks here |
+|------|------|------------|-------------------|
+| 1 | `code-and-schemas` | `shiroe/**`, `registry/*.schema.json`, `pyproject.toml` | It executes. It cannot be aspirational. |
+| 2 | `accepted-adrs` | `docs/adr/ADR-*.md` | A deliberate, dated, reviewed decision that code is obliged to follow. |
+| 3 | `agents-spec` | `AGENTS.md`, `SOUL.md`, `_shared/*.md` | The contract every harness reads. Binding, but written ahead of the code. |
+| 4 | `glossary` | `docs/GLOSSARY.md`, `docs/wiki/Glossary.md` | Fixes vocabulary so the tiers above can be compared at all. |
+| 5 | `generated-docs` | `registry/*.json`, `docs/wiki/**` | Derived from a rank-1 source. Authoritative about itself, never about intent. |
+| 6 | `narrative-docs` | `README.md`, `docs/*.md`, `skills/**`, `commands/*.md`, `team-packs/*.md`, `agents/*.md`, root manifests | Explanation and onboarding. Loudest, least binding. |
+
+## The three evaluation rules
+
+**1. `tiers` is evaluated before `archived`.** This ordering is load-bearing, not
+incidental. An accepted ADR that happens to sit near superseded material stays
+authoritative, while superseded prose is silenced no matter how confidently it is
+written. Reversing the two would let an archive glob mute a live decision record.
+
+**2. `unscoped` is evaluated last.** It is the explicit "not a canon surface"
+list — tests, scripts, CI, fixtures, generated evidence. Anything not matched by
+`tiers`, `archived`, or `unscoped` is an **unclassified surface** and fails the
+audit. There is no implicit default. That is the whole point: a new top-level
+directory must be given an authority answer before it can ship.
+
+**3. Ties within a rank are not conflicts.** Two globs in the same tier may match
+the same file. Two globs in *different* tiers matching the same file is an
+ambiguity and fails the audit.
+
+## Archived surfaces
+
+Archived material is excluded from the conflict scan entirely. It is allowed to
+contradict current canon — that is what "superseded" means — but it must say so
+in its first 15 lines, and no active surface may cite an archived directory as if
+it were live.
+
+## Conflict rules
+
+Named questions with a single settled authority. The authority must be an ADR
+with `**Status:** Accepted`. `docs/adr/ADR-0001-canonical-store.md` is exempt
+from the conflict scan for the obvious reason: its Context section has to quote
+the contradiction it retired in order to explain the decision.
+
+## The map
+
+```json shiroe.source-authority/v1
+{
+  "schema": "shiroe.source-authority/v1",
+  "tiers": [
+    {
+      "rank": 1,
+      "id": "code-and-schemas",
+      "paths": [
+        "shiroe/**/*.py",
+        "shiroe/**/*.json",
+        "shiroe/VERSION",
+        "registry/*.schema.json",
+        "pyproject.toml"
+      ]
+    },
+    {
+      "rank": 2,
+      "id": "accepted-adrs",
+      "paths": ["docs/adr/ADR-*.md"]
+    },
+    {
+      "rank": 3,
+      "id": "agents-spec",
+      "paths": ["AGENTS.md", "SOUL.md", "_shared/*.md"]
+    },
+    {
+      "rank": 4,
+      "id": "glossary",
+      "paths": ["docs/GLOSSARY.md", "docs/wiki/Glossary.md"]
+    },
+    {
+      "rank": 5,
+      "id": "generated-docs",
+      "paths": [
+        "shiroe-registry.json",
+        "registry/adapters.json",
+        "registry/capabilities.json",
+        "registry/codecs.json",
+        "registry/components.json",
+        "registry/missions.json",
+        "docs/wiki/**"
+      ],
+      "exclude": ["docs/wiki/Glossary.md"]
+    },
+    {
+      "rank": 6,
+      "id": "narrative-docs",
+      "paths": [
+        "README.md",
+        "QUICKSTART.md",
+        "INSTALL.md",
+        "CONTRIBUTING.md",
+        "SECURITY.md",
+        "SECURITY_CONTACTS.md",
+        "SHARING_POLICY.md",
+        "PRIVACY.md",
+        "REDACT.md",
+        "GITHUB_OS.md",
+        "SKILL.md",
+        "CLAUDE.md",
+        "GEMINI.md",
+        "CODEX.md",
+        "LLAMA.md",
+        "docs/*.md",
+        "skills/**/*.md",
+        "commands/*.md",
+        "team-packs/*.md",
+        "agents/*.md",
+        "references/*.md",
+        "references/target-model-profiles/**"
+      ],
+      "exclude": ["docs/GLOSSARY.md"]
+    }
+  ],
+  "archived": [
+    {
+      "id": "v4x-canon",
+      "paths": ["references/v4x-canon/**"],
+      "marker": "Superseded"
+    },
+    {
+      "id": "changelog",
+      "paths": ["CHANGELOG.md"]
+    },
+    {
+      "id": "plans",
+      "paths": ["docs/plans/**"],
+      "marker": "Superseded"
+    }
+  ],
+  "unscoped": [
+    "tests/**",
+    "benchmarks/**",
+    "scripts/**",
+    ".github/**",
+    ".cursor/**",
+    ".claude-plugin/**",
+    "assets/**",
+    "missions/**",
+    "policies/**",
+    "config/**",
+    "memory/**",
+    "team/**",
+    "docs/canon/**",
+    "docs/audits/**",
+    "docs/_evidence/**",
+    ".gitignore",
+    ".windsurfrules",
+    ".aider.conf.yml.example",
+    "pytest.ini",
+    "LICENSE",
+    "CODEOWNERS"
+  ],
+  "conflict_rules": [
+    {
+      "question": "canonical-store",
+      "authority": "docs/adr/ADR-0001-canonical-store.md",
+      "resolution": "sqlite=current-state, jsonl=history, markdown=generated-view"
+    }
+  ]
+}
+```
+
+## Extending this file
+
+Adding a directory means adding it to exactly one of `tiers`, `archived`, or
+`unscoped`. Adding it to two different tiers fails the audit. Adding it to none
+fails the audit. Deleting a directory without deleting its glob fails the audit
+as a dead glob. All three failures are intentional: the map is only worth having
+if it cannot silently rot.
