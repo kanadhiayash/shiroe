@@ -10,28 +10,24 @@ For large changes, open an issue first.
 
 For security issues, do not open a public issue. Read `SECURITY.md`.
 
-## Branch naming
+## Branches
+
+`main` is the only long-lived branch. Everything else is a short-lived topic
+branch: cut from current `main`, one PR's worth of work, deleted when that PR
+lands. PRs target `main`; there is no other base.
 
 Use:
 
-    <type>/shiroe__<short-description>
-
-Allowed types:
-
-- feat
-- fix
-- refactor
-- docs
-- test
-- ci
-- chore
-- revert
+    <type>/shr-<short-description>
 
 Examples:
 
-    docs/shiroe__public-surface-overhaul
-    fix/shiroe__privacy-redaction-edge-case
-    test/shiroe__benchmark-failure-report
+    docs/shr-public-surface-overhaul
+    fix/shr-privacy-redaction-edge-case
+    test/shr-benchmark-failure-report
+
+`docs/BRANCHING.md` is the branch model of record — allowed types, branch
+lifetime, merge and retention rules. Read it before opening your first PR.
 
 ## Pull request expectations
 
@@ -92,7 +88,9 @@ Not allowed without evidence:
 
 ## Branch retention
 
-Preserve branch history unless removal is required for security or legal reasons. If a branch name is unsafe, rename or archive it rather than deleting history.
+Protected refs — `main` and any frozen `release/*` baseline — are never deleted. If a branch name is unsafe, rename it to `archive/<original-name>` rather than deleting history.
+
+Topic branches are the exception: deleting them once their PR lands is expected, and `.github/workflows/branch-retention.yml` deliberately does not fire on them.
 
 ## Releases
 
