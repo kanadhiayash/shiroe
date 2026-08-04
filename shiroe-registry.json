@@ -374,104 +374,126 @@
   "commands": [
     {
       "command": "start",
-      "path": "commands/start.md"
+      "path": "commands/start.md",
+      "status": "contract"
     },
     {
       "command": "done",
-      "path": "commands/done.md"
+      "path": "commands/done.md",
+      "status": "contract"
     },
     {
       "command": "stop",
-      "path": "commands/stop.md"
+      "path": "commands/stop.md",
+      "status": "contract"
     },
     {
       "command": "status",
-      "path": "commands/status.md"
+      "path": "commands/status.md",
+      "status": "contract"
     },
     {
       "command": "sync-parent",
-      "path": "commands/sync-parent.md"
+      "path": "commands/sync-parent.md",
+      "status": "contract"
     },
     {
       "command": "reset-permissions",
-      "path": "commands/reset-permissions.md"
+      "path": "commands/reset-permissions.md",
+      "status": "contract"
     },
     {
       "command": "review-skill",
-      "path": "commands/review-skill.md"
+      "path": "commands/review-skill.md",
+      "status": "contract"
     },
     {
       "command": "team",
-      "path": "commands/team.md"
+      "path": "commands/team.md",
+      "status": "contract"
     }
   ],
   "team_packs": [
     {
       "pack": "solo",
       "type": "role",
-      "path": "team-packs/solo.md"
+      "path": "team-packs/solo.md",
+      "status": "contract"
     },
     {
       "pack": "build",
       "type": "role",
-      "path": "team-packs/build.md"
+      "path": "team-packs/build.md",
+      "status": "contract"
     },
     {
       "pack": "research",
       "type": "role",
-      "path": "team-packs/research.md"
+      "path": "team-packs/research.md",
+      "status": "contract"
     },
     {
       "pack": "red",
       "type": "role",
-      "path": "team-packs/red.md"
+      "path": "team-packs/red.md",
+      "status": "contract"
     },
     {
       "pack": "audit",
       "type": "role",
-      "path": "team-packs/audit.md"
+      "path": "team-packs/audit.md",
+      "status": "contract"
     },
     {
       "pack": "ship",
       "type": "role",
-      "path": "team-packs/ship.md"
+      "path": "team-packs/ship.md",
+      "status": "contract"
     },
     {
       "pack": "small",
       "type": "profile",
-      "path": "team-packs/small.md"
+      "path": "team-packs/small.md",
+      "status": "contract"
     },
     {
       "pack": "medium",
       "type": "profile",
-      "path": "team-packs/medium.md"
+      "path": "team-packs/medium.md",
+      "status": "contract"
     },
     {
       "pack": "enterprise",
       "type": "profile",
-      "path": "team-packs/enterprise.md"
+      "path": "team-packs/enterprise.md",
+      "status": "contract"
     }
   ],
   "gates": [
     {
       "gate": "privacy-guard",
-      "path": "shiroe/guards/privacy_guard.py"
+      "path": "shiroe/guards/privacy_guard.py",
+      "status": "runtime"
     },
     {
       "gate": "contradiction-guard",
-      "path": "shiroe/guards/contradiction_guard.py"
+      "path": "shiroe/guards/contradiction_guard.py",
+      "status": "runtime"
     },
     {
       "gate": "evidence-guard",
-      "path": "shiroe/guards/evidence_guard.py"
+      "path": "shiroe/guards/evidence_guard.py",
+      "status": "runtime"
     },
     {
       "gate": "fact-guard",
-      "path": "shiroe/guards/fact_guard.py"
+      "path": "shiroe/guards/fact_guard.py",
+      "status": "runtime"
     },
     {
       "gate": "write-gate",
-      "path": "shiroe/guards/write_gate.py"
+      "path": "shiroe/guards/write_gate.py",
+      "status": "runtime"
     }
   ]
 }
