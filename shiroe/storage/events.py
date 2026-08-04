@@ -256,6 +256,10 @@ class EventLog:
         from shiroe.storage.records import apply_event
 
         conn.execute("DELETE FROM memory_events")
+        # memory_sources holds a foreign key into memory_records, so it has to
+        # go first or the delete below fails the constraint. Sources are carried
+        # in the memory.written payload and come back with their record.
+        conn.execute("DELETE FROM memory_sources")
         conn.execute("DELETE FROM memory_records")
         count = 0
         for env in self.iter_events():

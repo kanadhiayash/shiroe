@@ -83,6 +83,7 @@ def write_record(
     off the envelope, so replay produces identical rows without reinterpreting
     envelope metadata as record data.
     """
+    sources = fields.pop("sources", None)
     unknown = set(fields) - set(_RECORD_DEFAULTS)
     if unknown:
         raise ValueError(f"unknown record field(s): {sorted(unknown)}")
@@ -100,6 +101,11 @@ def write_record(
         "updated_at": stamp,
         "schema_version": SCHEMA_VERSION,
     }
+    if sources:
+        # Provenance travels with the record. memory_sources carries a foreign
+        # key to memory_records, so a replay that rebuilt records without their
+        # sources would either orphan them or fail on the constraint.
+        payload["sources"] = list(sources)
 
     env = log.append(EventEnvelope(
         event_type="memory.written",
@@ -180,6 +186,21 @@ def apply_event(conn: sqlite3.Connection, env: dict) -> bool:
             f"VALUES ({placeholders})",
             values,
         )
+        for source in payload.get("sources") or ():
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO memory_sources
+                    (id, memory_id, source_type, source_ref, source_digest,
+                     observed_at, retrieved_at, provenance)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    source["id"], payload["id"], source["source_type"],
+                    source["source_ref"], source.get("source_digest"),
+                    source.get("observed_at"), source.get("retrieved_at"),
+                    source.get("provenance", "unknown"),
+                ),
+            )
         return True
 
     if kind in ("memory.superseded", "memory.archived"):
