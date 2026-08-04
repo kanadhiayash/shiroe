@@ -881,6 +881,40 @@ def test_archived_surface_without_its_marker_fails(repo_root: Path, tmp_path: Pa
     assert "archived-unmarked" in result.stdout
 
 
+def test_a_removed_claim_is_not_drift_checked(repo_root: Path, tmp_path: Path) -> None:
+    """A claim withdrawn from its surface asserts nothing to drift against.
+
+    The ledger's status enum carries "removed" for exactly this. Drift-checking
+    it reports the tree disagreeing with a number nobody publishes any more, so
+    withdrawing a stale claim would be impossible without also deleting the
+    record of why it was withdrawn.
+    """
+    withdrawn = {
+        **_SYNTH_LEDGER,
+        "claims": [{
+            **_SYNTH_LEDGER["claims"][0],
+            "status": "removed",
+            "evidence_value": None,
+            "owner": "tests",
+            "resolving_pr": "none",
+            "why_unverified": "withdrawn from the surface",
+        }],
+    }
+    result = _run(
+        repo_root / SCRIPT_REL,
+        _synth(tmp_path, **{
+            LEDGER_REL: json.dumps(withdrawn, indent=2),
+            # No numeric claim left on the surface either, matching a real
+            # withdrawal -- otherwise unledgered-claim fires instead.
+            "README.md": "# Synth\n\nSQLite is canonical for current state.\n",
+        }),
+    )
+    assert result.returncode == 0, (
+        f"a removed claim should not be drift-checked:\n"
+        f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+    )
+
+
 def test_claim_drift_between_ledger_and_tree_fails(repo_root: Path, tmp_path: Path) -> None:
     """The recorded evidence value must still match what the tree computes."""
     drifted = {

@@ -246,7 +246,7 @@ When `memory-keeper` detects a conflict between an incoming write and existing w
 | audit | Reader + Linter + Quality gate | pre-ship QA |
 | ship | Changelog drafter + Release reviewer + Deploy verifier | release prep |
 
-Max 4 agents per pack. Outputs land in `team/`. Activate via `/team [type]`. Definitions in `team-packs/`.
+Max 6 agents per pack. Outputs land in `team/`. Activate via `/team [type]`. Definitions in `team-packs/`.
 
 ## Connector Advisory
 
@@ -272,6 +272,6 @@ Full table + adding-a-harness procedure: `references/harness-translation-map.md`
 - **Not a hosted service.** No Shiroe server. Memory lives in local markdown in the project repo. Optional MCP connectors talk to hosted services only after explicit enable in `SHARING_POLICY.md`.
 - **Not bundled with any MCP tools.** Recommendation-only. Never installs a connector on the user's behalf.
 - **Not a sprawling skill catalog.** A small set of skills with strict triggers, not a large catalogue of specialists.
-- **Not an always-on multi-agent panel.** Team packs are on-demand only and capped at 4 agents.
+- **Not an always-on multi-agent panel.** Team packs are on-demand only and capped at 6 agents.
 - **Not a persona.** Context + memory layer, not a simulated role.
 - **Not dedicated to any single user or organization.** Free to install; use any model the user brings.

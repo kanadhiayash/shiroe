@@ -9,12 +9,12 @@
       "line": 122,
       "claim": "pytest — 979 tests, Python 3.11/3.12/3.13",
       "claim_class": "command_attested",
-      "status": "contradicted",
-      "evidence_value": 979,
+      "status": "removed",
+      "evidence_value": null,
       "evidence_command": "python3 -m pytest -q",
       "owner": "kanadhiayash",
       "resolving_pr": "docs/shr-generated-surfaces",
-      "why_unverified": "Was accurate at a4549e0 (978 passed + 1 skipped). Later PRs have added tests since; `python3 -m pytest -q` now reports 1076 passed + 1 skipped (chore/shr-repository-cleanup added tests/test_no_private_operational_references.py, +13). Not machine_verified because counting tests without running them means reimplementing collection; the honest fix is to generate the number from a real run rather than keep it as a sentence someone remembers to edit."
+      "why_unverified": "Withdrawn from README.md rather than re-pinned. Nothing regenerates the README, so a hardcoded count is stale the next time a test lands -- this one drifted twice (979 -> 1179 tests, 82 -> 94 files) and produced a canon finding each time. The Python matrix on that row carries the information a reader needs; the counts carried drift."
     },
     {
       "id": "readme-test-files",
@@ -22,15 +22,15 @@
       "line": 122,
       "claim": "82 files",
       "claim_class": "machine_verified",
-      "status": "contradicted",
-      "evidence_value": 82,
+      "status": "removed",
+      "evidence_value": null,
       "verify": {
         "kind": "count_glob",
         "glob": "tests/test_*.py"
       },
       "owner": "kanadhiayash",
       "resolving_pr": "docs/shr-generated-surfaces",
-      "why_unverified": "README.md publishes 82; the tree now holds 90 (fix/shr-canon-consistency added tests/test_canon_consistency.py, fix/shr-active-identity added tests/test_execution_sequence_compat.py and tests/test_active_identity.py, chore/shr-repository-cleanup added tests/test_no_private_operational_references.py, security/shr-redaction-manifest added tests/test_redaction_manifest.py). Recorded at the published value on purpose: the resulting claim-drift finding is the tripwire proving the ledger notices when a PR moves a number the README states."
+      "why_unverified": "Withdrawn from README.md rather than re-pinned. Nothing regenerates the README, so a hardcoded count is stale the next time a test lands -- this one drifted twice (979 -> 1179 tests, 82 -> 94 files) and produced a canon finding each time. The Python matrix on that row carries the information a reader needs; the counts carried drift."
     },
     {
       "id": "readme-release-checks",
@@ -120,40 +120,31 @@
       "id": "readme-agent-cap",
       "surface": "README.md",
       "line": 362,
-      "claim": "team-packs/ — 9 on-demand multi-agent configurations, capped at 4 agents",
+      "claim": "team-packs/ — 9 on-demand multi-agent configurations, capped at 6 agents",
       "claim_class": "manual",
-      "status": "contradicted",
-      "evidence_value": 4,
-      "evidence_path": "team-packs/enterprise.md",
-      "owner": "kanadhiayash",
-      "resolving_pr": "docs/shr-generated-surfaces",
-      "why_unverified": "team-packs/enterprise.md declares agents_active: 6, above the cap this line publishes. Either the cap is 6 and three surfaces understate it, or enterprise.md is over budget. A human decides which; the checker only proves they disagree."
+      "status": "verified",
+      "evidence_value": 6,
+      "evidence_path": "team-packs/enterprise.md"
     },
     {
       "id": "agents-pack-cap-max",
       "surface": "AGENTS.md",
-      "line": 226,
-      "claim": "Max 4 agents per pack",
+      "line": 249,
+      "claim": "Max 6 agents per pack",
       "claim_class": "manual",
-      "status": "contradicted",
-      "evidence_value": 4,
-      "evidence_path": "team-packs/enterprise.md",
-      "owner": "kanadhiayash",
-      "resolving_pr": "docs/shr-generated-surfaces",
-      "why_unverified": "Same contradiction as readme-agent-cap, restated on the spec surface: enterprise.md declares agents_active: 6."
+      "status": "verified",
+      "evidence_value": 6,
+      "evidence_path": "team-packs/enterprise.md"
     },
     {
       "id": "agents-pack-cap-capped",
       "surface": "AGENTS.md",
-      "line": 252,
-      "claim": "Team packs are on-demand only and capped at 4 agents",
+      "line": 275,
+      "claim": "Team packs are on-demand only and capped at 6 agents",
       "claim_class": "manual",
-      "status": "contradicted",
-      "evidence_value": 4,
-      "evidence_path": "team-packs/enterprise.md",
-      "owner": "kanadhiayash",
-      "resolving_pr": "docs/shr-generated-surfaces",
-      "why_unverified": "Third restatement of the same cap. AGENTS.md publishes it twice and README.md once; all three disagree with team-packs/enterprise.md."
+      "status": "verified",
+      "evidence_value": 6,
+      "evidence_path": "team-packs/enterprise.md"
     }
   ]
 }

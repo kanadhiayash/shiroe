@@ -899,6 +899,13 @@ def check_claim_drift(root: Path, ledger: dict) -> list[Finding]:
     for claim in ledger.get("claims", []):
         if claim.get("claim_class") != "machine_verified":
             continue
+        if claim.get("status") == "removed":
+            # The status enum carries "removed" for a claim withdrawn from its
+            # surface. It asserts nothing, so there is nothing to drift against
+            # -- and drift-checking it reports the tree disagreeing with a
+            # number nobody publishes any more. The entry stays in the ledger so
+            # the withdrawal keeps its reason.
+            continue
         observed = recompute(root, claim["verify"])
         expected = claim.get("evidence_value")
         if observed != expected:

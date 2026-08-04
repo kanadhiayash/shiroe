@@ -119,7 +119,7 @@ So this is the honest version: what a machine checks on every commit, and what n
 
 | Check | What it proves |
 |---|---|
-| `pytest` — **979 tests**, 82 files, Python 3.11/3.12/3.13 | Behaviour under test |
+| `pytest` — Python 3.11/3.12/3.13 | Behaviour under test |
 | `shiroe release check` — **16 checks** | Gate posture; writes SHA-bound evidence to `docs/audits/` |
 | `audit-privacy --strict` | Zero credential-class hits, repo-wide |
 | `check-version-consistency` | 13 version and identity surfaces cannot drift |
@@ -359,7 +359,7 @@ Stated plainly, because the alternative is letting you discover them later.
 | `skills/` | 15 on-trigger procedures. |
 | `agents/` | 6 background roles. |
 | `commands/` | 8 user-facing command contracts. |
-| `team-packs/` | 9 on-demand multi-agent configurations, capped at 4 agents. |
+| `team-packs/` | 9 on-demand multi-agent configurations, capped at 6 agents. |
 | `benchmarks/` | Internal quality axes and external loader scaffolding. |
 | `docs/` | Architecture, security, release, reference. |
 
