@@ -40,8 +40,30 @@ def _table(headers: list[str], rows: list[list[str]]) -> str:
     return "\n".join(out) + "\n"
 
 
-def _stamp() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+def _stamp(conn: sqlite3.Connection) -> str:
+    """
+    The state the view was rendered from, not the moment it was rendered.
+
+    A view is a derived projection, so two renders of unchanged state must be
+    byte-identical: otherwise the worktree is dirty after any regeneration, and
+    a rebuilt store cannot be compared against the original by digest. A
+    wall-clock stamp made every render differ and turned that comparison into a
+    guaranteed mismatch.
+
+    Derived from the newest event, falling back to the newest record, so it
+    still answers "how current is this?" and survives a replay unchanged.
+    """
+    for sql in (
+        "SELECT MAX(timestamp) FROM memory_events",
+        "SELECT MAX(updated_at) FROM memory_records",
+    ):
+        try:
+            value = conn.execute(sql).fetchone()[0]
+        except sqlite3.Error:
+            continue
+        if value:
+            return str(value)
+    return "empty store"
 
 
 def render_all(root: Path | str, conn: sqlite3.Connection) -> list[Path]:
@@ -67,7 +89,7 @@ def _render_view(name: str, conn: sqlite3.Connection) -> str:
         "active-team": _view_active_team,
         "session-summary": _view_session_summary,
     }[name]
-    return BANNER + f"\n# {name}\n\n_generated {_stamp()}_\n\n" + body_fn(conn)
+    return BANNER + f"\n# {name}\n\n_state as of {_stamp(conn)}_\n\n" + body_fn(conn)
 
 
 # --- individual views ------------------------------------------------------

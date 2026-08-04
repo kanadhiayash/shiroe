@@ -40,6 +40,8 @@ from shiroe.compat.legacy_identity import (
     LEGACY_IMPORT_BACKUP_PREFIX,
     LEGACY_V1_STATE_DB_NAME,
 )
+from shiroe.storage.events import EventLog
+from shiroe.storage.records import write_record
 from shiroe.storage.state import StateDB
 
 BACKUP_PREFIX = "shiroe-"
@@ -149,33 +151,32 @@ def _iter_legacy_sqlite(root: Path) -> Iterable[tuple[str, dict]]:
         conn.close()
 
 
-def _insert_record(conn: sqlite3.Connection, *, id_: str, kind: str, title: str,
-                   claim: str, summary: str, source_type: str, source_ref: str,
-                   content_hash: str) -> None:
+def _insert_record(conn: sqlite3.Connection, log: EventLog, *, id_: str, kind: str,
+                   title: str, claim: str, summary: str, source_type: str,
+                   source_ref: str, content_hash: str) -> None:
+    """
+    Import one v1 record through the event log, not straight into the table.
+
+    Writing the table directly made imported records invisible to history: a
+    later `shiroe state rebuild` replays the log over current state, so records
+    with no event behind them were destroyed by the rebuild that was supposed to
+    restore them. Provenance travels in the same event, because memory_sources
+    has a foreign key into memory_records and the two must return together.
+    """
     now = _now()
-    conn.execute(
-        """
-        INSERT INTO memory_records
-            (id, kind, title, claim, summary, status, confidence,
-             evidence_grade, privacy_class, authority, scope,
-             valid_from, valid_until, created_at, updated_at, owner,
-             schema_version, archived)
-        VALUES (?, ?, ?, ?, ?, 'active', 'unknown',
-                'unknown', 'internal', 0.0, 'project',
-                NULL, NULL, ?, ?, 'importer',
-                2, 0)
-        """,
-        (id_, kind, title, claim, summary, now, now),
-    )
-    conn.execute(
-        """
-        INSERT INTO memory_sources
-            (id, memory_id, source_type, source_ref, source_digest,
-             observed_at, retrieved_at, provenance)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'v1-importer')
-        """,
-        ("src_" + uuid.uuid4().hex[:16], id_, source_type, source_ref,
-         "sha256:" + content_hash, now, now),
+    write_record(
+        conn, log,
+        id_=id_, kind=kind, title=title, claim=claim, summary=summary,
+        owner="importer", timestamp=now,
+        sources=[{
+            "id": "src_" + uuid.uuid4().hex[:16],
+            "source_type": source_type,
+            "source_ref": source_ref,
+            "source_digest": "sha256:" + content_hash,
+            "observed_at": now,
+            "retrieved_at": now,
+            "provenance": "v1-importer",
+        }],
     )
 
 
@@ -203,6 +204,7 @@ def run_import(root: Path | str, *, dry_run: bool = True) -> ImportManifest:
         conn = db.connect()
 
     existing = _existing_ids(conn)
+    log = EventLog(root, mirror_conn=conn)
     counts = {"atom_jsonl": 0, "legacy_sqlite": 0, "markdown": 0}
 
     def _try_insert(source_type: str, source_ref: str, kind: str, title: str,
@@ -217,7 +219,7 @@ def run_import(root: Path | str, *, dry_run: bool = True) -> ImportManifest:
             manifest.records_written += 1
             return
         _insert_record(
-            conn, id_=rid, kind=kind, title=title, claim=claim,
+            conn, log, id_=rid, kind=kind, title=title, claim=claim,
             summary=summary, source_type=source_type, source_ref=source_ref,
             content_hash=content_hash,
         )
