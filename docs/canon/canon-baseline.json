@@ -72,7 +72,8 @@
       "why_open": "A live user-facing command contract points at an archived directory. Either the citation should move to a current surface or the target should stop being archived; both are content decisions.",
       "owner": "kanadhiayash",
       "resolving_pr": "fix/shr-active-identity",
-      "status": "acknowledged"
+      "status": "acknowledged",
+      "digest": "59a00556d170"
     },
     {
       "id": "references/connector-advisory.md::cites-archived",
@@ -82,7 +83,8 @@
       "why_open": "Active shared reference sourcing itself from archived canon. Same decision as commands/team.md.",
       "owner": "kanadhiayash",
       "resolving_pr": "fix/shr-active-identity",
-      "status": "acknowledged"
+      "status": "acknowledged",
+      "digest": "59a00556d170"
     },
     {
       "id": "references/harness-translation-map.md::cites-archived",
@@ -92,7 +94,8 @@
       "why_open": "Active shared reference sourcing itself from archived canon. Same decision as commands/team.md.",
       "owner": "kanadhiayash",
       "resolving_pr": "fix/shr-active-identity",
-      "status": "acknowledged"
+      "status": "acknowledged",
+      "digest": "59a00556d170"
     },
     {
       "id": "references/two-strikes-rule.md::cites-archived",
@@ -102,7 +105,8 @@
       "why_open": "Active shared reference sourcing itself from archived canon. Same decision as commands/team.md.",
       "owner": "kanadhiayash",
       "resolving_pr": "fix/shr-active-identity",
-      "status": "acknowledged"
+      "status": "acknowledged",
+      "digest": "59a00556d170"
     },
     {
       "id": "shiroe/release/claim_gate.py::cites-archived",
@@ -112,7 +116,8 @@
       "why_open": "Rank-1 code citing an archived path. This is the sharpest instance: the release claim gate derives behaviour from a document the authority map calls superseded, so the citation is either a real dependency (and the target is not archived) or dead weight in the gate.",
       "owner": "kanadhiayash",
       "resolving_pr": "fix/shr-active-identity",
-      "status": "acknowledged"
+      "status": "acknowledged",
+      "digest": "59a00556d170"
     },
     {
       "id": "shiroe-registry.json::commands.status-missing",

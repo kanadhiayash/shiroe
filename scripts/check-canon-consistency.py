@@ -61,6 +61,7 @@ detector actually fires.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -182,18 +183,43 @@ def read_text(root: Path, rel: str) -> str | None:
 
 
 class Finding:
-    __slots__ = ("surface", "rule", "shr", "count", "excerpt")
+    __slots__ = ("surface", "rule", "shr", "count", "excerpt", "hits")
 
-    def __init__(self, surface: str, rule: str, shr: str, count: int = 1, excerpt: str = "") -> None:
+    def __init__(
+        self,
+        surface: str,
+        rule: str,
+        shr: str,
+        count: int = 1,
+        excerpt: str = "",
+        hits: tuple[str, ...] = (),
+    ) -> None:
         self.surface = surface
         self.rule = rule
         self.shr = shr
         self.count = count
         self.excerpt = excerpt
+        # The matched text, when the detector can supply it. Feeds `digest`.
+        self.hits = tuple(hits)
 
     @property
     def id(self) -> str:
         return f"{self.surface}::{self.rule}"
+
+    @property
+    def digest(self) -> str:
+        """
+        Fingerprint of WHAT was matched, not how many times.
+
+        Identity is (surface, rule) and drift was `count` alone, so swapping an
+        acknowledged contradiction for a *different* one of the same rule on the
+        same surface kept count at 1 and stayed [KNOWN]. Every acknowledgement
+        was a laundering slot. Empty when the detector supplies no hits, in which
+        case reconcile falls back to the count comparison.
+        """
+        if not self.hits:
+            return ""
+        return hashlib.sha256("\n".join(sorted(self.hits)).encode("utf-8")).hexdigest()[:12]
 
 
 # --------------------------------------------------------------------------- #
@@ -506,7 +532,7 @@ def check_canon_conflicts(root: Path, cls: Classification, amap: dict) -> list[F
             hits = _contradiction_hits(text, pattern)
             if hits:
                 findings.append(
-                    Finding(rel, rule, "SHR-004", count=len(hits), excerpt=hits[0])
+                    Finding(rel, rule, "SHR-004", count=len(hits), excerpt=hits[0], hits=tuple(hits))
                 )
     return findings
 
@@ -548,7 +574,7 @@ def check_live_citations_of_archived(root: Path, amap: dict, cls: Classification
         if cited:
             findings.append(
                 Finding(rel, "cites-archived", "SHR-004", count=len(cited),
-                        excerpt=", ".join(cited))
+                        excerpt=", ".join(cited), hits=tuple(cited))
             )
     return findings
 
@@ -633,13 +659,38 @@ def check_status_labels(root: Path, enum: list[str]) -> tuple[list[Finding], lis
 # SHR-006 — public claim ledger
 # --------------------------------------------------------------------------- #
 
+# Public surfaces bold their numbers ("**979 tests**"), so a shape that demands a
+# literal space and a lowercase noun sees almost nothing. `_GAP` absorbs Markdown
+# emphasis, backticks and non-breaking space on either side of the number, and
+# every shape is case-insensitive.
+_GAP = r"[*_`]*[\s\u00a0]+[*_`]*"
+_NUM = r"[*_`]*(\d{1,4})[*_`]*"
+
 CLAIM_SHAPES = [
-    re.compile(r"(\d{1,4})\s+(?:tests|files|checks|surfaces|skills|agents|commands|team-packs|packs|gates)\b"),
-    re.compile(r"capped at (\d+) agents"),
-    re.compile(r"Max (\d+) agents per pack"),
-    re.compile(r"lists all (\d+)"),
+    re.compile(
+        r"(?i)" + _NUM + _GAP
+        + r"(?:tests|files|checks|surfaces|skills|agents|commands|team-packs|packs|gates)\b"
+    ),
+    re.compile(r"(?i)capped at" + _GAP + _NUM + _GAP + r"agents"),
+    re.compile(r"(?i)max" + _GAP + _NUM + _GAP + r"agents per pack"),
+    re.compile(r"(?i)lists all" + _GAP + _NUM),
 ]
 CLAIM_SURFACES = ["README.md", "AGENTS.md"]
+
+_MARKUP_RE = re.compile(r"[*_`]+")
+
+
+def _normalise_claim(text: str) -> str:
+    """
+    Strip Markdown emphasis and fold whitespace, lowercased.
+
+    The ledger records the claim as a human writes it ("979 tests"); the surface
+    renders it with emphasis ("**979** tests"). Comparing raw strings made every
+    bolded claim look unledgered the moment CLAIM_SHAPES learned to see markup.
+    """
+    return " ".join(_MARKUP_RE.sub("", text).replace("\u00a0", " ").split()).lower()
+
+
 
 
 def _dotted(data: object, path: str) -> object:
@@ -717,10 +768,11 @@ def check_unledgered_claims(root: Path, ledger: dict) -> list[Finding]:
             continue
         known = by_surface.get(rel, [])
         orphans: list[str] = []
+        known_norm = [_normalise_claim(entry) for entry in known]
         for shape in CLAIM_SHAPES:
             for match in shape.finditer(text):
                 phrase = match.group(0)
-                if not any(phrase in entry for entry in known):
+                if not any(_normalise_claim(phrase) in entry for entry in known_norm):
                     orphans.append(phrase)
         if orphans:
             findings.append(
@@ -730,8 +782,11 @@ def check_unledgered_claims(root: Path, ledger: dict) -> list[Finding]:
     return findings
 
 
-AGENTS_ACTIVE_RE = re.compile(r"(?m)^agents_active:\s*(\d+)")
-CAP_RES = [re.compile(r"capped at (\d+) agents"), re.compile(r"Max (\d+) agents per pack")]
+AGENTS_ACTIVE_RE = re.compile(r"(?m)^\s*agents_active:\s*[\"\']?(\d+)")
+CAP_RES = [
+    re.compile(r"(?i)capped at" + _GAP + _NUM + _GAP + r"agents"),
+    re.compile(r"(?i)max" + _GAP + _NUM + _GAP + r"agents per pack"),
+]
 
 
 def check_agent_cap(root: Path) -> list[Finding]:
@@ -783,6 +838,7 @@ def reconcile(observed: list[Finding], baseline: dict[str, dict]) -> tuple[list[
     for finding in observed:
         if finding.id in seen:  # same (surface, rule) twice — fold multiplicity
             seen[finding.id].count += finding.count
+            seen[finding.id].hits += finding.hits
             continue
         seen[finding.id] = finding
 
@@ -794,6 +850,13 @@ def reconcile(observed: list[Finding], baseline: dict[str, dict]) -> tuple[list[
         elif entry["status"] == "resolved":
             buckets["regressed"].append(finding)
             errors.append(f"REGRESSED: {fid} is recorded resolved but is present again")
+        elif entry.get("digest") not in (None, "", finding.digest):
+            buckets["count"].append(finding)
+            errors.append(
+                f"CONTENT DRIFT: {fid} is acknowledged, but the matched text changed "
+                f"(baseline digest {entry['digest']}, tree {finding.digest}). "
+                f"Observed now: {finding.excerpt!r}"
+            )
         elif entry["count"] != finding.count:
             buckets["count"].append(finding)
             errors.append(
